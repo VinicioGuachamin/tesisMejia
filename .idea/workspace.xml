@@ -59,8 +59,8 @@
       <file leaf-file-name="empleado_aCrear.html.twig" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/templates/empleado_a/empleado_aCrear.html.twig">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="318">
-              <caret line="615" column="54" selection-start-line="615" selection-start-column="54" selection-end-line="615" selection-end-column="54" />
+            <state relative-caret-position="335">
+              <caret line="616" column="1" selection-start-line="616" selection-start-column="1" selection-end-line="616" selection-end-column="1" />
               <folding>
                 <element signature="e#12#26#0#Twig" expanded="true" />
                 <element signature="e#246#267#0#Twig" expanded="true" />
@@ -81,6 +81,9 @@
         </entry>
       </file>
     </leaf>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
@@ -193,6 +196,7 @@
     <option name="width" value="1366" />
     <option name="height" value="728" />
   </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
@@ -314,26 +318,27 @@
       <workItem from="1532467912277" duration="13369000" />
       <workItem from="1532528158231" duration="18857000" />
       <workItem from="1532708169174" duration="18966000" />
-      <workItem from="1532970815559" duration="16771000" />
+      <workItem from="1532970815559" duration="17831000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="81895000" />
+    <option name="totallyTimeSpent" value="82955000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-1288" y="-8" width="1296" height="1000" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="1" visible="true" weight="0.21953125" />
+      <window_info active="true" content_ui="combo" id="Project" order="1" visible="true" weight="0.21953125" />
       <window_info anchor="bottom" id="TODO" order="10" />
       <window_info anchor="bottom" id="Docker" order="3" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="0" side_tool="true" />
       <window_info anchor="right" id="Database" order="0" />
       <window_info anchor="bottom" id="Database Changes" order="11" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" order="1" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Version Control" order="1" />
       <window_info anchor="bottom" id="Run" order="6" />
       <window_info id="Structure" order="2" side_tool="true" weight="0.25" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="2" visible="true" weight="0.2996633" />
+      <window_info anchor="bottom" id="Terminal" order="2" visible="true" weight="0.2996633" />
       <window_info id="Favorites" order="0" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="7" weight="0.4" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="3" weight="0.25" />
@@ -352,16 +357,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/Controller/EmpleadoAController.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="340">
-          <caret line="26" column="7" selection-start-line="26" selection-start-column="7" selection-end-line="26" selection-end-column="7" />
-          <folding>
-            <element signature="e#4012#4031#1#PHP" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Controller/SueldoController.php">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1173">
@@ -585,10 +580,13 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/templates/empleado_a/empleado_aCrear.html.twig">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="318">
-          <caret line="615" column="54" selection-start-line="615" selection-start-column="54" selection-end-line="615" selection-end-column="54" />
+        <state relative-caret-position="335">
+          <caret line="616" column="1" selection-start-line="616" selection-start-column="1" selection-end-line="616" selection-end-column="1" />
           <folding>
             <element signature="e#12#26#0#Twig" expanded="true" />
             <element signature="e#246#267#0#Twig" expanded="true" />
