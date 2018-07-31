@@ -19,3 +19,27 @@ legend{
     /*padding-right: 25px;*/
 
 /*}*/
+
+/*PARA LA INPUT DE LA IMAGEN*/
+.thumb{
+    width: 70px;
+    height: 80px;
+    border: 1px solid #000;
+    margin: 10px 5px 0 0;
+}
+
+.image-upload > input
+{
+    display: none;
+
+}
+
+.image-upload label{
+    cursor: pointer;
+}
+
+.image-upload img
+{
+    width: 30px;
+    cursor: pointer;
+}
