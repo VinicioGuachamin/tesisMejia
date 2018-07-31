@@ -31,6 +31,7 @@ class EmpleadoAController extends Controller
         $form = $this->createForm(EmpleadoAType::class, $empleado_a);
 
         $form->handleRequest($request);
+        $img = null;
 
         if ($form->isSubmitted() && $form->isValid()) {
 
@@ -43,7 +44,7 @@ class EmpleadoAController extends Controller
         }
 
         return $this->render('empleado_a/empleado_aCrear.html.twig', array(
-            'formEmpleado_a' => $form->createView()
+            'formEmpleado_a' => $form->createView(), 'img'=>$img
         ));
 
     }
@@ -57,6 +58,7 @@ class EmpleadoAController extends Controller
         $form = $this->createForm(EmpleadoAType::class, $empleado_a);
 
         $form->handleRequest($request);
+        $img =$empleado_a->getImage();
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager = $this->getDoctrine()->getManager();
@@ -66,7 +68,7 @@ class EmpleadoAController extends Controller
         }
 
         return $this->render('empleado_a/empleado_aCrear.html.twig', array(
-            'formEmpleado_a' => $form->createView()
+            'formEmpleado_a' => $form->createView(),'img'=>$img
         ));
 
     }

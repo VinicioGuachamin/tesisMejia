@@ -14,12 +14,26 @@
         <legend style="color: #025aa5">INFORMACIÓN BÁSICA</legend>
         <div class="row">
                 <div class="col-md-3">
-                    <div class="form-group">
-                        <label class="col-form-label-sm" for="foto">Subir foto</label>
-                        {{ form_widget(formEmpleado_a.foto,
-                            {'attr':{'class':'form-control form-control-sm','id':'foto'}})
-                        }}
+                    <div class="row">
+                        <div class="col-5">
+                            <div class="form-group image-upload">
+                                <label class="col-form-label-sm" for="appbundle_person_foto">
+                                    Subir foto<img src="{{ asset('img/camera-solid.svg') }}" title="Selecionar archivo desde su PC">
+                                </label>
+                                {{ form_widget(formEmpleado_a.foto,
+                                    {'attr':{'class':'form-control form-control-sm','id':'foto'}})
+                                }}
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            {% if img != null %}
+                                <img class="thumb" id="img-cargada" src="{{ asset('foto_empleados/' ~ img ) }}" alt="Card image cap">
+                            {% endif %}
+
+                            <div id="list"></div>
+                        </div>
                     </div>
+
                 </div>
                 <div class="col-md-3">
                     <div class="form-group">
@@ -612,8 +626,6 @@
             }
         });
 
-//gggggggggggggggggggggg
-        //hhhhhh
         //FUNCIÓN PARA OCULTAR O MOSTRAR EL TIPO Y NOMBRE DE LA COMISIÓN SEGÚN LO SELECCIONADO EN COMISIONES
         //ESTA FUNCIÓN SE EJECUTA AL MOMENTO DE EDITAR
         if($('input:radio[name="appbundle_person[comision]"]:checked').val() == "Si"){
@@ -629,8 +641,37 @@
             document.getElementById("appbundle_person_nombrecomision").value = "";
             document.getElementById("appbundle_person_nombrecomision").setAttribute("readonly", "readonly");
         }
-//sssssssssssssaaaaaaaaaaaaaaffffffffff
-//probando commit
-        ///rrrrrrrrr
+    </script>
+
+    <script>
+        function archivo(evt) {
+            var files = evt.target.files; // FileList object
+
+            //Obtenemos la imagen del campo "file".
+            for (var i = 0, f; f = files[i]; i++) {
+                //Solo admitimos imágenes.
+                if (!f.type.match('image.*')) {
+                    continue;
+                }
+
+                var reader = new FileReader();
+
+                reader.onload = (function(theFile) {
+                    return function(e) {
+                        // Creamos la imagen.
+                        document.getElementById("list").innerHTML = ['<img class="thumb" src="', e.target.result,'" title="', escape(theFile.name), '"/>'].join('');
+                        if ( document.getElementById( "img-cargada" )) {
+                            var img = document.getElementById("img-cargada");
+                            img.style.display = 'none';
+                        }
+
+                    };
+                })(f);
+
+                reader.readAsDataURL(f);
+            }
+        }
+
+        document.getElementById('appbundle_person_foto').addEventListener('change', archivo, false);
     </script>
 {% endblock %}
