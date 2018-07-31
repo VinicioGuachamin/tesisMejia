@@ -1,0 +1,74 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Sueldos{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" type="text/css" rel="stylesheet" />
+{% endblock %}
+
+{% block body %}
+
+    <div class="row">
+        <div class="col-md-1"></div>
+        <div class="col-md-10">
+
+
+                {{ render(controller(
+                    'App\\Controller\\SueldoController::crearSueldo'
+                )) }}
+
+
+            <table id="example" class="hover" cellspacing="0" width="100%">
+                <thead>
+                <tr>
+                    <th>Categoria</th>
+                    <th>Sueldo</th>
+                    <th>Acción</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for suel in sueldo %}
+                    <tr>
+                        <td>{{ suel.categoria }}</td>
+                        <td>{{ suel.valor }}</td>
+                        <td>
+
+                            {{ render(controller(
+                                'App\\Controller\\SueldoController::editarSueldo', { 'id' : suel.id }
+                            )) }}
+
+                            {{ render(controller(
+                                'App\\Controller\\SueldoController::vistaEliminarSueldo', { 'id' : suel.id }
+                            )) }}
+
+                        </td>
+                    </tr>
+                {% else %}
+                    No users have been found.
+                {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-1"></div>
+    </div>
+
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+            $('#example').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
+                }
+            });
+        } );
+
+
+    </script>
+{% endblock %}

@@ -1,0 +1,21 @@
+fieldset
+{
+    border: 2px solid #025aa5;
+    padding: 60px;
+    padding-top: 20px;
+    border-radius: 20px;
+}
+legend{
+    width: auto;
+    padding: 6px;
+}
+.text_oculto{
+    border: none;
+}
+.hide{
+    display: none;
+}
+/*label{*/
+    /*padding-right: 25px;*/
+
+/*}*/

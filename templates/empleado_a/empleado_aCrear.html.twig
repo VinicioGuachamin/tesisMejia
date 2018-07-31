@@ -1,0 +1,632 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nuevo Empleado A{% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+
+    <link href="{{ asset('css/empleado_a.css') }}" type="text/css" rel="stylesheet" />
+{% endblock %}
+{% form_theme formEmpleado_a 'form/fields.html.twig' %}
+{% block body %}
+
+    {{ form_start(formEmpleado_a) }}
+    <fieldset id="fieldset_1">
+        <legend style="color: #025aa5">INFORMACIÓN BÁSICA</legend>
+        <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="foto">Subir foto</label>
+                        {{ form_widget(formEmpleado_a.foto,
+                            {'attr':{'class':'form-control form-control-sm','id':'foto'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="rol">Rol</label>
+                        {{ form_widget(formEmpleado_a.rol,
+                            {'attr':{'class':'form-control form-control-sm','id':'rol'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="tipoempleado">Tipo Empleado</label>
+                        {{ form_widget(formEmpleado_a.tipoempleado,
+                            {'attr':{'class':'form-control form-control-sm','id':'tipoempleado'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="codbiometrico">Cód. Reloj B.</label>
+                        {{ form_widget(formEmpleado_a.codbiometrico,
+                            {'attr':{'class':'form-control form-control-sm','id':'codbiometrico'}})
+                        }}
+                    </div>
+                </div>
+        </div>
+
+        <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="nombres">Nombres</label>
+                        {{ form_widget(formEmpleado_a.nombres,
+                            {'attr':{'class':'form-control form-control-sm','id':'nombres'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="apellidos">Apellidos</label>
+                        {{ form_widget(formEmpleado_a.apellidos,
+                            {'attr':{'class':'form-control form-control-sm','id':'apellidos'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="cedula">Cédula ciudadanía</label>
+                        {{ form_widget(formEmpleado_a.cedula,
+                            {'attr':{'class':'form-control form-control-sm','id':'cedula'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="ecivil">Estado Civil</label>
+                        {{ form_widget(formEmpleado_a.ecivil,
+                            {'attr':{'class':'form-control form-control-sm','id':'ecivil'}})
+                        }}
+                    </div>
+                </div>
+        </div>
+
+        <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="fnacimiento">Fecha nacimiento</label>
+                        {{ form_widget(formEmpleado_a.fnacimiento,
+                            {'attr':{'class':'form-control form-control-sm','id':'fnacimiento'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="tsangre">Tipo de Sangre</label>
+                        {{ form_widget(formEmpleado_a.tsangre,
+                            {'attr':{'class':'form-control form-control-sm','id':'tsangre'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="sueldo">Sueldo</label>
+                        {{ form_widget(formEmpleado_a.sueldo,
+                            {'attr':{'class':'form-control form-control-sm','id':'sueldo'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="valor">&nbsp;</label>
+                        {{ form_widget(formEmpleado_a.valor,
+                            {'attr':{'class':'form-control form-control-sm','id':'valor', 'readonly':'readonly'}})
+                        }}
+                    </div>
+                </div>
+        </div>
+
+        <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="nombreconyugue">Nombre Cónyugue</label>
+                        {{ form_widget(formEmpleado_a.nombreconyugue,
+                            {'attr':{'class':'form-control form-control-sm','id':'nombreconyugue', 'placeholder':'Nombres y apellidos completos'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="cedulaconyugue">Cédula Cónyugue</label>
+                        {{ form_widget(formEmpleado_a.cedulaconyugue,
+                            {'attr':{'class':'form-control form-control-sm','id':'cedulaconyugue'}})
+                        }}
+                    </div>
+                </div>
+        </div>
+
+        <div class="row">
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="cargafamiliar">Carg. Famil.</label>
+                        {{ form_widget(formEmpleado_a.cargafamiliar,
+                            {'attr':{'class':'form-control form-control-sm','id':'cargafamiliar'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="hijos">Hijos</label>
+                        {{ form_widget(formEmpleado_a.hijos,
+                            {'attr':{'class':'form-control form-control-sm','id':'hijos'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="cargaeduc">Cargas educ.</label>
+                        {{ form_widget(formEmpleado_a.cargaeduc,
+                            {'attr':{'class':'form-control form-control-sm','id':'cargaeduc'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="carnetconadis">Carnet CONADIS</label>
+                        {{ form_widget(formEmpleado_a.carnetconadis,
+                            {'attr':{'class':'form-control form-control-sm','id':'carnetconadis'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="discapacidad">Discapacidad</label>
+                        {{ form_widget(formEmpleado_a.discapacidad,
+                            {'attr':{'class':'form-control form-control-sm','id':'discapacidad', 'placeholder': '%'}})
+                        }}
+                    </div>
+                </div>
+        </div>
+
+        <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="cuentabanco">N° Cuenta Banco</label>
+                        {{ form_widget(formEmpleado_a.cuentabanco,
+                            {'attr':{'class':'form-control form-control-sm','id':'cuentabanco'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="nombrebanco">Nombre Banco</label>
+                        {{ form_widget(formEmpleado_a.nombrebanco,
+                            {'attr':{'class':'form-control form-control-sm','id':'nombrebanco'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="tipocuenta">Tipo cuenta</label>
+                        {{ form_widget(formEmpleado_a.tipocuenta,
+                            {'attr':{'class':'form-control form-control-sm text_oculto','id':'tipocuenta'}})
+                        }}
+                    </div>
+                </div>
+        </div>
+
+        <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="ingresomagisterio">Ingreso al Magisterio</label>
+                        {{ form_widget(formEmpleado_a.ingresomagisterio,
+                            {'attr':{'class':'form-control form-control-sm','id':'ingresomagisterio'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="ingresoinstitucion">Ingreso a Institución</label>
+                        {{ form_widget(formEmpleado_a.ingresoinstitucion,
+                            {'attr':{'class':'form-control form-control-sm','id':'ingresoinstitucion'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="nombramiento">Nombramiento</label>
+                        {{ form_widget(formEmpleado_a.nombramiento,
+                            {'attr':{'class':'form-control form-control-sm text_oculto','id':'nombramiento'}})
+                        }}
+                    </div>
+                </div>
+        </div>
+
+        <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="jornada">Jornada de Trabajo</label>
+                        {{ form_widget(formEmpleado_a.jornada,
+                            {'attr':{'class':'form-control form-control-sm text_oculto','id':'jornada'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="niveljornada">Nivel Estudio</label>
+                        {{ form_widget(formEmpleado_a.niveljornada,
+                            {'attr':{'class':'form-control form-control-sm text_oculto','id':'niveljornada'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="asignaturas">Asignaturas que dicta</label>
+                        {{ form_widget(formEmpleado_a.asignaturas,
+                            {'attr':{'class':'form-control form-control-sm','id':'asignaturas'}})
+                        }}
+                    </div>
+                </div>
+        </div>
+
+        <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="edificiolabora">Edificio Labora</label>
+                        {{ form_widget(formEmpleado_a.edificiolabora,
+                            {'attr':{'class':'form-control form-control-sm text_oculto','id':'edificiolabora'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="directorarea">Director de Área</label>
+                        {{ form_widget(formEmpleado_a.directorarea,
+                            {'attr':{'class':'form-control form-control-sm text_oculto','id':'directorarea'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="descripdirarea">Descripción</label>
+                        {{ form_widget(formEmpleado_a.descripdirarea,
+                            {'attr':{'class':'form-control form-control-sm','id':'descripdirarea', 'readonly':'readonly'}})
+                        }}
+                    </div>
+                </div>
+        </div>
+
+        <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="comision">Comisiones</label>
+                        {{ form_widget(formEmpleado_a.comision,
+                            {'attr':{'class':'form-control form-control-sm text_oculto','id':'comision'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="tipocomision">Tipo comision</label>
+                        {{ form_widget(formEmpleado_a.tipocomision,
+                            {'attr':{'class':'form-control form-control-sm disabled text_oculto','id':'tipocomision'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="nombrecomision">¿De qué comisión?</label>
+                        {{ form_widget(formEmpleado_a.nombrecomision,
+                            {'attr':{'class':'form-control form-control-sm','id':'nombrecomision', 'readonly':'readonly'}})
+                        }}
+                    </div>
+                </div>
+        </div>
+
+        <br>
+        <div class="row">
+            <div class="col text-md-center">
+                <button type="button" class="btn btn-primary" id="siguiente">Siguiente</button>
+            </div>
+        </div>
+    </fieldset>
+
+
+    <fieldset class="hide" id="fieldset_2">
+        <legend style="color: #025aa5">DIRECCIÓN DOMICILIARIA</legend>
+        <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="calleprincipal">Calle Principal</label>
+                        {{ form_widget(formEmpleado_a.calleprincipal,
+                            {'attr':{'class':'form-control form-control-sm','id':'calleprincipal'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="calletransversal">Calle Transversal</label>
+                        {{ form_widget(formEmpleado_a.calletransversal,
+                            {'attr':{'class':'form-control form-control-sm','id':'calletransversal'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="numcasa">N° casa y/o dpto</label>
+                        {{ form_widget(formEmpleado_a.numcasa,
+                            {'attr':{'class':'form-control form-control-sm','id':'numcasa'}})
+                        }}
+                    </div>
+                </div>
+        </div>
+
+        <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="barrio">Barrio</label>
+                        {{ form_widget(formEmpleado_a.barrio,
+                            {'attr':{'class':'form-control form-control-sm','id':'barrio'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="sector">Sector</label>
+                        {{ form_widget(formEmpleado_a.sector,
+                            {'attr':{'class':'form-control form-control-sm','id':'sector'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="canton">Canton</label>
+                        {{ form_widget(formEmpleado_a.canton,
+                            {'attr':{'class':'form-control form-control-sm','id':'canton'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="parroquia">Parroquia</label>
+                        {{ form_widget(formEmpleado_a.parroquia,
+                            {'attr':{'class':'form-control form-control-sm','id':'parroquia'}})
+                        }}
+                    </div>
+                </div>
+        </div>
+
+        <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="teldomicilio">Telf. Dom.</label>
+                        {{ form_widget(formEmpleado_a.teldomicilio,
+                            {'attr':{'class':'form-control form-control-sm','id':'teldomicilio'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="teloficina">Oficina</label>
+                        {{ form_widget(formEmpleado_a.teloficina,
+                            {'attr':{'class':'form-control form-control-sm','id':'teloficina'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="celular">Celular</label>
+                        {{ form_widget(formEmpleado_a.celular,
+                            {'attr':{'class':'form-control form-control-sm','id':'celular'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="operadora">Operadora</label>
+                        {{ form_widget(formEmpleado_a.operadora,
+                            {'attr':{'class':'form-control form-control-sm text_oculto','id':'operadora'}})
+                        }}
+                    </div>
+                </div>
+        </div>
+
+        <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="emailprincipal">Email Principal</label>
+                        {{ form_widget(formEmpleado_a.emailprincipal,
+                            {'attr':{'class':'form-control form-control-sm','id':'emailprincipal'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="emailalterno">Email Alterno</label>
+                        {{ form_widget(formEmpleado_a.emailalterno,
+                            {'attr':{'class':'form-control form-control-sm','id':'emailalterno'}})
+                        }}
+                    </div>
+                </div>
+        </div>
+
+        <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="nombreemergencia">En caso de emergencia comunicarse</label>
+                        {{ form_widget(formEmpleado_a.nombreemergencia,
+                            {'attr':{'class':'form-control form-control-sm','id':'nombreemergencia'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="parentescoemergencia">Parentesco</label>
+                        {{ form_widget(formEmpleado_a.parentescoemergencia,
+                            {'attr':{'class':'form-control form-control-sm','id':'parentescoemergencia'}})
+                        }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="col-form-label-sm" for="telemergencia">Telef.</label>
+                        {{ form_widget(formEmpleado_a.telemergencia,
+                            {'attr':{'class':'form-control form-control-sm','id':'telemergencia'}})
+                        }}
+                    </div>
+                </div>
+        </div>
+
+        <br>
+        <div class="row">
+                <div class="col text-md-center">
+                    <button type="button" class="btn btn-primary" id="regresar">Regresar</button>
+                    {{ form_widget(formEmpleado_a.guardar,
+                        {'attr':{'class':'btn btn-primary','id':'guardar'}}) }}
+                </div>
+        </div>
+
+    </fieldset>
+
+
+    {{ form_end(formEmpleado_a) }}
+
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script>
+
+        //CAMBIAR LA PARROQUIA SEGÚN EL CANTÓN SELECCIONADO
+        $('#appbundle_person_canton').change(function () {
+            var citySelector = $(this);
+            // Request the neighborhoods of the selected city.
+            $.ajax({
+                url: "{{ path('person_list_neighborhoods') }}",
+                type: "GET",
+                dataType: "JSON",
+                data: {
+                    cityid: citySelector.val()
+                },
+                success: function (neighborhoods) {
+                    console.log(neighborhoods)
+                    var neighborhoodSelect = $("#appbundle_person_parroquia");
+                    neighborhoodSelect.html('');
+                    neighborhoodSelect.append('<option value>Seleccione..</option>');
+                    $.each(neighborhoods, function (key, neighborhood) {
+                        neighborhoodSelect.append('<option value="' + neighborhood.id + '">' + neighborhood.nombre + '</option>');
+                    });
+                },
+                error: function (err) {
+                    alert("An error ocurred while loading data ...");
+                }
+            });
+        });
+
+
+        //FUNCIÓN PARA EL BOTON SIGUIENTE
+        $('#siguiente').on("click", function() {
+            $("#fieldset_2").removeClass("hide");
+            $("#fieldset_1").addClass("hide");
+        });
+
+
+        //FUNCIÓN PARA EL BOTON REGRESAR
+        $('#regresar').on("click", function() {
+            $("#fieldset_1").removeClass("hide");
+            $("#fieldset_2").addClass("hide");
+        });
+
+
+        //CAMBIAR EL VALOR DEL SUELDO SEGÚN LA CATEGORÍA SELECCIONADA
+        $('#appbundle_person_sueldo').change(function () {
+            $.ajax({
+                url: "{{ path('consulta_sueldo') }}",
+                type: "GET",
+                dataType: "JSON",
+                data: {
+                    sueldoid: $('#appbundle_person_sueldo').val()
+                },
+                success: function (val) {
+                    console.log(val[0].valor);
+                    var valor = $("#appbundle_person_valor");
+                    valor.html(''); // Remueve los valores actuales
+                    $("#appbundle_person_valor").val(val[0].valor);
+                },
+                error: function (err) {
+                    alert("An error ocurred while loading data ...");
+                }
+            });
+        });
+
+
+        // LLENA EL VALOR DEL SUELDO SEGUN LA CATEGORÍA QUE ESTÁ SELECCIONADA,
+        // ESTA FUNCIÓN SE EJECUTA AL MOMENTO DE EDITAR
+        if( $('#appbundle_person_sueldo').val() != ""){
+            $.ajax({
+                url: "{{ path('consulta_sueldo') }}",
+                type: "GET",
+                dataType: "JSON",
+                data: {
+                    sueldoid: $('#appbundle_person_sueldo').val()
+                },
+                success: function (val) {
+                    console.log(val[0].valor);
+                    var valor = $("#appbundle_person_valor");
+                    valor.html(''); // Remueve los valores actuales
+                    $("#appbundle_person_valor").val(val[0].valor);
+                },
+                error: function (err) {
+                    alert("An error ocurred while loading data...");
+                }
+            });
+        }
+
+
+        //FUNCIÓN PARA BLOQUEAR O MOSTRAR LA DESCRIPCIÓN DEL DIRECTOR DE ÁREA SEGÚN LO SELECCIONADO
+        $("#appbundle_person_directorarea").click(function () {
+            if($('input:radio[name="appbundle_person[directorarea]"]:checked').val() == "Si"){
+                document.getElementById("appbundle_person_descripdirarea").removeAttribute("readonly");
+            }else {
+                document.getElementById("appbundle_person_descripdirarea").value = "";
+                document.getElementById("appbundle_person_descripdirarea").setAttribute("readonly", "readonly");
+            }
+
+        });
+
+
+        //FUNCIÓN PARA BLOQUEAR O MOSTRAR LA DESCRIPCIÓN DEL DIRECTOR DE ÁREA SEGÚN LO SELECCIONADO
+        //ESTA FUNCIÓN SE EJECUTA AL MOMENTO DE EDITAR
+        if($('input:radio[name="appbundle_person[directorarea]"]:checked').val() == "Si"){
+            document.getElementById("appbundle_person_descripdirarea").removeAttribute("readonly");
+        }else {
+            document.getElementById("appbundle_person_descripdirarea").value = "";
+            document.getElementById("appbundle_person_descripdirarea").setAttribute("readonly", "readonly");
+        }
+
+
+        //FUNCIÓN PARA OCULTAR O MOSTRAR EL TIPO Y NOMBRE DE LA COMISIÓN SEGÚN LO SELECCIONADO EN COMISIONES
+        $("#appbundle_person_comision").click(function () {
+            if($('input:radio[name="appbundle_person[comision]"]:checked').val() == "Si"){
+                document.getElementById("appbundle_person_tipocomision_0").removeAttribute("disabled");
+                document.getElementById("appbundle_person_tipocomision_1").removeAttribute("disabled");
+                document.getElementById("appbundle_person_nombrecomision").removeAttribute("readonly");
+            }else {
+                document.getElementById("appbundle_person_tipocomision_0").checked = false;
+                document.getElementById("appbundle_person_tipocomision_1").checked = false;
+                document.getElementById("appbundle_person_tipocomision_0").setAttribute("disabled", "disabled");
+                document.getElementById("appbundle_person_tipocomision_1").setAttribute("disabled", "disabled");
+                document.getElementById("appbundle_person_nombrecomision").value = "";
+                document.getElementById("appbundle_person_nombrecomision").setAttribute("readonly", "readonly");
+            }
+        });
+
+        //FUNCIÓN PARA OCULTAR O MOSTRAR EL TIPO Y NOMBRE DE LA COMISIÓN SEGÚN LO SELECCIONADO EN COMISIONES
+        //ESTA FUNCIÓN SE EJECUTA AL MOMENTO DE EDITAR
+        if($('input:radio[name="appbundle_person[comision]"]:checked').val() == "Si"){
+            console.log("entra")
+            document.getElementById("appbundle_person_tipocomision_0").removeAttribute("disabled");
+            document.getElementById("appbundle_person_tipocomision_1").removeAttribute("disabled");
+            document.getElementById("appbundle_person_nombrecomision").removeAttribute("readonly");
+        }else {
+            document.getElementById("appbundle_person_tipocomision_0").checked = false;
+            document.getElementById("appbundle_person_tipocomision_1").checked = false;
+            document.getElementById("appbundle_person_tipocomision_0").setAttribute("disabled", "disabled");
+            document.getElementById("appbundle_person_tipocomision_1").setAttribute("disabled", "disabled");
+            document.getElementById("appbundle_person_nombrecomision").value = "";
+            document.getElementById("appbundle_person_nombrecomision").setAttribute("readonly", "readonly");
+        }
+
+    </script>
+{% endblock %}

@@ -1,0 +1,10 @@
+/*ESTILOS NAVBAR*/
+.navColor {
+    background-color: #025aa5;
+    border: solid 1px white;
+}
+
+#imgNav {
+    width: 5%;
+    height: 5%;
+}

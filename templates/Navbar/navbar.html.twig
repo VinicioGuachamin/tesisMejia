@@ -1,0 +1,38 @@
+<div class="container">
+    <div class="d-flex p-1">I'm a flexbox container!</div>
+</div>
+<nav class="navbar navbar-toggleable-sm navbar-inverse navColor bg-faded p-1" >
+    <div class="container">
+        <!--<a class="navbar-brand" href="#">Navbar</a>-->
+        <img id="imgNav" src="https://upload.wikimedia.org/wikipedia/commons/b/b9/Sello_del_Instituto_Nacional_Mej%C3%ADa.png">
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+                data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNavDropdown">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{ path('empleados') }}"><i class="fas fa-users"></i> Empleados </a>
+                </li>
+                <li class="nav-item">
+                    {#<a class="nav-link"href="{{ path('nuevodocente') }}"><i class="fas fa-list-alt"></i> Formularios </a>#}
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-list-alt"></i> Registrar
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#">Empleado</a>
+                        <a class="dropdown-item" href="{{ path('empleadoA_nuevo') }}">Empleado A</a>
+                        <a class="dropdown-item" href="#">Empleado B</a>
+                        <a class="dropdown-item" href="{{ path('sueldo') }}">Sueldo</a>
+                        <a class="dropdown-item" href="#">Horarios</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    {#<a class="nav-link" href="{{ path('control') }}">Control</a>#}
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
