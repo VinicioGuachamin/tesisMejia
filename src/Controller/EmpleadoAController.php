@@ -58,7 +58,7 @@ class EmpleadoAController extends Controller
         $form = $this->createForm(EmpleadoAType::class, $empleado_a);
 
         $form->handleRequest($request);
-        $img =$empleado_a->getImage();
+        $img =$empleado_a->getFoto();
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager = $this->getDoctrine()->getManager();
