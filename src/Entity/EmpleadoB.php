@@ -6,12 +6,12 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
-
 /**
- * @ORM\Entity(repositoryClass="App\Repository\EmpleadoARepository")
+ * @ORM\Entity(repositoryClass="App\Repository\EmpleadoBRepository")
  * @UniqueEntity("cedula", message="El numero de cedula ya existe")
  */
-class EmpleadoA
+
+class EmpleadoB
 {
     /**
      * @ORM\Id()
@@ -152,12 +152,6 @@ class EmpleadoA
      */
     private $tipocuenta;
 
-    /**
-     * @ORM\Column(type="date")
-     * @Assert\Date()
-     * @Assert\NotBlank(message="Campo Obligatorio")
-     */
-    private $ingresomagisterio;
 
     /**
      * @ORM\Column(type="date")
@@ -167,12 +161,6 @@ class EmpleadoA
     private $ingresoinstitucion;
 
     /**
-     * @ORM\Column(type="simple_array")
-     * @Assert\NotBlank(message="Campo Obligatorio")
-     */
-    private $nombramiento;
-
-    /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Sueldo", inversedBy="empleadoAs")
      * @ORM\JoinColumn(nullable=false)
      * @Assert\NotBlank(message="Campo Obligatorio")
@@ -180,59 +168,22 @@ class EmpleadoA
     private $sueldo;
 
     /**
-     * @ORM\Column(type="simple_array")
+     * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank(message="Campo Obligatorio")
      */
-    private $jornada;
+    private $cargo;
 
     /**
-     * @ORM\Column(type="simple_array")
+     * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank(message="Campo Obligatorio")
      */
-    private $niveljornada;
-
-    /**
-     * @ORM\Column(type="string", length=500)
-     * @Assert\NotBlank(message="Campo Obligatorio")
-     */
-    private $asignaturas;
+    private $dptolabora;
 
     /**
      * @ORM\Column(type="simple_array")
      * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $edificiolabora;
-
-    /**
-     * @ORM\Column(type="string", columnDefinition="ENUM('Si', 'No')", length=10)
-     * @Assert\Choice(choices = {"Si","No"})
-     * @Assert\NotBlank(message="Campo Obligatorio")
-     */
-    private $directorarea;
-
-    /**
-     * @ORM\Column(type="string", length=500, nullable=true)
-     */
-    private $descripdirarea;
-
-    /**
-     * @ORM\Column(type="string", columnDefinition="ENUM('Si', 'No')", length=10)
-     * @Assert\Choice(choices = {"Si","No"})
-     * @Assert\NotBlank(message="Campo Obligatorio")
-     */
-    private $comision;
-
-    /**
-     * @ORM\Column(type="string", columnDefinition="ENUM('Coordinador', 'Integrante')", length=10, nullable=true)
-     * @Assert\Choice(choices = {"Coordinador","Integrante"})
-     */
-    private $tipocomision;
-
-
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    private $nombrecomision;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -549,23 +500,6 @@ class EmpleadoA
 
         return $this;
     }
-
-    /**
-     * @return mixed
-     */
-    public function getIngresomagisterio()
-    {
-        return $this->ingresomagisterio;
-    }
-
-    /**
-     * @param mixed $ingresomagisterio
-     */
-    public function setIngresomagisterio($ingresomagisterio): void
-    {
-        $this->ingresomagisterio = $ingresomagisterio;
-    }
-
     /**
      * @return mixed
      */
@@ -596,38 +530,26 @@ class EmpleadoA
         return $this;
     }
 
-    public function getAsignaturas(): ?string
+    public function getCargo(): ?string
     {
-        return $this->asignaturas;
+        return $this->cargo;
     }
 
-    public function setAsignaturas(string $asignaturas): self
+    public function setCargo(string $cargo): self
     {
-        $this->asignaturas = $asignaturas;
+        $this->cargo = $cargo;
 
         return $this;
     }
 
-    public function getDescripdirarea(): ?string
+    public function getDptolabora(): ?string
     {
-        return $this->descripdirarea;
+        return $this->dptolabora;
     }
 
-    public function setDescripdirarea(?string $descripdirarea): self
+    public function setDptolabora(string $dptolabora): self
     {
-        $this->descripdirarea = $descripdirarea;
-
-        return $this;
-    }
-
-    public function getNombrecomision(): ?string
-    {
-        return $this->nombrecomision;
-    }
-
-    public function setNombrecomision(?string $nombrecomision): self
-    {
-        $this->nombrecomision = $nombrecomision;
+        $this->dptolabora = $dptolabora;
 
         return $this;
     }
