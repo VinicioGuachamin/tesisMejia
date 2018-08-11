@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -274,6 +276,21 @@ class EmpleadoA
      * @ORM\Column(type="string", length=255)
      */
     private $telemergencia;
+
+    /**
+     * @ORM\OneToOne(targetEntity="App\Entity\Bachillerato", mappedBy="empleado_a")
+     */
+    private $bachillerato;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Superior", mappedBy="empleado_a")
+     */
+    private $superiors;
+
+    public function __construct()
+    {
+        $this->superiors = new ArrayCollection();
+    }
 
 
 
@@ -923,6 +940,54 @@ class EmpleadoA
     public function setOperadora($operadora): void
     {
         $this->operadora = $operadora;
+    }
+
+    public function getBachillerato(): ?Bachillerato
+    {
+        return $this->bachillerato;
+    }
+
+    public function setBachillerato(Bachillerato $bachillerato): self
+    {
+        $this->bachillerato = $bachillerato;
+
+        // set the owning side of the relation if necessary
+        if ($this !== $bachillerato->getEmpleadoA()) {
+            $bachillerato->setEmpleadoA($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Superior[]
+     */
+    public function getSuperiors(): Collection
+    {
+        return $this->superiors;
+    }
+
+    public function addSuperior(Superior $superior): self
+    {
+        if (!$this->superiors->contains($superior)) {
+            $this->superiors[] = $superior;
+            $superior->setEmpleadoA($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSuperior(Superior $superior): self
+    {
+        if ($this->superiors->contains($superior)) {
+            $this->superiors->removeElement($superior);
+            // set the owning side to null (unless already changed)
+            if ($superior->getEmpleadoA() === $this) {
+                $superior->setEmpleadoA(null);
+            }
+        }
+
+        return $this;
     }
 
 

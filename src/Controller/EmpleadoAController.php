@@ -2,8 +2,14 @@
 
 namespace App\Controller;
 
+use App\Entity\Bachillerato;
 use App\Entity\EmpleadoA;
+use App\Entity\Postbachillerato;
+use App\Entity\Superior;
+use App\Form\BachilleratoType;
 use App\Form\EmpleadoAType;
+use App\Form\PostbachilleratoType;
+use App\Form\SuperiorType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -39,8 +45,10 @@ class EmpleadoAController extends Controller
             $em = $this->getDoctrine()->getManager();
             $em->persist($empleado_a);
             $em->flush();
-
-            return $this->redirectToRoute('empleados');
+            $id= $empleado_a->getId();
+            return $this->redirectToRoute('empleadoA_educacion', array(
+                'id'=>$id
+            ));
         }
 
         return $this->render('empleado_a/empleado_aCrear.html.twig', array(
@@ -51,7 +59,7 @@ class EmpleadoAController extends Controller
 
     /**
      * FUNCIÓN PARA EDITAR UN EMPLEADO A
-     * @Route("/empleado/{id}/editar", name="empleadoA_editar")
+     * @Route("/empleado/a/{id}/editar", name="empleadoA_editar")
      */
     public function editarEmpleadoA(Request $request, $id){
         $empleado_a = $this->getDoctrine()->getRepository(EmpleadoA::class)->find($id);
@@ -64,7 +72,9 @@ class EmpleadoAController extends Controller
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->flush();
 
-            return $this->redirectToRoute('sueldo');
+            return $this->redirectToRoute('empleadoA_educacion', array(
+                'id'=>$id
+            ));
         }
 
         return $this->render('empleado_a/empleado_aCrear.html.twig', array(
@@ -72,6 +82,7 @@ class EmpleadoAController extends Controller
         ));
 
     }
+
 
     /**
      * Returns a JSON string with the neighborhoods of the City with the providen id.
@@ -145,5 +156,318 @@ class EmpleadoAController extends Controller
 
         // ej.
         // [{"id":"3","valor":"1234"},{"id":"4","valor":"9876"}]
+    }
+
+
+    /**
+     * FUNCIÓN PARA CREAR UN NUEVO BACHILLERATO
+     * @Route("/empleado/a/nuevo/bachillerato/{id}", name="empleadoA_nuevoBachillerato")
+     */
+    public function crearEmpleadoABachillerato(Request $request, $id){
+
+        //Verifico si hay datos en la tabla Bachillerato con el id del Empleado
+        $bachilleratoData = $this->getDoctrine()
+            ->getRepository(Bachillerato::class)
+            ->findOneBy(['empleado_a'=>$id]);
+
+        //Inicializo una varibale en caso de que exista o no datos con el id del Empleado en la tabla Bachillerato
+        if (count($bachilleratoData) == 0){
+            $data = false;
+        }else{
+            $data = true;
+        }
+
+        $bachillerato = new Bachillerato();
+        $form = $this->createForm(BachilleratoType::class, $bachillerato);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $bachillerato = $form->getData();
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($bachillerato);
+            $em->flush();
+
+            return $this->redirectToRoute('empleadoA_educacion', array('id'=>$id));
+        }
+
+        return $this->render('empleado_a/bachillerato.html.twig', array(
+            'formEmpleado_a' => $form->createView(),
+            'id'=>$id,
+            'data'=>$data
+        ));
+    }
+
+
+    /**
+     * FUNCIÓN PARA EDITAR UN BACHILLERATO
+     * @Route("/empleado/a/nuevo/bachillerato/{id}/editar/{idEmpleado}", name="empleadoA_editarBachillerato")
+     */
+    public function editarEmpleadoABachillerato(Request $request, $id, $idEmpleado){
+
+        $bachillerato = $this->getDoctrine()->getRepository(Bachillerato::class)->find($id);
+        $form = $this->createForm(BachilleratoType::class, $bachillerato);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $bachillerato = $form->getData();
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($bachillerato);
+            $em->flush();
+            return $this->redirectToRoute('empleadoA_educacion', array('id'=>$idEmpleado));
+        }
+
+        return $this->render('empleado_a/bachillerato_editar.html.twig', array(
+            'formEmpleado_a' => $form->createView(),
+            'id'=>$id,
+            'idEmpleado'=>$idEmpleado
+        ));
+    }
+
+    /**
+     * FUNCIÓN PARA ELIMINAR UN BACHILLERATO REGISTRADO
+     * @Route("/empleado/a/nuevo/bachillerato/{id}/eliminar/{idEmpleado}", name="empleadoA_eliminarBachillerato")
+     */
+    public function eliminarEmpleadoABachillerato($id, $idEmpleado){
+        $em = $this->getDoctrine()->getManager();
+        $bachillerato= $em->getRepository(Bachillerato::class)->find($id);
+
+        if (!$bachillerato) {
+            throw $this->createNotFoundException(
+                'No product found for id '.$id
+            );
+        }
+
+        $em->remove($bachillerato);
+        $em->flush();
+
+        return $this->redirectToRoute('empleadoA_educacion', array('id'=>$idEmpleado));
+
+    }
+
+    /**
+     * @Route("/empleado/a/nuevo/bachillerato/{id}/vistaeliminar/{idEmpleado}", name="vista_elminar_bachillerato")
+     */
+    public function vistaEliminarBchillerato($id, $idEmpleado){
+
+        return $this->render('empleado_a/bachillerato_eliminar.html.twig', array(
+            'id'=>$id,
+            'idEmpleado'=>$idEmpleado
+        ));
+
+    }
+
+    /**
+     * FUNCIÓN PARA RENDERISAR LA VISTA DE LOS OFRMULARIOS EDUCACIÓN EMPLEADOA
+     * @Route("/empleado/a/nuevo/educacion/{id}", name="empleadoA_educacion")
+     */
+    public function empleadoAEducacion($id){
+        $bachillerato = $this->getDoctrine()->getRepository(Bachillerato::class)->findBy(
+            ['empleado_a' => $id]
+        );
+
+        $postbachillerato = $this->getDoctrine()->getRepository(Postbachillerato::class)->findBy(
+            ['empleado_a' => $id]
+        );
+
+        $superior = $this->getDoctrine()->getRepository(Superior::class)->findBy(
+            ['empleado_a' => $id]
+        );
+
+        return $this->render('empleado_a/educacion.html.twig', array(
+            'bachillerato' => $bachillerato,
+            'postbachillerato' => $postbachillerato,
+            'superior'=> $superior,
+            'idEmpladoA' => $id
+        ));
+
+    }
+
+
+    /**
+     * FUNCIÓN PARA CREAR UN NUEVO POSTBACHILLERATO
+     * @Route("/empleado/a/nuevo/postbachillerato/{id}", name="empleadoA_nuevoPostbachillerato")
+     */
+    public function crearEmpleadoAPostbachillerato(Request $request, $id){
+
+        //Verifico si hay datos en la tabla PostBachillerato con el id del Empleado
+        $postbachilleratoData = $this->getDoctrine()
+            ->getRepository(Postbachillerato::class)
+            ->findOneBy(['empleado_a'=>$id]);
+
+        //Inicializo una varibale en caso de que exista o no datos con el id del Empleado en la tabla Bachillerato
+        if (count($postbachilleratoData) == 0){
+            $data = false;
+        }else{
+            $data = true;
+        }
+
+        $postbachillerato = new Postbachillerato();
+        $form = $this->createForm(PostbachilleratoType::class, $postbachillerato);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $postbachillerato = $form->getData();
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($postbachillerato);
+            $em->flush();
+
+            return $this->redirectToRoute('empleadoA_educacion', array('id'=>$id));
+        }
+
+        return $this->render('empleado_a/postbachillerato_crear.html.twig', array(
+            'formEmpleado_a' => $form->createView(),
+            'id'=>$id,
+            'data'=>$data
+        ));
+    }
+
+
+    /**
+     * FUNCIÓN PARA EDITAR UN POSTBACHILLERATO
+     * @Route("/empleado/a/nuevo/postbachillerato/{id}/editar/{idEmpleado}", name="empleadoA_editarPostbachillerato")
+     */
+    public function editarEmpleadoAPostbachillerato(Request $request, $id, $idEmpleado){
+
+        $postbachillerato = $this->getDoctrine()->getRepository(Postbachillerato::class)->find($id);
+        $form = $this->createForm(PostbachilleratoType::class, $postbachillerato);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $postbachillerato = $form->getData();
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($postbachillerato);
+            $em->flush();
+            return $this->redirectToRoute('empleadoA_educacion', array('id'=>$idEmpleado));
+        }
+
+        return $this->render('empleado_a/postbachillerato_editar.html.twig', array(
+            'formEmpleado_a' => $form->createView(),
+            'id'=>$id,
+            'idEmpleado'=>$idEmpleado
+        ));
+    }
+
+
+    /**
+     * FUNCIÓN PARA ELIMINAR UN POSTBACHILLERATO REGISTRADO
+     * @Route("/empleado/a/nuevo/postbachillerato/{id}/eliminar/{idEmpleado}", name="empleadoA_eliminarPostbachillerato")
+     */
+    public function eliminarEmpleadoAPostbachillerato($id, $idEmpleado){
+        $em = $this->getDoctrine()->getManager();
+        $postbachillerato= $em->getRepository(Postbachillerato::class)->find($id);
+
+        if (!$postbachillerato) {
+            throw $this->createNotFoundException(
+                'No product found for id '.$id
+            );
+        }
+
+        $em->remove($postbachillerato);
+        $em->flush();
+
+        return $this->redirectToRoute('empleadoA_educacion', array('id'=>$idEmpleado));
+
+    }
+
+    /**
+     * @Route("/empleado/a/nuevo/postbachillerato/{id}/vistaeliminar/{idEmpleado}", name="vista_elminar_postbachillerato")
+     */
+    public function vistaEliminarPostbachillerato($id, $idEmpleado){
+
+        return $this->render('empleado_a/postbachillerato_eliminar.html.twig', array(
+            'id'=>$id,
+            'idEmpleado'=>$idEmpleado
+        ));
+
+    }
+
+
+    /**
+     * FUNCIÓN PARA CREAR UN NUEVO SUPERIOR
+     * @Route("/empleado/a/nuevo/superior/{id}", name="empleadoA_nuevoSuperior")
+     */
+    public function crearEmpleadoASuperior(Request $request, $id){
+        $superior = new Superior();
+        $form = $this->createForm(SuperiorType::class, $superior);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $superior = $form->getData();
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($superior);
+            $em->flush();
+
+            return $this->redirectToRoute('empleadoA_educacion', array('id'=>$id));
+        }
+
+        return $this->render('empleado_a/superior_crear.html.twig', array(
+            'formEmpleado_a' => $form->createView(),
+            'id'=>$id
+        ));
+    }
+
+    /**
+     * FUNCIÓN PARA EDITAR UN SUPERIOR
+     * @Route("/empleado/a/nuevo/superior/{id}/editar/{idEmpleado}", name="empleadoA_editarSuperior")
+     */
+    public function editarEmpleadoASuperior(Request $request, $id, $idEmpleado){
+
+        $superior = $this->getDoctrine()->getRepository(Superior::class)->find($id);
+        $form = $this->createForm(SuperiorType::class, $superior);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $superior = $form->getData();
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($superior);
+            $em->flush();
+            return $this->redirectToRoute('empleadoA_educacion', array('id'=>$idEmpleado));
+        }
+
+        return $this->render('empleado_a/superior_editar.html.twig', array(
+            'formEmpleado_a' => $form->createView(),
+            'id'=>$id,
+            'idEmpleado'=>$idEmpleado
+        ));
+    }
+
+
+    /**
+     * FUNCIÓN PARA ELIMINAR UN SUPERIOR REGISTRADO
+     * @Route("/empleado/a/nuevo/superior/{id}/eliminar/{idEmpleado}", name="empleadoA_eliminarSuperior")
+     */
+    public function eliminarEmpleadoASuperior($id, $idEmpleado){
+        $em = $this->getDoctrine()->getManager();
+        $superior= $em->getRepository(Superior::class)->find($id);
+
+        if (!$superior) {
+            throw $this->createNotFoundException(
+                'No product found for id '.$id
+            );
+        }
+
+        $em->remove($superior);
+        $em->flush();
+
+        return $this->redirectToRoute('empleadoA_educacion', array('id'=>$idEmpleado));
+
+    }
+
+    /**
+     * @Route("/empleado/a/nuevo/superior/{id}/vistaeliminar/{idEmpleado}", name="vista_elminar_superior")
+     */
+    public function vistaEliminarSuperior($id, $idEmpleado){
+
+        return $this->render('empleado_a/superior_eliminar.html.twig', array(
+            'id'=>$id,
+            'idEmpleado'=>$idEmpleado
+        ));
+
     }
 }

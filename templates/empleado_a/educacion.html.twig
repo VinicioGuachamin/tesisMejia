@@ -1,0 +1,199 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Educación{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" type="text/css" rel="stylesheet" />
+    <link href="{{ asset('css/empleado_a.css') }}" type="text/css" rel="stylesheet" />
+{% endblock %}
+
+{% block body %}
+    <fieldset style="padding-top: 0px">
+        <legend>NIVEL DE INSTRUCCIÓN</legend>
+        <div class="row">
+
+            <div class="col-md-12">
+
+                {{ render(controller(
+                    'App\\Controller\\EmpleadoAController::crearEmpleadoABachillerato', {'id':idEmpladoA}
+                )) }}
+
+                <table id="tableBachillerato" class="hover" cellspacing="0" width="100%">
+                    <thead>
+                    <tr>
+                        <th>Título Bachillerato</th>
+                        <th>Institución</th>
+                        <th>Fecha Título</th>
+                        <th>Acción</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for bach in bachillerato %}
+                        <tr>
+                            <td>{{ bach.titulo }}</td>
+                            <td>{{ bach.institucion }}</td>
+                            <td>{{ bach.fechaTitulo|date('Y-m-d') }}</td>
+                            <td>
+                                {{ render(controller(
+                                    'App\\Controller\\EmpleadoAController::editarEmpleadoABachillerato', { 'id' : bach.id, 'idEmpleado': idEmpladoA}
+                                )) }}
+                                {{ render(controller(
+                                    'App\\Controller\\EmpleadoAController::vistaEliminarBchillerato', { 'id' : bach.id,  'idEmpleado': idEmpladoA}
+                                )) }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <br>
+        <hr>
+        <br>
+
+        <div class="row">
+
+            <div class="col-md-12">
+
+                {{ render(controller(
+                    'App\\Controller\\EmpleadoAController::crearEmpleadoAPostbachillerato', {'id':idEmpladoA}
+                )) }}
+
+                <table id="tablePostbachillerato" class="hover" cellspacing="0" width="100%">
+                    <thead>
+                    <tr>
+                        <th>Título Postbachillerato</th>
+                        <th>Institución</th>
+                        <th>Fecha Título</th>
+                        <th>Acción</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for bach in postbachillerato %}
+                        <tr>
+                            <td>{{ bach.titulo }}</td>
+                            <td>{{ bach.institucion }}</td>
+                            <td>{{ bach.fechaTitulo|date('Y-m-d') }}</td>
+                            <td>
+                                {{ render(controller(
+                                    'App\\Controller\\EmpleadoAController::editarEmpleadoAPostbachillerato', { 'id' : bach.id, 'idEmpleado': idEmpladoA}
+                                )) }}
+                                {{ render(controller(
+                                    'App\\Controller\\EmpleadoAController::vistaEliminarPostbachillerato', { 'id' : bach.id,  'idEmpleado': idEmpladoA}
+                                )) }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <br>
+        <hr>
+        <br>
+
+        <div class="row">
+
+            <div class="col-md-12">
+
+                {{ render(controller(
+                    'App\\Controller\\EmpleadoAController::crearEmpleadoASuperior', {'id':idEmpladoA}
+                )) }}
+
+                <table id="tableSuperior" class="hover" cellspacing="0" width="100%">
+                    <thead>
+                    <tr>
+                        <th>Título Eduacación Superior</th>
+                        <th>Institución</th>
+                        <th>Reg. Senescyt</th>
+                        <th>Nivel</th>
+                        <th>Acción</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for bach in superior %}
+                        <tr>
+                            <td>{{ bach.titulo }}</td>
+                            <td>{{ bach.institucion }}</td>
+                            <td>{{ bach.registroSenescyt }}</td>
+                            <td>{{ bach.nivel }}</td>
+                            <td>
+                                {{ render(controller(
+                                    'App\\Controller\\EmpleadoAController::editarEmpleadoASuperior', { 'id' : bach.id, 'idEmpleado': idEmpladoA}
+                                )) }}
+                                {{ render(controller(
+                                    'App\\Controller\\EmpleadoAController::vistaEliminarSuperior', { 'id' : bach.id,  'idEmpleado': idEmpladoA}
+                                )) }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <br>
+
+        <div class="row">
+            <div class="col text-md-center">
+                <a href="{{ path('empleadoA_editar', {'id': idEmpladoA}) }}" class="btn btn-primary">
+                    Regresar
+                </a>
+                <a href="{{ path('empleados')}}" class="btn btn-primary">
+                    Finalizar
+                </a>
+            </div>
+        </div>
+    </fieldset>
+
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+            $('#tableBachillerato').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
+                },
+                "searching": false,
+                "paging": false,
+                "info": false
+            });
+        } );
+
+        $(document).ready(function() {
+            $('#tablePostbachillerato').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
+                },
+                "searching": false,
+                "paging": false,
+                "info": false
+            });
+        } );
+
+        $(document).ready(function() {
+            $('#tableSuperior').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
+                },
+                "searching": false,
+                "paging": false,
+                "info": false
+            });
+        } );
+
+    </script>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% form_theme formEmpleado_a 'form/fields.html.twig' %}
+
+<div class="text-right" style="padding: 8px">
+    <button type="button" class="btn btn-light" data-toggle="modal" data-target="#exampleModalCentersuperior" >
+        <i class="fas fa-plus"></i> Agregar
+    </button>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModalCentersuperior" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Registrar Educación Superior</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            {{ form_start(formEmpleado_a, {'action': path('empleadoA_nuevoSuperior', {'id': id})}) }}
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="titulo">Título Obtenido:</label>
+                    {{ form_widget(formEmpleado_a.titulo, {'attr':{'class':'form-control form-control-sm'}}) }}
+                </div>
+                <div class="form-group">
+                    <label for="institucion">Institución:</label>
+                    {{ form_widget(formEmpleado_a.institucion, {'attr':{'class':'form-control form-control-sm'}}) }}
+                </div>
+                <div class="form-group">
+                    <label for="registro_senescyt">Registro Senescyt:</label>
+                    {{ form_widget(formEmpleado_a.registro_senescyt, {'attr':{'class':'form-control form-control-sm'}}) }}
+                </div>
+                <div class="form-group">
+                    <label for="nivel">Nivel:</label>
+                    {{ form_widget(formEmpleado_a.nivel, {'attr':{'class':'form-control form-control-sm'}}) }}
+                </div>
+                <div class="form-group" style="display: none">
+                    <label for="empleado_a">Id EmpleadoA</label>
+                    {{ form_widget(formEmpleado_a.empleado_a, {'attr':{'class':'form-control form-control-sm'}}) }}
+                </div>
+
+            </div>
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+
+                {{ form_widget(formEmpleado_a.guardar, {'attr':{'class':'btn btn-primary'}}) }}
+            </div>
+
+            {{ form_end(formEmpleado_a) }}
+
+        </div>
+    </div>
+</div>
+
+<p id="idEmpleadoA" style="display: none">{{ id }}</p>
+
+{% block javascripts %}
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script>
+        //OBTENGO EL ID DEL EMPLEADOA CREADO
+        var idEmpleado = document.getElementById("idEmpleadoA").innerText;
+
+        //SETTEO EL ID CON EL QUE SE VA AGUARDAR EL NUEVO BACHILLERATO
+        $("#superior_empleado_a").val(idEmpleado);
+
+    </script>
+{% endblock %}
