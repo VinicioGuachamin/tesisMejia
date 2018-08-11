@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Sueldo;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -15,7 +16,7 @@ class SueldoType extends AbstractType
     {
         $builder
             ->add('categoria', TextType::class)
-            ->add('valor', TextType::class)
+            ->add('valor', IntegerType::class)
             ->add('guardar', SubmitType::class)
         ;
     }

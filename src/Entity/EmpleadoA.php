@@ -20,59 +20,79 @@ class EmpleadoA
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Assert\Image(mimeTypesMessage="Este archivo no es una imagen válida")
      */
     private $foto;
 
     /**
      * @ORM\Column(type="string", columnDefinition="ENUM('ROLE_ADMIN', 'ROLE_SUPERUSER', 'ROLE_USER')", length=100)
      * @Assert\Choice(choices = {"ROLE_ADMIN", "ROLE_SUPERUSER", "ROLE_USER"})
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $rol;
 
     /**
      * @ORM\Column(type="string", columnDefinition="ENUM('Docente', 'Médico', 'Oficina')", length=100)
      * @Assert\Choice(choices = {"Docente","Médico", "Oficina"})
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $tipoempleado;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Campo Obligatorio")
+     * @Assert\Regex(pattern="/\d/",
+     *     match=false,
+     *     message="Tu nombre no puede tener números")
      */
     private $nombres;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Campo Obligatorio")
+     * @Assert\Regex(pattern="/\d/",
+     *     match=false,
+     *     message="Tu nombre no puede tener números"))
      */
     private $apellidos;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $codbiometrico;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $cedula;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="date")
+     * @Assert\Date()
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $fnacimiento;
 
     /**
      * @ORM\Column(type="string", columnDefinition="ENUM('Soltero/a', 'Unión de Hecho', 'Casado/a', 'Divorciado/a', 'Viudo/a')", length=100)
      * @Assert\Choice(choices = {"Soltero/a","Unión de Hecho", "Casado/a", "Divorciado/a", "Viudo/a"})
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $ecivil;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $tsangre;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Assert\Regex(pattern="/\d/",
+     *     match=false,
+     *     message="Tu nombre no puede tener números")
      */
     private $nombreconyugue;
 
@@ -83,16 +103,19 @@ class EmpleadoA
 
     /**
      * @ORM\Column(type="integer")
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $cargafamiliar;
 
     /**
      * @ORM\Column(type="integer")
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $hijos;
 
     /**
      * @ORM\Column(type="integer")
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $cargaeduc;
 
@@ -108,64 +131,78 @@ class EmpleadoA
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $cuentabanco;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $nombrebanco;
 
     /**
      * @ORM\Column(type="string", columnDefinition="ENUM('Ahorro', 'Corriente')", length=100)
      * @Assert\Choice(choices = {"Ahorro","Corriente"})
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $tipocuenta;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="date")
+     * @Assert\Date()
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $ingresomagisterio;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="date")
+     * @Assert\Date()
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $ingresoinstitucion;
 
     /**
      * @ORM\Column(type="simple_array")
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $nombramiento;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Sueldo", inversedBy="empleadoAs")
      * @ORM\JoinColumn(nullable=false)
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $sueldo;
 
     /**
      * @ORM\Column(type="simple_array")
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $jornada;
 
     /**
      * @ORM\Column(type="simple_array")
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $niveljornada;
 
     /**
      * @ORM\Column(type="string", length=500)
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $asignaturas;
 
     /**
      * @ORM\Column(type="simple_array")
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $edificiolabora;
 
     /**
      * @ORM\Column(type="string", columnDefinition="ENUM('Si', 'No')", length=10)
      * @Assert\Choice(choices = {"Si","No"})
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $directorarea;
 
@@ -177,6 +214,7 @@ class EmpleadoA
     /**
      * @ORM\Column(type="string", columnDefinition="ENUM('Si', 'No')", length=10)
      * @Assert\Choice(choices = {"Si","No"})
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $comision;
 
@@ -194,84 +232,105 @@ class EmpleadoA
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $calleprincipal;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $calletransversal;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $numcasa;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $barrio;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $sector;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Canton", inversedBy="empleadoAs")
      * @ORM\JoinColumn(nullable=false)
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $canton;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Parroquia", inversedBy="empleadoAs")
      * @ORM\JoinColumn(nullable=false)
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $parroquia;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Campo Obligatorio")
+     * @Assert\Length(min="7", max="9", minMessage="Minimo 7 caracteres", maxMessage="Maximo 9 caracteres")
      */
     private $teldomicilio;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Assert\Length(min="7", max="9", minMessage="Minimo 7 caracteres", maxMessage="Maximo 9 caracteres")
      */
     private $teloficina;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Campo Obligatorio")
+     * * @Assert\Regex(pattern="/\d/", message="Ingrese solo números")
+     * @Assert\Length(min="10", max="10", exactMessage="Debe tener 10 caracteres")
      */
     private $celular;
 
     /**
      * @ORM\Column(type="string", columnDefinition="ENUM('Movi', 'Claro', 'CNT', 'Otro')", length=10)
      * @Assert\Choice(choices = {"Movi","Claro", "CNT", "Otro"})
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $operadora;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Campo Obligatorio")
+     * @Assert\Email(message="Correo Electronico Invalido")
      */
     private $emailprincipal;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Assert\Email(message="Correo Electronico Invalido")
      */
     private $emailalterno;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $nombreemergencia;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $parentescoemergencia;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Campo Obligatorio")
+     * @Assert\Length(min="7", max="9", minMessage="Minimo 7 caracteres", maxMessage="Maximo 9 caracteres")
      */
     private $telemergencia;
 
@@ -349,17 +408,23 @@ class EmpleadoA
         return $this;
     }
 
-    public function getFnacimiento(): ?\DateTimeInterface
+    /**
+     * @return mixed
+     */
+    public function getFnacimiento()
     {
         return $this->fnacimiento;
     }
 
-    public function setFnacimiento(\DateTimeInterface $fnacimiento): self
+    /**
+     * @param mixed $fnacimiento
+     */
+    public function setFnacimiento($fnacimiento): void
     {
         $this->fnacimiento = $fnacimiento;
-
-        return $this;
     }
+
+
 
     public function getTsangre(): ?string
     {
@@ -481,29 +546,39 @@ class EmpleadoA
         return $this;
     }
 
-    public function getIngresomagisterio(): ?\DateTimeInterface
+    /**
+     * @return mixed
+     */
+    public function getIngresomagisterio()
     {
         return $this->ingresomagisterio;
     }
 
-    public function setIngresomagisterio(\DateTimeInterface $ingresomagisterio): self
+    /**
+     * @param mixed $ingresomagisterio
+     */
+    public function setIngresomagisterio($ingresomagisterio): void
     {
         $this->ingresomagisterio = $ingresomagisterio;
-
-        return $this;
     }
 
-    public function getIngresoinstitucion(): ?\DateTimeInterface
+    /**
+     * @return mixed
+     */
+    public function getIngresoinstitucion()
     {
         return $this->ingresoinstitucion;
     }
 
-    public function setIngresoinstitucion(\DateTimeInterface $ingresoinstitucion): self
+    /**
+     * @param mixed $ingresoinstitucion
+     */
+    public function setIngresoinstitucion($ingresoinstitucion): void
     {
         $this->ingresoinstitucion = $ingresoinstitucion;
-
-        return $this;
     }
+
+
 
     public function getSueldo(): ?Sueldo
     {

@@ -53,7 +53,8 @@ class EmpleadoAType extends AbstractType
             ->add('apellidos', TextType::class)
             ->add('codbiometrico', IntegerType::class)
             ->add('cedula')
-            ->add('fnacimiento',  DateType::class, array( 'widget' => 'single_text'))
+            ->add('fnacimiento',  DateType::class, array( 'widget' => 'single_text',
+                'invalid_message' => 'Fecha Invalida'))
             ->add('ecivil', ChoiceType::class, array('placeholder' => 'Seleccione...',
                 'choices' => array(
                     'Soltero/a' => 'Soltero/a',
@@ -62,8 +63,8 @@ class EmpleadoAType extends AbstractType
                     'Divorciado/a' => 'Divorciado/a',
                     'Viudo/a' => 'Viudo/a')))
             ->add('tsangre', TextType::class)
-            ->add('nombreconyugue', TextType::class)
-            ->add('cedulaconyugue', TextType::class)
+            ->add('nombreconyugue', TextType::class, array('required' => false))
+            ->add('cedulaconyugue', TextType::class, array('required' => false))
             ->add('cargafamiliar', IntegerType::class)
             ->add('hijos', IntegerType::class)
             ->add('cargaeduc', IntegerType::class)
@@ -77,8 +78,10 @@ class EmpleadoAType extends AbstractType
                     'Corriente' => 'Corriente'),
                 'expanded' => true,
                 'multiple' => false))
-            ->add('ingresomagisterio', DateType::class, array( 'widget' => 'single_text'))
-            ->add('ingresoinstitucion', DateType::class, array( 'widget' => 'single_text'))
+            ->add('ingresomagisterio', DateType::class, array( 'widget' => 'single_text',
+                'invalid_message' => 'Fecha Invalida'))
+            ->add('ingresoinstitucion', DateType::class, array( 'widget' => 'single_text',
+                'invalid_message' => 'Fecha Invalida'))
             ->add('nombramiento', ChoiceType::class, array(
                 'choices' => array(
                     'Definitivo' => 'Definitivo',
@@ -135,7 +138,7 @@ class EmpleadoAType extends AbstractType
             ->add('sector', TextType::class)
             ->add('teldomicilio', IntegerType::class)
             ->add('teloficina', IntegerType::class)
-            ->add('celular', IntegerType::class)
+            ->add('celular', TextType::class)
             ->add('operadora', ChoiceType::class, array(
                 'choices' => array(
                     'Movi' => 'Movi',

@@ -16,28 +16,36 @@
                 </button>
             </div>
 
-            {{ form_start(formSueldo, {'action': path('sueldo_nuevo')}) }}
-            <div class="modal-body">
+            {{ form_start(formSueldo, {'action': path('sueldo_nuevo'),'attr':{'class':'needs-validation', 'novalidate': 'novalidate'}}) }}
 
+            <div class="modal-body">
                 <div class="form-group">
-                    <label for="categoria">Categoria:</label>
+                    <label for="categoria"><strong style="color: red">*</strong>Categoria:</label>
                     {{ form_widget(formSueldo.categoria, {'attr':{'class':'form-control'}}) }}
                     <h7 class="text-danger">{{ form_errors(formSueldo.categoria) }}</h7>
+                    <div class="invalid-feedback">
+                        Campo Obligatorio.
+                    </div>
                 </div>
-
                 <div class="form-group">
-                    <label for="valor">Valor:</label>
-                    {{ form_widget(formSueldo.valor, {'attr':{'class':'form-control'}}) }}
+                    <label for="valor"><strong style="color: red">*</strong>Valor:</label>
+                    {{ form_widget(formSueldo.valor, {'attr':{'class':'form-control','pattern':'[1-9]\d{0,}'}}) }}
                     <h7 class="text-danger">{{ form_errors(formSueldo.valor) }}</h7>
+                    <div class="invalid-feedback">
+                        Campo Obligatorio.
+                    </div>
                 </div>
-
             </div>
+
             <div class="modal-footer">
 
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
                 {{ form_widget(formSueldo.guardar, {'attr':{'class':'btn btn-primary'}}) }}
 
             </div>
+            <h7 style="color: red">*Campos Obligatorios</h7>
+
+
             {{ form_end(formSueldo) }}
         </div>
     </div>
