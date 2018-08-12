@@ -5,7 +5,6 @@
 
 <!-- Modal -->
 <div class="modal fade" id="exampleModalCenter{{ id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-    {{ form_start(formSueldo, {'action': path('sueldo_editar', {'id': id})}) }}
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -15,18 +14,26 @@
                 </button>
             </div>
 
+            {{ form_start(formSueldo, {'action': path('sueldo_editar', {'id': id}),'attr':{'class':'needs-validation', 'novalidate': 'novalidate'}}) }}
+
             <div class="modal-body">
 
-                <div class="form-group col-11">
-                    <label for="categoria">Categoria:</label>
+                <div class="form-group">
+                    <label for="categoria"><strong style="color: red">*</strong>Categoria:</label>
                     {{ form_widget(formSueldo.categoria, {'attr':{'class':'form-control text-uppercase'}}) }}
                     <h7 class="text-danger">{{ form_errors(formSueldo.categoria) }}</h7>
+                    <div class="invalid-feedback">
+                        Campo Obligatorio.
+                    </div>
                 </div>
 
-                <div class="form-group col-11">
-                    <label for="valor">Valor:</label>
+                <div class="form-group">
+                    <label for="valor"><strong style="color: red">*</strong>Valor:</label>
                     {{ form_widget(formSueldo.valor, {'attr':{'class':'form-control'}}) }}
                     <h7 class="text-danger">{{ form_errors(formSueldo.valor) }}</h7>
+                    <div class="invalid-feedback">
+                        Campo Obligatorio.
+                    </div>
                 </div>
 
             </div>
@@ -36,8 +43,10 @@
                 {{ form_widget(formSueldo.guardar, {'attr':{'class':'btn btn-primary'}}) }}
 
             </div>
+            <h7 style="color: red">*Campos Obligatorios</h7>
+            {{ form_end(formSueldo) }}
 
         </div>
     </div>
-    {{ form_end(formSueldo) }}
+
 </div>

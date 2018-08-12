@@ -3,7 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Canton;
-use App\Entity\EmpleadoA;
+use App\Entity\EmpleadoB;
 use App\Entity\Sueldo;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -14,7 +14,6 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
@@ -22,7 +21,7 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class EmpleadoAType extends AbstractType
+class EmpleadoBType extends AbstractType
 {
     private $em;
 
@@ -78,32 +77,13 @@ class EmpleadoAType extends AbstractType
                     'Corriente' => 'Corriente'),
                 'expanded' => true,
                 'multiple' => false))
-            ->add('ingresomagisterio', DateType::class, array( 'widget' => 'single_text',
-                'invalid_message' => 'Fecha Invalida'))
+
             ->add('ingresoinstitucion', DateType::class, array( 'widget' => 'single_text',
                 'invalid_message' => 'Fecha Invalida'))
-            ->add('nombramiento', ChoiceType::class, array(
-                'choices' => array(
-                    'Definitivo' => 'Definitivo',
-                    'Provisional' => 'Provisional',
-                    'Reubicacion' => 'Reubicacion'),
-                'expanded' => true,
-                'multiple' => true))
-            ->add('jornada', ChoiceType::class, array(
-                'choices' => array(
-                    'Matutina' => 'Matutina',
-                    'Vespertina' => 'Vespertina',
-                    'Nocturna' => 'Nocturna'),
-                'expanded' => true,
-                'multiple' => true))
-            ->add('niveljornada', ChoiceType::class, array(
-                'choices' => array(
-                    'EGB' => 'EGB',
-                    'EGBS' => 'EGBS',
-                    'BACH' => 'BACH'),
-                'expanded' => true,
-                'multiple' => true))
-            ->add('asignaturas', TextareaType::class)
+
+            ->add('cargo', TextType::class)
+            ->add('dptolabora', TextType::class)
+
             ->add('edificiolabora', ChoiceType::class, array(
                 'choices' => array(
                     'Central' => 'Central',
@@ -111,26 +91,6 @@ class EmpleadoAType extends AbstractType
                     'Internado' => 'Internado'),
                 'expanded' => true,
                 'multiple' => true))
-            ->add('directorarea', ChoiceType::class, array(
-                'choices' => array(
-                    'Si' => 'Si',
-                    'No' => 'No'),
-                'expanded' => true,
-                'multiple' => false))
-            ->add('descripdirarea', TextType::class)
-            ->add('comision', ChoiceType::class, array(
-                'choices' => array(
-                    'Si' => 'Si',
-                    'No' => 'No'),
-                'expanded' => true,
-                'multiple' => false))
-            ->add('tipocomision', ChoiceType::class, array(
-                'choices' => array(
-                    'Coordinador' => 'Coordinador',
-                    'Integrante' => 'Integrante'),
-                'expanded' => true,
-                'multiple' => false))
-            ->add('nombrecomision', TextType::class)
             ->add('calleprincipal', TextType::class)
             ->add('calletransversal',TextType::class)
             ->add('numcasa', TextType::class)
@@ -157,13 +117,12 @@ class EmpleadoAType extends AbstractType
                 'class' => Sueldo::class,
                 'choice_label' => 'categoria'))
             ->add('valor', TextType::class, array('mapped'=>false))
-            //->add('canton')
-            //->add('parroquia')
+//            ->add('canton')
+//            ->add('parroquia')
             ->add('guardar', SubmitType::class)
         ;
         $builder->addEventListener(FormEvents::PRE_SET_DATA, array($this, 'onPreSetData'));
         $builder->addEventListener(FormEvents::PRE_SUBMIT, array($this, 'onPreSubmit'));
-
     }
 
     protected function addElements(FormInterface $form, Canton $city = null) {
@@ -224,7 +183,7 @@ class EmpleadoAType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => EmpleadoA::class,
+            'data_class' => EmpleadoB::class,
         ]);
     }
 
