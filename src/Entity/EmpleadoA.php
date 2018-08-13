@@ -69,7 +69,7 @@ class EmpleadoA
     /**
      * @var string $cedula
      *
-     * @ORM\Column(type="string", length=255, unique=true)
+     * @ORM\Column(type="string", length=15, unique=true)
      * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $cedula;

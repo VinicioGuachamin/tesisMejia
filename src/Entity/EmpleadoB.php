@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -67,8 +69,9 @@ class EmpleadoB
     /**
      * @var string $cedula
      *
-     * @ORM\Column(type="string", length=255, unique=true)
+     * @ORM\Column(type="string", length=15, unique=true)
      * @Assert\NotBlank(message="Campo Obligatorio")
+     * @Assert\Length(min="10", max="10", exactMessage="Debe tener 10 caracteres")
      */
     private $cedula;
 
@@ -102,6 +105,7 @@ class EmpleadoB
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Assert\Length(min="10", max="10", exactMessage="Debe tener 10 caracteres")
      */
     private $cedulaconyugue;
 
@@ -245,7 +249,7 @@ class EmpleadoB
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank(message="Campo Obligatorio")
-     * * @Assert\Regex(pattern="/\d/", message="Ingrese solo números")
+     * @Assert\Regex(pattern="/\d/", message="Ingrese solo números")
      * @Assert\Length(min="10", max="10", exactMessage="Debe tener 10 caracteres")
      */
     private $celular;
@@ -288,6 +292,22 @@ class EmpleadoB
      * @Assert\Length(min="7", max="9", minMessage="Minimo 7 caracteres", maxMessage="Maximo 9 caracteres")
      */
     private $telemergencia;
+
+    /**
+     * @ORM\OneToOne(targetEntity="App\Entity\BachilleratoB", mappedBy="empleado_b")
+     */
+    private $bachillerato;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\SuperiorB", mappedBy="empleado_b")
+     */
+    private $superiors;
+
+    public function __construct()
+    {
+        $this->superiors = new ArrayCollection();
+    }
+
 
 
 
@@ -798,53 +818,6 @@ class EmpleadoB
         $this->tipocuenta = $tipocuenta;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getNombramiento()
-    {
-        return $this->nombramiento;
-    }
-
-    /**
-     * @param mixed $nombramiento
-     */
-    public function setNombramiento($nombramiento): void
-    {
-        $this->nombramiento = $nombramiento;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getJornada()
-    {
-        return $this->jornada;
-    }
-
-    /**
-     * @param mixed $jornada
-     */
-    public function setJornada($jornada): void
-    {
-        $this->jornada = $jornada;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getNiveljornada()
-    {
-        return $this->niveljornada;
-    }
-
-    /**
-     * @param mixed $niveljornada
-     */
-    public function setNiveljornada($niveljornada): void
-    {
-        $this->niveljornada = $niveljornada;
-    }
 
     /**
      * @return mixed
@@ -862,53 +835,6 @@ class EmpleadoB
         $this->edificiolabora = $edificiolabora;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getDirectorarea()
-    {
-        return $this->directorarea;
-    }
-
-    /**
-     * @param mixed $directorarea
-     */
-    public function setDirectorarea($directorarea): void
-    {
-        $this->directorarea = $directorarea;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getComision()
-    {
-        return $this->comision;
-    }
-
-    /**
-     * @param mixed $comision
-     */
-    public function setComision($comision): void
-    {
-        $this->comision = $comision;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getTipocomision()
-    {
-        return $this->tipocomision;
-    }
-
-    /**
-     * @param mixed $tipocomision
-     */
-    public function setTipocomision($tipocomision): void
-    {
-        $this->tipocomision = $tipocomision;
-    }
 
     /**
      * @return mixed
@@ -924,6 +850,54 @@ class EmpleadoB
     public function setOperadora($operadora): void
     {
         $this->operadora = $operadora;
+    }
+
+    public function getBachillerato(): ?BachilleratoB
+    {
+        return $this->bachillerato;
+    }
+
+    public function setBachillerato(BachilleratoB $bachillerato_b): self
+    {
+        $this->bachillerato = $bachillerato_b;
+
+        // set the owning side of the relation if necessary
+        if ($this !== $bachillerato_b->getEmpleadoB()) {
+            $bachillerato_b->setEmpleadoB($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Superior[]
+     */
+    public function getSuperiors(): Collection
+    {
+        return $this->superiors;
+    }
+
+    public function addSuperior(SuperiorB $superior_b): self
+    {
+        if (!$this->superiors->contains($superior_b)) {
+            $this->superiors[] = $superior_b;
+            $superior_b->setEmpleadoB($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSuperior(SuperiorB $superior_b): self
+    {
+        if ($this->superiors->contains($superior_b)) {
+            $this->superiors->removeElement($superior_b);
+            // set the owning side to null (unless already changed)
+            if ($superior_b->getEmpleadoB() === $this) {
+                $superior_b->setEmpleadoB(null);
+            }
+        }
+
+        return $this;
     }
 
 

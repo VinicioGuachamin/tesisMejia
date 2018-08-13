@@ -1,0 +1,48 @@
+
+<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#exampleModalCentera{{ id }}" >
+    <i class="fas fa-edit"></i>
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModalCentera{{ id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Editar Postbachillerato</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            {{ form_start(formEmpleado_b, {'action': path('empleadoA_editarPostbachillerato', {'id': id, 'idEmpleado': idEmpleado})}) }}
+            <div class="modal-body">
+                <div class="form-group col-11">
+                    <label for="titulo">Título Obtenido:</label>
+                    {{ form_widget(formEmpleado_b.titulo, {'attr':{'class':'form-control form-control-sm'}}) }}
+                </div>
+                <div class="form-group col-11">
+                    <label for="institucion">Institución:</label>
+                    {{ form_widget(formEmpleado_b.institucion, {'attr':{'class':'form-control form-control-sm'}}) }}
+                </div>
+                <div class="form-group col-11">
+                    <label for="fecha_titulo">Fecha Título:</label>
+                    {{ form_widget(formEmpleado_b.fecha_titulo, {'attr':{'class':'form-control form-control-sm'}}) }}
+                </div>
+                <div class="form-group col-11" style="display: none">
+                    <label for="empleado_a">Id EmpleadoB</label>
+                    {{ form_widget(formEmpleado_b.empleado_b, {'attr':{'class':'form-control form-control-sm'}}) }}
+                </div>
+
+            </div>
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+
+                {{ form_widget(formEmpleado_b.guardar, {'attr':{'class':'btn btn-primary'}}) }}
+            </div>
+
+            {{ form_end(formEmpleado_b) }}
+
+        </div>
+    </div>
+</div>

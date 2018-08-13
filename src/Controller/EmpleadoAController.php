@@ -171,10 +171,10 @@ class EmpleadoAController extends Controller
             ->findOneBy(['empleado_a'=>$id]);
 
         //Inicializo una varibale en caso de que exista o no datos con el id del Empleado en la tabla Bachillerato
-        if (count($bachilleratoData) == 0){
-            $data = false;
-        }else{
+        if (empty($bachilleratoData) == 0){
             $data = true;
+        }else{
+            $data = false;
         }
 
         $bachillerato = new Bachillerato();
@@ -297,10 +297,10 @@ class EmpleadoAController extends Controller
             ->findOneBy(['empleado_a'=>$id]);
 
         //Inicializo una varibale en caso de que exista o no datos con el id del Empleado en la tabla Bachillerato
-        if (count($postbachilleratoData) == 0){
-            $data = false;
-        }else{
+        if (empty($postbachilleratoData) == 0){
             $data = true;
+        }else{
+            $data = false;
         }
 
         $postbachillerato = new Postbachillerato();
