@@ -2,7 +2,7 @@
     <div class="d-flex p-1">I'm a flexbox container!</div>
 </div>
 
-<nav class="navbar navbar-expand-lg navbar-dark navColor">
+<nav class="navbar navbar-expand-lg navbar-dark navColor p-1">
     <div class="container">
         {#<a class="navbar-brand" href="#">Navbar</a>#}
         <img id="imgNav" src="https://upload.wikimedia.org/wikipedia/commons/b/b9/Sello_del_Instituto_Nacional_Mej%C3%ADa.png">
@@ -15,7 +15,7 @@
                 <li class="nav-item active">
                     <a class="nav-link" href="{{ path('empleados') }}"><i class="fas fa-users"></i> Empleados </a>
                 </li>
-                <li class="nav-item dropdown">
+                <li class="nav-item dropdown active">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="fas fa-list-alt"></i> Registrar
                     </a>
@@ -24,8 +24,11 @@
                         <a class="dropdown-item" href="{{ path('empleadoA_nuevo') }}">Empleado A</a>
                         <a class="dropdown-item" href="{{ path('empleadoB_nuevo') }}">Empleado B</a>
                         <a class="dropdown-item" href="{{ path('sueldo') }}">Sueldo</a>
-                        <a class="dropdown-item" href="#">Horarios</a>
+                        <a class="dropdown-item" href="{{ path('horario') }}">Horarios</a>
                     </div>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{ path('control') }}"><i class="fas fa-table"></i> Control </a>
                 </li>
                 <li class="nav-item">
                     {#<a class="nav-link" href="{{ path('control') }}">Control</a>#}

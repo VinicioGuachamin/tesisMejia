@@ -29,8 +29,8 @@ class EmpleadoA
     private $foto;
 
     /**
-     * @ORM\Column(type="string", columnDefinition="ENUM('ROLE_ADMIN', 'ROLE_SUPERUSER', 'ROLE_USER')", length=100)
-     * @Assert\Choice(choices = {"ROLE_ADMIN", "ROLE_SUPERUSER", "ROLE_USER"})
+     * @ORM\Column(type="string", columnDefinition="ENUM('ROLE_ADMIN', 'ROLE_SUPERUSER', 'ROLE_USER', 'NINGUNO')", length=100)
+     * @Assert\Choice(choices = {"ROLE_ADMIN", "ROLE_SUPERUSER", "ROLE_USER", "NINGUNO"})
      * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $rol;
@@ -350,6 +350,12 @@ class EmpleadoA
      */
     private $superiors;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Horario", inversedBy="empleado_a")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $horario;
+
     public function __construct()
     {
         $this->superiors = new ArrayCollection();
@@ -358,6 +364,9 @@ class EmpleadoA
 
 
     //**************************** GETTERS Y SETTERS *************************//
+
+
+
 
     public function getId()
     {
@@ -1037,6 +1046,23 @@ class EmpleadoA
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getHorario()
+    {
+        return $this->horario;
+    }
+
+    /**
+     * @param mixed $horario
+     */
+    public function setHorario($horario): void
+    {
+        $this->horario = $horario;
+    }
+
 
     /**
      * @return Collection|Superior[]

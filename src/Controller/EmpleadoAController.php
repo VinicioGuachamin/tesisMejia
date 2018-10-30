@@ -40,7 +40,6 @@ class EmpleadoAController extends Controller
         $img = null;
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $empleado_a = $form->getData();
             $em = $this->getDoctrine()->getManager();
             $em->persist($empleado_a);

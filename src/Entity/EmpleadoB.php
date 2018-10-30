@@ -29,15 +29,15 @@ class EmpleadoB
     private $foto;
 
     /**
-     * @ORM\Column(type="string", columnDefinition="ENUM('ROLE_ADMIN', 'ROLE_SUPERUSER', 'ROLE_USER')", length=100)
-     * @Assert\Choice(choices = {"ROLE_ADMIN", "ROLE_SUPERUSER", "ROLE_USER"})
+     * @ORM\Column(type="string", columnDefinition="ENUM('ROLE_ADMIN', 'ROLE_SUPERUSER', 'ROLE_USER', 'NINGUNO')", length=100)
+     * @Assert\Choice(choices = {"ROLE_ADMIN", "ROLE_SUPERUSER", "ROLE_USER", "NINGUNO"})
      * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $rol;
 
     /**
-     * @ORM\Column(type="string", columnDefinition="ENUM('Docente', 'Médico', 'Oficina')", length=100)
-     * @Assert\Choice(choices = {"Docente","Médico", "Oficina"})
+     * @ORM\Column(type="string", columnDefinition="ENUM('Conserje', 'Operario de imprenta')", length=100)
+     * @Assert\Choice(choices = {"Conserje","Operario de imprenta"})
      * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $tipoempleado;
@@ -302,6 +302,12 @@ class EmpleadoB
      * @ORM\OneToMany(targetEntity="App\Entity\SuperiorB", mappedBy="empleado_b")
      */
     private $superiors;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Horario", inversedBy="empleado_b")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $horario;
 
     public function __construct()
     {
@@ -868,6 +874,24 @@ class EmpleadoB
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getHorario()
+    {
+        return $this->horario;
+    }
+
+    /**
+     * @param mixed $horario
+     */
+    public function setHorario($horario): void
+    {
+        $this->horario = $horario;
+    }
+
+
 
     /**
      * @return Collection|Superior[]

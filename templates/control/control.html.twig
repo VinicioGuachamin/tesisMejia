@@ -1,0 +1,224 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Control{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" type="text/css" rel="stylesheet" />
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <br>
+        <h3>Suba el archivo excel</h3>
+        <input type="file" id="files" name="files"/>
+        <br><br>
+        <button type="button" class="btn btn-primary" id="calcularHorarios">Calcular</button>
+        {#<table id="example" class="display" cellspacing="0" width="100%">#}
+            {#<thead>#}
+            {#<tr>#}
+                {#<th>Codigo</th>#}
+                {#<th>Nombre</th>#}
+                {#<th>Puesto</th>#}
+                {#<th>Dia</th>#}
+                {#<th>Hora</th>#}
+                {#<th>Cedula</th>#}
+            {#</tr>#}
+            {#</thead>#}
+        {#</table>#}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.7.7/xlsx.core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xls/0.7.6/xls.core.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function(){
+
+            var dataExcel = [];
+            var dataBase = [];
+
+            //OBTENER TODOS LOS EMPLEADOS CON HORARIOS DE LA BASE DE DATOS
+            $('#files').change(handleFile);
+            console.log("template control");
+            $.ajax({
+                url:'{{ (path('getEmpleados')) }}',
+                type: "GET",
+                dataType: "JSON",
+                success: function (data)
+                {
+                    console.log(data);
+                    dataBase = data;
+                    //window.location= '{{ path("horario") }}';
+                }
+            });
+
+            //FUNCIÓN PARA OBTENER LOS DATOS DEL EXCEL
+            function handleFile(e) {
+                //Obtener los archivos del control de carga
+                var files = e.target.files;
+                var i, f;
+
+                //Recorrer archivos
+                for (i = 0, f = files[i]; i != files.length; ++i) {
+                    var reader = new FileReader();
+                    console.log(f.name.split(".").pop());
+                    var extension = f.name.split(".").pop();
+
+                    if (extension =="xlsx"){
+                        var name = f.name;
+                        reader.onload = function (e) {
+                            var data = e.target.result;
+                            var result;
+                            var workbook = XLSX.read(data, { type: 'binary' });
+                            var sheet_name_list = workbook.SheetNames;
+                            sheet_name_list.forEach(function (y) { /* Iterar a través de hojas */
+                                //Convertir los datos a JSON
+                                var roa = XLSX.utils.sheet_to_json(workbook.Sheets[y]);
+                                if (roa.length > 0) {
+                                    result = roa;
+                                }
+                            });
+                            console.log("XLSX");
+                            //console.log(result);
+                            dataExcel = result;
+
+                            // $('#example').dataTable( {
+                            //     data : result,
+                            //     columns: [
+                            //         {"data" : "Código"},
+                            //         {"data" : "Nombre"},
+                            //         {"data" : "Puesto"},
+                            //         {"data" : "Día"},
+                            //         {"data" : "Hora Marca"},
+                            //         {"data" : "Núm. Identificación"}
+                            //     ],
+                            // });
+                        };
+                        reader.readAsArrayBuffer(f);
+                    }else{
+                        if(extension =="xls"){
+                            reader.onload = function (e) {
+                                var data = e.target.result;
+                                var cfb = XLS.CFB.read(data, {type: 'binary'});
+                                var wb = XLS.parse_xlscfb(cfb);
+
+                                wb.SheetNames.forEach(function(sheetName) {
+                                    // Obtain The Current Row As CSV
+                                    var sCSV = XLS.utils.make_csv(wb.Sheets[sheetName]);
+                                    var oJS = XLS.utils.sheet_to_row_object_array(wb.Sheets[sheetName]);
+
+                                    console.log("XLS");
+                                    //console.log(oJS);
+
+                                    dataExcel = oJS;
+
+                                    // $('#example').dataTable( {
+                                    //     data : oJS,
+                                    //     columns: [
+                                    //         {"data" : "Código"},
+                                    //         {"data" : "Nombre"},
+                                    //         {"data" : "Puesto"},
+                                    //         {"data" : "Día"},
+                                    //         {"data" : "Hora Marca"},
+                                    //         {"data" : 'Núm. Identificación'}
+                                    //     ],
+                                    // });
+                                });
+                            }
+                            // Dígale a JS que comience a leer el archivo ... Podría retrasarlo si lo desea
+                            reader.readAsBinaryString(f);
+                        }else{
+                            console.log("formato de archivo no valido")
+                        }
+                    }
+
+                }
+            }
+
+            //FUNCION PARA AGRUPAR OBJETOS IGUALES
+            function arrayFromObject(obj) {
+                var arr = [];
+                for (var i in obj) {
+                    arr.push(obj[i]);
+                }
+                return arr;
+            }
+
+            //FUNCION PARA AGRUPAR OBJETOS IGUALES
+            function groupBy(list, fn) {
+                var groups = {};
+                for (var i = 0; i < list.length; i++) {
+                    var group = JSON.stringify(fn(list[i]));
+                    if (group in groups) {
+                        groups[group].push(list[i]);
+                    } else {
+                        groups[group] = [list[i]];
+                    }
+                }
+                return arrayFromObject(groups);
+            }
+
+            //FUNCIÓN PARA EL BOTON CALCULAR
+            $('#calcularHorarios').on("click", function() {
+                var groupEmpleadosDias = [];
+                var groupDataExcel = groupBy(dataExcel, dataExcel => dataExcel.Código);
+
+                for (var i=0; i<groupDataExcel.length; i++){
+                    groupEmpleadosDias.push(
+                        groupBy(groupDataExcel[i], function(item)  {
+                            return [item['Día']];
+                        })
+                    );
+                }
+                console.log(groupEmpleadosDias);
+
+                for (var m=0; m<dataBase.length; m++){
+                    for (var n=0; n<groupEmpleadosDias.length; n++){
+                        if (dataBase[m].codbiometrico == groupEmpleadosDias[n][0][0]['Código']){
+                            for(var key in groupEmpleadosDias[n]){
+                                var newKey = groupEmpleadosDias[n][key];
+                                //console.log(groupEmpleadosDias[n][key][0]['Día']);
+                                switch (groupEmpleadosDias[n][key][0]['Día']){
+                                    case "1":
+                                        console.log(groupEmpleadosDias[n][key][0]['Día']);
+                                        break;
+                                    case "2":
+                                        console.log(groupEmpleadosDias[n][key][0]['Día']);
+                                        break;
+                                    case "3":
+                                        console.log(groupEmpleadosDias[n][key][0]['Día']);
+                                        break;
+                                    case "4":
+                                        console.log(groupEmpleadosDias[n][key][0]['Día']);
+                                        break;
+                                    case "5":
+                                        console.log(groupEmpleadosDias[n][key][0]['Día']);
+                                        console.log(groupEmpleadosDias[n][key]);
+                                        break;
+                                    case "6":
+                                        console.log(groupEmpleadosDias[n][key][0]['Día']);
+                                        break;
+                                }
+
+                            }
+
+                        }else {
+                            console.log("no coincide");
+                        }
+                    }
+                }
+
+            });
+
+        });
+
+
+
+    </script>
+
+{% endblock %}

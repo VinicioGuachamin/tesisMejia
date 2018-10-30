@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Canton;
 use App\Entity\EmpleadoA;
+use App\Entity\Horario;
 use App\Entity\Sueldo;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -43,7 +44,8 @@ class EmpleadoAType extends AbstractType
                 'choices' => array(
                     'Administrador' => 'ROLE_ADMIN',
                     'SuperUsuario' => 'ROLE_SUPERUSER',
-                    'Usuario' => 'ROLE_USER')))
+                    'Usuario' => 'ROLE_USER',
+                    'Ninguno' => 'NINGUNO')))
             ->add('tipoempleado', ChoiceType::class, array('placeholder' => 'Seleccione...',
                 'choices' => array(
                     'Docente' => 'Docente',
@@ -156,6 +158,10 @@ class EmpleadoAType extends AbstractType
                 'placeholder' => 'Seleccione...',
                 'class' => Sueldo::class,
                 'choice_label' => 'categoria'))
+            ->add('horario', EntityType::class, array(
+                'placeholder' => 'Seleccione...',
+                'class' => Horario::class,
+                'choice_label' => 'id'))
             ->add('valor', TextType::class, array('mapped'=>false))
             //->add('canton')
             //->add('parroquia')

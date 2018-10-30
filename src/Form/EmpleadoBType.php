@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Canton;
 use App\Entity\EmpleadoB;
+use App\Entity\Horario;
 use App\Entity\Sueldo;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -42,12 +43,12 @@ class EmpleadoBType extends AbstractType
                 'choices' => array(
                     'Administrador' => 'ROLE_ADMIN',
                     'SuperUsuario' => 'ROLE_SUPERUSER',
-                    'Usuario' => 'ROLE_USER')))
+                    'Usuario' => 'ROLE_USER',
+                    'Ninguno' => 'NINGUNO')))
             ->add('tipoempleado', ChoiceType::class, array('placeholder' => 'Seleccione...',
                 'choices' => array(
-                    'Docente' => 'Docente',
-                    'Médico' => 'Médico',
-                    'Oficina' => 'Oficina')))
+                    'Conserje' => 'Conserje',
+                    'Operario de imprenta' => 'Operario de imprenta')))
             ->add('nombres', TextType::class)
             ->add('apellidos', TextType::class)
             ->add('codbiometrico', IntegerType::class)
@@ -116,6 +117,10 @@ class EmpleadoBType extends AbstractType
                 'placeholder' => 'Seleccione...',
                 'class' => Sueldo::class,
                 'choice_label' => 'categoria'))
+            ->add('horario', EntityType::class, array(
+                'placeholder' => 'Seleccione...',
+                'class' => Horario::class,
+                'choice_label' => 'id'))
             ->add('valor', TextType::class, array('mapped'=>false))
 //            ->add('canton')
 //            ->add('parroquia')

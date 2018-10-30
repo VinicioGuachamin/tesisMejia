@@ -13,6 +13,20 @@
     <fieldset id="fieldset_1">
         <legend style="color: #025aa5">INFORMACIÓN BÁSICA</legend>
         <div class="row">
+            <div class="col-md-6" style="text-align: center">
+                <h4>EMPLEADO A</h4>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="col-form-label-sm" for="horario">Horario</label>
+                    {{ form_widget(formEmpleado_a.horario,
+                        {'attr':{'class':'form-control form-control-sm','id':'horario'}})
+                    }}
+                    <h7 class="text-danger">{{ form_errors(formEmpleado_a.horario) }}</h7>
+                </div>
+            </div>
+        </div>
+        <div class="row">
                 <div class="col-md-3">
                     <div class="row">
                         <div class="col-5">
