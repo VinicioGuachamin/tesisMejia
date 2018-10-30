@@ -36,8 +36,8 @@ class EmpleadoB
     private $rol;
 
     /**
-     * @ORM\Column(type="string", columnDefinition="ENUM('Conserje', 'Operario de imprenta')", length=100)
-     * @Assert\Choice(choices = {"Conserje","Operario de imprenta"})
+     * @ORM\Column(type="string", columnDefinition="ENUM('Conserje', 'Operario de imprenta', 'Limpieza')", length=100)
+     * @Assert\Choice(choices = {"Conserje","Operario de imprenta","Limpieza"})
      * @Assert\NotBlank(message="Campo Obligatorio")
      */
     private $tipoempleado;

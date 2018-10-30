@@ -48,7 +48,8 @@ class EmpleadoBType extends AbstractType
             ->add('tipoempleado', ChoiceType::class, array('placeholder' => 'Seleccione...',
                 'choices' => array(
                     'Conserje' => 'Conserje',
-                    'Operario de imprenta' => 'Operario de imprenta')))
+                    'Operario de imprenta' => 'Operario de imprenta',
+                    'Limpieza' => 'Limpieza')))
             ->add('nombres', TextType::class)
             ->add('apellidos', TextType::class)
             ->add('codbiometrico', IntegerType::class)

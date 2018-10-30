@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 27-09-2018 a las 04:47:48
+-- Tiempo de generación: 28-10-2018 a las 02:02:39
 -- Versión del servidor: 10.1.26-MariaDB
 -- Versión de PHP: 7.1.8
 
@@ -41,7 +41,9 @@ CREATE TABLE `bachillerato` (
 --
 
 INSERT INTO `bachillerato` (`id`, `empleado_a_id`, `titulo`, `institucion`, `fecha_titulo`) VALUES
-(2, 1, 'Fisico Matematico', 'Colegio Mejia', '2018-08-15 00:00:00');
+(2, 2, 'Fisico Matematico', 'Colegio Mejia', '2018-10-02 00:00:00'),
+(3, 3, 'Fisico Matematico', 'Colegio Mejia', '2018-10-18 00:00:00'),
+(4, 4, 'CIENCIAS ESPECIALIDAD INFORMATICA', '5 DE JUNIO', '1996-08-16 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -62,7 +64,7 @@ CREATE TABLE `bachillerato_b` (
 --
 
 INSERT INTO `bachillerato_b` (`id`, `empleado_b_id`, `titulo`, `institucion`, `fecha_titulo`) VALUES
-(1, 1, 'Estudiando', 'Estudiando', '2018-08-04');
+(1, 1, 'Estudiando', 'Estudiando', '2018-10-04');
 
 -- --------------------------------------------------------
 
@@ -100,8 +102,9 @@ CREATE TABLE `empleado_a` (
   `sueldo_id` int(11) NOT NULL,
   `canton_id` int(11) NOT NULL,
   `parroquia_id` int(11) NOT NULL,
+  `horario_id` int(11) NOT NULL,
   `foto` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `rol` enum('ROLE_ADMIN','ROLE_SUPERUSER','ROLE_USER') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `rol` enum('ROLE_ADMIN','ROLE_SUPERUSER','ROLE_USER','NINGUNO') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `tipoempleado` enum('Docente','Médico','Oficina') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `nombres` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `apellidos` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -152,8 +155,10 @@ CREATE TABLE `empleado_a` (
 -- Volcado de datos para la tabla `empleado_a`
 --
 
-INSERT INTO `empleado_a` (`id`, `sueldo_id`, `canton_id`, `parroquia_id`, `foto`, `rol`, `tipoempleado`, `nombres`, `apellidos`, `codbiometrico`, `cedula`, `fnacimiento`, `ecivil`, `tsangre`, `nombreconyugue`, `cedulaconyugue`, `cargafamiliar`, `hijos`, `cargaeduc`, `carnetconadis`, `discapacidad`, `cuentabanco`, `nombrebanco`, `tipocuenta`, `ingresomagisterio`, `ingresoinstitucion`, `nombramiento`, `jornada`, `niveljornada`, `asignaturas`, `edificiolabora`, `directorarea`, `descripdirarea`, `comision`, `tipocomision`, `nombrecomision`, `calleprincipal`, `calletransversal`, `numcasa`, `barrio`, `sector`, `teldomicilio`, `teloficina`, `celular`, `operadora`, `emailprincipal`, `emailalterno`, `nombreemergencia`, `parentescoemergencia`, `telemergencia`) VALUES
-(1, 1, 1, 18, '0a711218f1835257f3f2d90c55aca714.jpeg', 'ROLE_ADMIN', 'Docente', 'Vinicio Geovanny', 'Guachamin Quingaluisa', '111', '1721707568', '2018-08-13', 'Soltero/a', 'Orh', 'Ninguno', 'Ninguno', 0, 0, 0, 'Ninguno', 'Ninguno', '1111111111111', 'Pichincha', 'Ahorro', '2018-08-13', '2018-08-13', 'Provisional', 'Matutina,Nocturna', 'EGBS', 'dddd, ffff, nnnn', 'Sur,Internado', 'No', NULL, 'No', NULL, NULL, 'assssssssssss', 'gggggggggg', '5323', 'sddfsdfsdfsd', 'bbbbb', '2323423', '23423888', '2342399999', 'Movi', 'v@v.com', 'v@v.com', 'sdfsd', 'sdfsd', '5555555');
+INSERT INTO `empleado_a` (`id`, `sueldo_id`, `canton_id`, `parroquia_id`, `horario_id`, `foto`, `rol`, `tipoempleado`, `nombres`, `apellidos`, `codbiometrico`, `cedula`, `fnacimiento`, `ecivil`, `tsangre`, `nombreconyugue`, `cedulaconyugue`, `cargafamiliar`, `hijos`, `cargaeduc`, `carnetconadis`, `discapacidad`, `cuentabanco`, `nombrebanco`, `tipocuenta`, `ingresomagisterio`, `ingresoinstitucion`, `nombramiento`, `jornada`, `niveljornada`, `asignaturas`, `edificiolabora`, `directorarea`, `descripdirarea`, `comision`, `tipocomision`, `nombrecomision`, `calleprincipal`, `calletransversal`, `numcasa`, `barrio`, `sector`, `teldomicilio`, `teloficina`, `celular`, `operadora`, `emailprincipal`, `emailalterno`, `nombreemergencia`, `parentescoemergencia`, `telemergencia`) VALUES
+(2, 1, 1, 8, 6, '64c188c67647ed0676660ae0bad4b8fa.gif', 'ROLE_ADMIN', 'Docente', 'Vinicio Geovanny', 'Guachamin Quingaluisa', '2', '1721707568', '2018-11-01', 'Soltero/a', 'Orh', 'Ninguno', 'Ninguno', 0, 0, 0, 'Ninguno', 'Ninguno', '1111111111111', 'Pichincha', 'Ahorro', '2018-10-04', '2018-10-03', 'Definitivo', 'Vespertina', 'EGBS', 'Niguna materia', 'Sur', 'No', NULL, 'No', NULL, NULL, 'carapungos', 'alto mirador', '5323', 'La raya', 'Biloxi', '12345678', '12345678', '1234567890', 'Claro', 'v@v.com', 'v@v.com', 'sdfsd', 'sdfsd', '12345678'),
+(3, 3, 1, 8, 5, NULL, 'ROLE_ADMIN', 'Docente', 'Juan Perez', 'Samaniego Sanchez', '2323', '1721707560', '2018-10-22', 'Unión de Hecho', 'orh+', 'Maria Jimenez', '1287654567', 0, 0, 0, 'Ninguno', 'Ninguno', '1241231231', 'Guayaquil', 'Ahorro', '2018-10-01', '2018-10-01', 'Definitivo', 'Vespertina', 'EGBS', 'Ninguna', 'Sur', 'No', NULL, 'No', NULL, NULL, 'carapungos', 'gggggggggg', '5323', 'la Biloxi', 'Pintado', '12345678', '123445667', '0987658766', 'Claro', 'v@v.com', 'v@v.com', 'sdfsd', 'sdfsd', '12345678'),
+(4, 4, 1, 8, 7, '30d451b64aa1822c0a11dd6cb9ef29f4.jpeg', 'NINGUNO', 'Docente', 'MARCO ALONSO', 'ANDINO ANDINO', '54', '1715108328', '1977-10-25', 'Casado/a', 'O+', 'PAOLA SUAREZ', 'Ninguno', 0, 0, 0, 'Ninguno', 'Ninguno', '20302602', 'GUAYAQUIL', 'Ahorro', '2007-11-01', '2007-11-01', 'Definitivo', 'Matutina', 'EGBS', 'MATEMÁTICA, CAS', 'Central', 'No', NULL, 'No', NULL, NULL, 'AMADEO IZQUIETA', 'S47-35', 'S46-35', 'LA INMACULADA', 'CHILLOGALLO', '22696427', NULL, '0983769143', 'Movi', 'marandino77@gmail.com', 'marandino77@gmail.com', 'PAOLA SUAREZ', 'ESPOSA', '983769208');
 
 -- --------------------------------------------------------
 
@@ -166,9 +171,10 @@ CREATE TABLE `empleado_b` (
   `sueldo_id` int(11) NOT NULL,
   `canton_id` int(11) NOT NULL,
   `parroquia_id` int(11) NOT NULL,
+  `horario_id` int(11) NOT NULL,
   `foto` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `rol` enum('ROLE_ADMIN','ROLE_SUPERUSER','ROLE_USER') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `tipoempleado` enum('Docente','Médico','Oficina') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `rol` enum('ROLE_ADMIN','ROLE_SUPERUSER','ROLE_USER','NINGUNO') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tipoempleado` enum('Conserje','Operario de imprenta') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `nombres` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `apellidos` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `codbiometrico` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -210,8 +216,34 @@ CREATE TABLE `empleado_b` (
 -- Volcado de datos para la tabla `empleado_b`
 --
 
-INSERT INTO `empleado_b` (`id`, `sueldo_id`, `canton_id`, `parroquia_id`, `foto`, `rol`, `tipoempleado`, `nombres`, `apellidos`, `codbiometrico`, `cedula`, `fnacimiento`, `ecivil`, `tsangre`, `nombreconyugue`, `cedulaconyugue`, `cargafamiliar`, `hijos`, `cargaeduc`, `carnetconadis`, `discapacidad`, `cuentabanco`, `nombrebanco`, `tipocuenta`, `ingresoinstitucion`, `cargo`, `dptolabora`, `edificiolabora`, `calleprincipal`, `calletransversal`, `numcasa`, `barrio`, `sector`, `teldomicilio`, `teloficina`, `celular`, `operadora`, `emailprincipal`, `emailalterno`, `nombreemergencia`, `parentescoemergencia`, `telemergencia`) VALUES
-(1, 1, 1, 17, '76e68f3983b8ea101d5916c8880ca7a0.jpeg', 'ROLE_ADMIN', 'Docente', 'aaaaaaa', 'bbbbbbbb', '22222', '1233444123', '2018-08-02', 'Soltero/a', 'Orh', 'Ninguno', NULL, 0, 0, 0, 'Ninguno', 'Ninguno', 'a12312', 'qwdasdcxx', 'Ahorro', '2018-08-13', 'ddddd', 'ccccccccccc', 'Central,Sur', 'assssssssssss', 'gggggggggg', '5323', 'sddfsdfsdfsd', 'bbbbb', '2323423', '2323423', '2323423987', 'Movi', 'v@v.com', 'v@v.com', 'sdfsd', 'sdfsd', '3333333');
+INSERT INTO `empleado_b` (`id`, `sueldo_id`, `canton_id`, `parroquia_id`, `horario_id`, `foto`, `rol`, `tipoempleado`, `nombres`, `apellidos`, `codbiometrico`, `cedula`, `fnacimiento`, `ecivil`, `tsangre`, `nombreconyugue`, `cedulaconyugue`, `cargafamiliar`, `hijos`, `cargaeduc`, `carnetconadis`, `discapacidad`, `cuentabanco`, `nombrebanco`, `tipocuenta`, `ingresoinstitucion`, `cargo`, `dptolabora`, `edificiolabora`, `calleprincipal`, `calletransversal`, `numcasa`, `barrio`, `sector`, `teldomicilio`, `teloficina`, `celular`, `operadora`, `emailprincipal`, `emailalterno`, `nombreemergencia`, `parentescoemergencia`, `telemergencia`) VALUES
+(1, 1, 1, 18, 5, 'd90a981c993a57f681d9228371b699f1.gif', 'ROLE_ADMIN', 'Conserje', 'Vinicio Geovanny', 'Guachamin Quingaluisa', '1212', '1721707568', '2018-10-12', 'Unión de Hecho', 'Orh', 'Ninguno', '1721787672', 0, 0, 0, 'Ninguno', 'Ninguno', '1111111111111', 'Pichincha', 'Ahorro', '2018-10-04', 'Conserje', 'Institucion', 'Central', 'assssssssssss', 'gggggggggg', '5323', 'sddfsdfsdfsd', 'bbbbb', '12345678', '12345678', '1234567890', 'Movi', 'v@v.com', 'v@v.com', 'sdfsd', 'sdfsd', '12345678');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `horario`
+--
+
+CREATE TABLE `horario` (
+  `id` int(11) NOT NULL,
+  `lunes` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `martes` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `miercoles` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `jueves` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `viernes` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sabado` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `horario`
+--
+
+INSERT INTO `horario` (`id`, `lunes`, `martes`, `miercoles`, `jueves`, `viernes`, `sabado`) VALUES
+(4, '9:49 PM,9:49 PM,9:49 PM,9:49 PM', '9:49 PM,,,9:49 PM', '9:49 PM,,,9:50 PM', '9:50 PM,9:50 PM,9:50 PM,9:50 PM', '9:50 PM,9:50 PM,9:50 PM,9:50 PM', '9:50 PM,,,9:50 PM'),
+(5, '9:58 PM,9:58 PM,9:58 PM,9:58 PM', '9:58 PM,9:58 PM,9:58 PM,9:58 PM', '9:58 PM,9:58 PM,9:58 PM,9:58 PM', '9:58 PM,9:58 PM,9:58 PM,9:58 PM', '9:58 PM,9:58 PM,9:58 PM,9:58 PM', '9:58 PM,9:58 PM,9:58 PM,9:58 PM'),
+(6, '8:00 AM,12:30 PM,1:30 PM,5:00 PM', '10:00 AM,,,2:00 PM', '8:00 AM,,,2:30 PM', '8:00 AM,12:30 PM,1:30 PM,5:00 PM', '8:00 AM,12:30 PM,1:30 PM,5:00 PM', ',,,'),
+(7, '7:00 AM,,,2:30 PM', '7:00 AM,,,1:00 PM', '7:00 AM,,,1:00 PM', '7:00 AM,,,3:30 PM', '7:00 AM,,,11:30 PM', '7:00 AM,,,12:00 PM');
 
 -- --------------------------------------------------------
 
@@ -227,8 +259,6 @@ CREATE TABLE `migration_versions` (
 -- Volcado de datos para la tabla `migration_versions`
 --
 
-INSERT INTO `migration_versions` (`version`) VALUES
-('20180813193206');
 
 -- --------------------------------------------------------
 
@@ -369,7 +399,8 @@ CREATE TABLE `postbachillerato` (
 --
 
 INSERT INTO `postbachillerato` (`id`, `empleado_a_id`, `titulo`, `institucion`, `fecha_titulo`) VALUES
-(1, 1, 'aaaaaa', 'ssssssss', '2018-08-14 00:00:00');
+(1, 2, 'dddd', 'aaaa', '2018-10-05 00:00:00'),
+(2, 3, 'aaa', 'aaaa', '2018-10-02 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -384,6 +415,13 @@ CREATE TABLE `postbachillerato_b` (
   `institucion` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL,
   `fecha_titulo` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `postbachillerato_b`
+--
+
+INSERT INTO `postbachillerato_b` (`id`, `empleado_b_id`, `titulo`, `institucion`, `fecha_titulo`) VALUES
+(1, 1, 'aaa', 'aaaa', '2018-10-04');
 
 -- --------------------------------------------------------
 
@@ -403,7 +441,8 @@ CREATE TABLE `sueldo` (
 
 INSERT INTO `sueldo` (`id`, `categoria`, `valor`) VALUES
 (1, 'A', '1545'),
-(3, 'B', '1435');
+(3, 'B', '1435'),
+(4, 'E', '987');
 
 -- --------------------------------------------------------
 
@@ -425,8 +464,11 @@ CREATE TABLE `superior` (
 --
 
 INSERT INTO `superior` (`id`, `empleado_a_id`, `titulo`, `institucion`, `registro_senescyt`, `nivel`) VALUES
-(1, 1, 'zzzzz', 'qqqqq', '1231213', 'Tecnólogo'),
-(2, 1, 'qqqq', 'zzzz', 'zzzzz', '3');
+(2, 2, 'qqqq', 'zzzz', '1231213', '3'),
+(3, 3, 'qqqq', 'zzzz', '1231213', 'Tecnólogo'),
+(4, 4, 'LICENCIADO CIENCIAS EDUCACION INFORMATICA', 'UNIVERSIDAD CENTRAL', '1005-02-258158', '3'),
+(5, 4, 'INGENIERO EDUCACION INFORMATICA', 'UNIVERSIDAD AUTONOMA QUITO', '1048-02-189875', '3'),
+(6, 4, 'MAGISTER EN GERENCIA DE PROYECTOS', 'UNIVERSIDAD CENTRAL', '1005-2016-1672034', '4');
 
 -- --------------------------------------------------------
 
@@ -475,7 +517,8 @@ ALTER TABLE `empleado_a`
   ADD UNIQUE KEY `UNIQ_951C4AB87BF39BE0` (`cedula`),
   ADD KEY `IDX_951C4AB8FBD8F2D3` (`sueldo_id`),
   ADD KEY `IDX_951C4AB88D070D0B` (`canton_id`),
-  ADD KEY `IDX_951C4AB874AFDC17` (`parroquia_id`);
+  ADD KEY `IDX_951C4AB874AFDC17` (`parroquia_id`),
+  ADD KEY `IDX_951C4AB84959F1BA` (`horario_id`);
 
 --
 -- Indices de la tabla `empleado_b`
@@ -485,7 +528,14 @@ ALTER TABLE `empleado_b`
   ADD UNIQUE KEY `UNIQ_C151B027BF39BE0` (`cedula`),
   ADD KEY `IDX_C151B02FBD8F2D3` (`sueldo_id`),
   ADD KEY `IDX_C151B028D070D0B` (`canton_id`),
-  ADD KEY `IDX_C151B0274AFDC17` (`parroquia_id`);
+  ADD KEY `IDX_C151B0274AFDC17` (`parroquia_id`),
+  ADD KEY `IDX_C151B024959F1BA` (`horario_id`);
+
+--
+-- Indices de la tabla `horario`
+--
+ALTER TABLE `horario`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indices de la tabla `migration_versions`
@@ -542,7 +592,7 @@ ALTER TABLE `superior_b`
 -- AUTO_INCREMENT de la tabla `bachillerato`
 --
 ALTER TABLE `bachillerato`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 --
 -- AUTO_INCREMENT de la tabla `bachillerato_b`
 --
@@ -557,12 +607,17 @@ ALTER TABLE `canton`
 -- AUTO_INCREMENT de la tabla `empleado_a`
 --
 ALTER TABLE `empleado_a`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 --
 -- AUTO_INCREMENT de la tabla `empleado_b`
 --
 ALTER TABLE `empleado_b`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+--
+-- AUTO_INCREMENT de la tabla `horario`
+--
+ALTER TABLE `horario`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 --
 -- AUTO_INCREMENT de la tabla `parroquia`
 --
@@ -572,22 +627,22 @@ ALTER TABLE `parroquia`
 -- AUTO_INCREMENT de la tabla `postbachillerato`
 --
 ALTER TABLE `postbachillerato`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 --
 -- AUTO_INCREMENT de la tabla `postbachillerato_b`
 --
 ALTER TABLE `postbachillerato_b`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 --
 -- AUTO_INCREMENT de la tabla `sueldo`
 --
 ALTER TABLE `sueldo`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 --
 -- AUTO_INCREMENT de la tabla `superior`
 --
 ALTER TABLE `superior`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 --
 -- AUTO_INCREMENT de la tabla `superior_b`
 --
@@ -613,6 +668,7 @@ ALTER TABLE `bachillerato_b`
 -- Filtros para la tabla `empleado_a`
 --
 ALTER TABLE `empleado_a`
+  ADD CONSTRAINT `FK_951C4AB84959F1BA` FOREIGN KEY (`horario_id`) REFERENCES `horario` (`id`),
   ADD CONSTRAINT `FK_951C4AB874AFDC17` FOREIGN KEY (`parroquia_id`) REFERENCES `parroquia` (`id`),
   ADD CONSTRAINT `FK_951C4AB88D070D0B` FOREIGN KEY (`canton_id`) REFERENCES `canton` (`id`),
   ADD CONSTRAINT `FK_951C4AB8FBD8F2D3` FOREIGN KEY (`sueldo_id`) REFERENCES `sueldo` (`id`);
@@ -621,6 +677,7 @@ ALTER TABLE `empleado_a`
 -- Filtros para la tabla `empleado_b`
 --
 ALTER TABLE `empleado_b`
+  ADD CONSTRAINT `FK_C151B024959F1BA` FOREIGN KEY (`horario_id`) REFERENCES `horario` (`id`),
   ADD CONSTRAINT `FK_C151B0274AFDC17` FOREIGN KEY (`parroquia_id`) REFERENCES `parroquia` (`id`),
   ADD CONSTRAINT `FK_C151B028D070D0B` FOREIGN KEY (`canton_id`) REFERENCES `canton` (`id`),
   ADD CONSTRAINT `FK_C151B02FBD8F2D3` FOREIGN KEY (`sueldo_id`) REFERENCES `sueldo` (`id`);

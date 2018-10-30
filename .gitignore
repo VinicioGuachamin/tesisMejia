@@ -4,6 +4,7 @@
 /var/
 /vendor/
 /.idea/
+/.src/Migrations/
 ###< symfony/framework-bundle ###
 
 ###> symfony/web-server-bundle ###

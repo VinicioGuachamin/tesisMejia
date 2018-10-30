@@ -88,7 +88,8 @@ class EmpleadoAType extends AbstractType
                 'choices' => array(
                     'Definitivo' => 'Definitivo',
                     'Provisional' => 'Provisional',
-                    'Reubicacion' => 'Reubicacion'),
+                    'Reubicacion' => 'Reubicacion',
+                    'Contrato' => 'Contrato'),
                 'expanded' => true,
                 'multiple' => true))
             ->add('jornada', ChoiceType::class, array(
@@ -102,7 +103,8 @@ class EmpleadoAType extends AbstractType
                 'choices' => array(
                     'EGB' => 'EGB',
                     'EGBS' => 'EGBS',
-                    'BACH' => 'BACH'),
+                    'BACH' => 'BACH',
+                    'BI' => 'BI'),
                 'expanded' => true,
                 'multiple' => true))
             ->add('asignaturas', TextareaType::class)
