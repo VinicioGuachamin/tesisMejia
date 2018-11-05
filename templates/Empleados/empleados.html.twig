@@ -1,1 +1,129 @@
 {% extends 'base.html.twig' %}
+
+{% block title %}Empleados{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" type="text/css" rel="stylesheet" />
+    <link href="{{ asset('css/perfil.css') }}" type="text/css" rel="stylesheet" />
+{% endblock %}
+
+{% block body %}
+
+    <div class="row">
+        <div class="col-12">
+
+            <table id="example" class="hover" cellspacing="0" width="100%">
+                <thead>
+                <tr>
+                    <th>Apellidos</th>
+                    <th>Nombre</th>
+                    <th>Tipo Empleado</th>
+                    <th>Cod. Biométrico</th>
+                    <th>Acción</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for a in empleados_a %}
+                    <tr>
+                        <td>{{ a.apellidos }}</td>
+                        <td>{{ a.nombres }}</td>
+                        <td>{{ a.tipoempleado }}</td>
+                        <td>{{ a.codbiometrico }}</td>
+                        <td>
+
+                            {{ render(controller(
+                                'App\\Controller\\EmpleadosController::verEmpleadoA', { 'id' : a.id }
+                            )) }}
+
+                            <a href="{{ path('empleadoA_editar', {'id':a.id}) }}" role="button" class="btn btn-primary btn-sm">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="#" role="button" class="btn btn-danger btn-sm">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+
+
+                        </td>
+                    </tr>
+                {% else %}
+                    No users have been found.
+                {% endfor %}
+
+                {% for b in empleados_b %}
+                    <tr>
+                        <td>{{ b.apellidos }}</td>
+                        <td>{{ b.nombres }}</td>
+                        <td>{{ b.tipoempleado }}</td>
+                        <td>{{ b.codbiometrico }}</td>
+                        <td>
+
+                            {{ render(controller(
+                                'App\\Controller\\EmpleadosController::verEmpleadoB', { 'id' : b.id }
+                            )) }}
+
+
+                            <a href="{{ path('empleadoB_editar', {'id':b.id}) }}" role="button" class="btn btn-primary btn-sm">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="#" role="button" class="btn btn-danger btn-sm">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+
+
+                        </td>
+                    </tr>
+                {% else %}
+                    No users have been found.
+                {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+            $('#example').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
+                }
+            });
+        } );
+
+
+    </script>
+
+    <script>
+        function myFunction(id) {
+            document.getElementById('fieldset_2A_'+id).classList.remove('hide');
+            document.getElementById('fieldset_1A_'+id).style.display = "none";
+            console.log(id);
+        }
+
+        function cerrar(id) {
+            document.getElementById('fieldset_1A_'+id).style.display = "block";
+            document.getElementById('fieldset_2A_'+id).classList.add("hide");
+
+        }
+
+        function myFunctionB(id) {
+            document.getElementById('fieldset_2B_'+id).classList.remove('hide');
+            document.getElementById('fieldset_1B_'+id).style.display = "none";
+            console.log(id);
+        }
+
+        function cerrarB(id) {
+            document.getElementById('fieldset_1B_'+id).style.display = "block";
+            document.getElementById('fieldset_2B_'+id).classList.add("hide");
+
+        }
+    </script>
+{% endblock %}

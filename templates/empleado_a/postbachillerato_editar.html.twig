@@ -16,19 +16,19 @@
 
             {{ form_start(formEmpleado_a, {'action': path('empleadoA_editarPostbachillerato', {'id': id, 'idEmpleado': idEmpleado})}) }}
             <div class="modal-body">
-                <div class="form-group col-11">
-                    <label for="titulo">Título Obtenido:</label>
+                <div class="form-group">
+                    <label for="titulo"><strong style="color: red">*</strong>Título Obtenido:</label>
                     {{ form_widget(formEmpleado_a.titulo, {'attr':{'class':'form-control form-control-sm'}}) }}
                 </div>
-                <div class="form-group col-11">
-                    <label for="institucion">Institución:</label>
+                <div class="form-group">
+                    <label for="institucion"><strong style="color: red">*</strong>Institución:</label>
                     {{ form_widget(formEmpleado_a.institucion, {'attr':{'class':'form-control form-control-sm'}}) }}
                 </div>
-                <div class="form-group col-11">
-                    <label for="fecha_titulo">Fecha Título:</label>
+                <div class="form-group">
+                    <label for="fecha_titulo"><strong style="color: red">*</strong>Fecha Título:</label>
                     {{ form_widget(formEmpleado_a.fecha_titulo, {'attr':{'class':'form-control form-control-sm'}}) }}
                 </div>
-                <div class="form-group col-11" style="display: none">
+                <div class="form-group" style="display: none">
                     <label for="empleado_a">Id EmpleadoA</label>
                     {{ form_widget(formEmpleado_a.empleado_a, {'attr':{'class':'form-control form-control-sm'}}) }}
                 </div>

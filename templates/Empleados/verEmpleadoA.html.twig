@@ -1,0 +1,238 @@
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#exampleModal{{ empleado_a.id }}">
+    <i class="far fa-user"></i>
+</button>
+
+<!-- Modal -->
+<div class="modal fade bd-example-modal-lg" id="exampleModal{{ empleado_a.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">{{ empleado_a.apellidos }} {{ empleado_a.nombres }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="cerrar({{ empleado_a.id }})">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <form>
+                    <fieldset id="fieldset_1A_{{ empleado_a.id }}">
+                        <strong><legend style="color: #025aa5; font-size:medium "><ins>INFORMACIÓN BÁSICA</ins></legend></strong>
+                        <div class="row">
+                            <div class="col-2">
+                                <h5><strong>{{ empleado_a.tipoempleado }}</strong></h5>
+                                <img src="{{ asset('fotos_empleados/'~ empleado_a.foto) }}" class="img-fluid img-perfil">
+
+                                <h5><strong>Categoria:</strong> {{ empleado_a.sueldo.categoria }}</h5>
+                                <h5><strong>Sueldo:</strong> ${{ empleado_a.sueldo.valor }}</h5>
+                            </div>
+
+                            <div class="col-10">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <h5><strong>CI: </strong>{{ empleado_a.cedula }}</h5>
+
+                                    </div>
+                                    <div class="col-6">
+                                        <h5><strong>Cód. Reloj B.:</strong> {{ empleado_a.codbiometrico }}</h5>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <strong>Fecha de Nacimiento:</strong>
+                                        <p>{{ empleado_a.fnacimiento |date('d/m/Y') }}</p>
+                                    </div>
+                                    <div class="col-4">
+                                        <strong>Estado Civil:</strong>
+                                        <p>{{ empleado_a.ecivil }}</p>
+                                    </div>
+                                    <div class="col-4">
+                                        <strong>Tipo de Sangre:</strong>
+                                        <p>{{ empleado_a.tsangre }}</p>
+                                    </div>
+                                </div>
+
+                                {% if empleado_a.ecivil == 'Unión de Hecho' or empleado_a.ecivil == 'Casado/a' %}
+                                    <div class="row">
+                                        <div class="col-8">
+                                            <strong>Nombre del Conyuge:</strong>
+                                            <p>{{ empleado_a.nombreconyugue }}</p>
+                                        </div>
+                                        <div class="col-4">
+                                            <strong>Cédula conyuge:</strong>
+                                            <p>{{ empleado_a.cedulaconyugue }}</p>
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+
+                                <div class="row">
+                                    <div class="col-4">
+                                        <strong>N° Cuenta Banc.:</strong>
+                                        <p>{{ empleado_a.cuentabanco }}</p>
+                                    </div>
+                                    <div class="col-4">
+                                        <strong>Nombre Banco:</strong>
+                                        <p>{{ empleado_a.nombrebanco }}</p>
+                                    </div>
+                                    <div class="col-4">
+                                        <strong>Tipo de Cuenta:</strong>
+                                        <p>{{ empleado_a.tipocuenta }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-4">
+                                        <strong>Ingreso al Magisterio:</strong>
+                                        <p>{{ empleado_a.ingresomagisterio |date('d/m/Y')}}</p>
+                                    </div>
+                                    <div class="col-4">
+                                        <strong>Ingreso a la Institución:</strong>
+                                        <p>{{ empleado_a.ingresoinstitucion |date('d/m/Y')}}</p>
+                                    </div>
+                                    <div class="col-4">
+                                        <strong>Nombramiento: </strong>
+                                        <ul class="lista">
+                                            {% for nombramiento in empleado_a.nombramiento %}
+                                                <li>{{ nombramiento }}</li>
+                                            {% endfor %}
+
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-4">
+                                        <strong>Jornada de Tabajo:</strong>
+                                        <ul class="lista">
+                                            {% for jornada in empleado_a.jornada %}
+                                                <li>{{ jornada }}</li>
+                                            {% endfor %}
+
+                                        </ul>
+                                    </div>
+                                    <div class="col-4">
+                                        <strong>Nivel Intrucción:</strong>
+                                        <ul class="lista">
+                                            {% for instruccion in empleado_a.niveljornada %}
+                                                <li>{{ instruccion }}</li>
+                                            {% endfor %}
+
+                                        </ul>
+                                    </div>
+                                    <div class="col-4">
+                                        <strong>Asignaturas: </strong>
+                                        <p>{{ empleado_a.asignaturas }}</p>
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+                    </fieldset>
+
+
+                    <fieldset class="hide" id="fieldset_2A_{{ empleado_a.id }}">
+                        <strong><legend style="color: #025aa5; font-size:medium "><ins>DIRECCIÓN DOMICILIARIA</ins></legend></strong>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="row">
+                                    <div class="col-4">
+                                        <strong>Calle Principal:</strong>
+                                        <p>{{ empleado_a.calleprincipal }}</p>
+                                    </div>
+                                    <div class="col-4">
+                                        <strong>Calle Transversal:</strong>
+                                        <p>{{ empleado_a.calletransversal }}</p>
+                                    </div>
+                                    <div class="col-4">
+                                        <strong>N° casa y/o dpto:</strong>
+                                        <p>{{ empleado_a.numcasa }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-3">
+                                        <strong>Barrio:</strong>
+                                        <p>{{ empleado_a.barrio }}</p>
+                                    </div>
+                                    <div class="col-3">
+                                        <strong>Sector:</strong>
+                                        <p>{{ empleado_a.sector }}</p>
+                                    </div>
+                                    <div class="col-3">
+                                        <strong>Canton:</strong>
+                                        <p>{{ empleado_a.canton.nombre }}</p>
+                                    </div>
+                                    <div class="col-3">
+                                        <strong>Parroquia:</strong>
+                                        <p>{{ empleado_a.parroquia.nombre }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-3">
+                                        <strong>Telf. Dom.:</strong>
+                                        <p>{{ empleado_a.teldomicilio }}</p>
+                                    </div>
+                                    <div class="col-3">
+                                        <strong>Oficina:</strong>
+                                        <p>{{ empleado_a.teloficina }}</p>
+                                    </div>
+                                    <div class="col-3">
+                                        <strong>Celular:</strong>
+                                        <p>{{ empleado_a.celular }}</p>
+                                    </div>
+                                    <div class="col-3">
+                                        <strong>Operadora:</strong>
+                                        <p>{{ empleado_a.operadora }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-6">
+                                        <strong>Email Principal:</strong>
+                                        <p>{{ empleado_a.emailprincipal }}</p>
+                                    </div>
+                                    <div class="col-6">
+                                        <strong>Email Alterno:</strong>
+                                        <p>{{ empleado_a.emailalterno }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-4">
+                                        <strong>En caso de emergencia comunicarse</strong>
+                                        <p>{{ empleado_a.nombreemergencia }}</p>
+                                    </div>
+                                    <div class="col-4">
+                                        <strong>Parentesco:</strong>
+                                        <p>{{ empleado_a.parentescoemergencia }}</p>
+                                    </div>
+                                    <div class="col-4">
+                                        <strong>Teléfono:</strong>
+                                        <p>{{ empleado_a.telemergencia }}</p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+
+
+                    </fieldset>
+                </form>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="cerrar({{ empleado_a.id }})">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="siguiente" onclick="myFunction({{ empleado_a.id }})">Siguiente</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+

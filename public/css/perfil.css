@@ -1,0 +1,23 @@
+fieldset
+{
+    padding: 10px;
+    padding-top: 0px;
+}
+
+
+.img-perfil{
+    width: 110px;
+    height: 150px;
+    padding:2px;
+    border:1px solid blue;
+    margin-bottom: 15px;
+}
+
+.hide{
+    display: none;
+}
+
+.lista li{
+    display:inline;
+
+}

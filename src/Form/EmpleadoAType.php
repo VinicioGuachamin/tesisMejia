@@ -160,6 +160,7 @@ class EmpleadoAType extends AbstractType
                 'placeholder' => 'Seleccione...',
                 'class' => Sueldo::class,
                 'choice_label' => 'categoria'))
+
             ->add('horario', EntityType::class, array(
                 'placeholder' => 'Seleccione...',
                 'class' => Horario::class,

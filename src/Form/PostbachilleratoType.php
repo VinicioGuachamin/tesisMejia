@@ -9,6 +9,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -17,8 +18,8 @@ class PostbachilleratoType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('titulo', TextareaType::class)
-            ->add('institucion', TextareaType::class)
+            ->add('titulo', TextType::class)
+            ->add('institucion', TextType::class)
             ->add('fecha_titulo', DateType::class, array( 'widget' => 'single_text'))
             ->add('empleado_a', EntityType::class, array(
                 //'placeholder' => 'Seleccione...',
