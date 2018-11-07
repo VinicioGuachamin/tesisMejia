@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Entity\Bachillerato;
 use App\Entity\EmpleadoA;
 use App\Entity\Postbachillerato;
@@ -15,9 +16,18 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+
 
 class EmpleadoAController extends Controller
 {
+
+    private $encoder;
+
+    public function __construct(UserPasswordEncoderInterface $encoder)
+    {
+       $this->encoder = $encoder;
+    }
     /**
      * @Route("/empleado/a", name="empleado_a")
      */
@@ -45,10 +55,30 @@ class EmpleadoAController extends Controller
             $em->persist($empleado_a);
             $em->flush();
             $id= $empleado_a->getId();
+
+            /*Guardo credenciales de acceso del empleado en la table User */
+            $manager = $this->getDoctrine()->getManager();
+            $user = new User();
+            $user->setUsername(
+                $empleado_a->getCedula()
+            );
+            $user->setPassword(
+                 $this->encoder->encodePassword($user, $empleado_a->getCedula())
+            );
+            $user->setEmail(
+                 $empleado_a->getEmailprincipal()
+            );
+            $user->setRole(
+                $empleado_a->getRol()
+            );
+            $manager->persist($user);
+            $manager->flush();
+
             return $this->redirectToRoute('empleadoA_educacion', array(
                 'id'=>$id
             ));
         }
+        
 
         return $this->render('empleado_a/empleado_aCrear.html.twig', array(
             'formEmpleado_a' => $form->createView(), 'img'=>$img
