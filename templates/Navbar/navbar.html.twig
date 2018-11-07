@@ -35,6 +35,11 @@
                     {% endif %}
                 </li>
                 <li class="nav-item active">
+                    {% if is_granted('ROLE_USER') %}
+                        <a class="nav-link" href="{{ path('inspeccion') }}"><i class="fas fa-eye"></i> Inspección </a>
+                    {% endif %}
+                </li>
+                <li class="nav-item active">
                     <a class="nav-link" href="{{path('logout')}}"><i class="fas fa-sign-out"></i> Salir </a>
                 </li>
             </ul>

@@ -40,10 +40,11 @@ security:
         # - { path: ^/profile, roles: ROLE_USER }
         - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         #- { path: ^/empleados, roles: ROLE_USER }
-        - { path: ^/empleados, roles: [ROLE_ADMIN,ROLE_USER ] }
+        - { path: ^/empleados, roles: [ROLE_ADMIN,ROLE_USER,ROLE_SUPERUSER] }
         - { path: ^/control, roles: ROLE_ADMIN }
         - { path: ^/empleado, roles: ROLE_ADMIN }
         - { path: ^/horario, roles: ROLE_ADMIN }
         - { path: ^/sueldo, roles: ROLE_ADMIN }
+        - { path: ^/inspeccion, roles: ROLE_USER}
 
 
