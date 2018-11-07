@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block body %}
-
+<br>
     <div class="row">
         <div class="col-12">
 
@@ -39,9 +39,9 @@
                             <a href="{{ path('empleadoA_editar', {'id':a.id}) }}" role="button" class="btn btn-primary btn-sm">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <a href="#" role="button" class="btn btn-danger btn-sm">
-                                <i class="fas fa-trash-alt"></i>
-                            </a>
+                            {{ render(controller(
+                                'App\\Controller\\EmpleadoAController::vistaEliminarEmpleadoA', { 'id' : a.id }
+                            )) }}
 
 
                         </td>
@@ -66,9 +66,9 @@
                             <a href="{{ path('empleadoB_editar', {'id':b.id}) }}" role="button" class="btn btn-primary btn-sm">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <a href="#" role="button" class="btn btn-danger btn-sm">
-                                <i class="fas fa-trash-alt"></i>
-                            </a>
+                            {{ render(controller(
+                                'App\\Controller\\EmpleadoBController::vistaEliminarEmpleadoB', { 'id' : b.id }
+                            )) }}
 
 
                         </td>
@@ -104,25 +104,43 @@
     <script>
         function myFunction(id) {
             document.getElementById('fieldset_2A_'+id).classList.remove('hide');
-            document.getElementById('fieldset_1A_'+id).style.display = "none";
-            console.log(id);
+            document.getElementById('fieldset_1A_'+id).classList.add('hide');
+            document.getElementById('siguiente'+id).classList.add('hide');
+            document.getElementById('siguiente2'+id).classList.remove('hide');
+        }
+        function myFunction2(id) {
+            document.getElementById('fieldset_3A_'+id).classList.remove('hide');
+            document.getElementById('fieldset_2A_'+id).classList.add('hide');
         }
 
         function cerrar(id) {
-            document.getElementById('fieldset_1A_'+id).style.display = "block";
+            document.getElementById('fieldset_1A_'+id).classList.remove('hide');
             document.getElementById('fieldset_2A_'+id).classList.add("hide");
+            document.getElementById('fieldset_3A_'+id).classList.add("hide");
+            document.getElementById('siguiente'+id).classList.remove('hide');
+            document.getElementById('siguiente2'+id).classList.add('hide');
 
         }
 
         function myFunctionB(id) {
             document.getElementById('fieldset_2B_'+id).classList.remove('hide');
-            document.getElementById('fieldset_1B_'+id).style.display = "none";
-            console.log(id);
+            document.getElementById('fieldset_1B_'+id).classList.add('hide');
+            document.getElementById('siguienteB'+id).classList.add('hide');
+            document.getElementById('siguiente2B'+id).classList.remove('hide');
+        }
+
+        function myFunction2B(id) {
+            document.getElementById('fieldset_3B_'+id).classList.remove('hide');
+            document.getElementById('fieldset_2B_'+id).classList.add('hide');
+            console.log("funvion para ver el filset 3 del B")
         }
 
         function cerrarB(id) {
-            document.getElementById('fieldset_1B_'+id).style.display = "block";
+            document.getElementById('fieldset_1B_'+id).classList.remove('hide');
             document.getElementById('fieldset_2B_'+id).classList.add("hide");
+            document.getElementById('fieldset_3B_'+id).classList.add("hide");
+            document.getElementById('siguienteB'+id).classList.remove('hide');
+            document.getElementById('siguiente2B'+id).classList.add('hide');
 
         }
     </script>

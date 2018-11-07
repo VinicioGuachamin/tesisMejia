@@ -82,6 +82,61 @@ class EmpleadoAController extends Controller
 
     }
 
+    /**
+     * FUNCIÓN PARA ELIMINAR UN EMPLEADO A
+     * @Route("/empleado/a/{id}/eliminar", name="eliminar_empleadoA")
+     */
+    public function eliminarEmpleadoA($id){
+        $em = $this->getDoctrine()->getManager();
+        $bachillerato = $em->getRepository(Bachillerato::class)->findBy(
+            ['empleado_a' => $id]
+        );
+
+        $postbachillerato = $this->getDoctrine()->getRepository(Postbachillerato::class)->findBy(
+            ['empleado_a' => $id]
+        );
+
+        $superior = $this->getDoctrine()->getRepository(Superior::class)->findBy(
+            ['empleado_a' => $id]
+        );
+
+        $empleado_a= $em->getRepository(EmpleadoA::class)->find($id);
+
+        if (!$empleado_a) {
+            throw $this->createNotFoundException(
+                'No product found for id '.$id
+            );
+        }
+        foreach ($bachillerato as $bach) {
+            $em->remove($bach);
+        }
+        foreach ($postbachillerato as $postbach) {
+            $em->remove($postbach);
+        }
+        foreach ($superior as $super) {
+            $em->remove($super);
+        }
+
+        $em->remove($empleado_a);
+        $em->flush();
+
+        return $this->redirectToRoute('empleados');
+
+    }
+
+    /**
+     * VISTA PARA ELIMINAR UN EMPLEADO A
+     * @Route("/empleado/a/{id}/vista/eliminar", name="vista_elminar_empleadoA")
+     */
+    public function vistaEliminarEmpleadoA($id){
+
+        return $this->render('empleado_a/empleado_Aeliminar.html.twig', array(
+            'id'=>$id,
+        ));
+
+    }
+
+
 
     /**
      * Returns a JSON string with the neighborhoods of the City with the providen id.
