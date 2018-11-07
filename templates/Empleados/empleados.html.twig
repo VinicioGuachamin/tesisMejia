@@ -36,12 +36,14 @@
                                 'App\\Controller\\EmpleadosController::verEmpleadoA', { 'id' : a.id }
                             )) }}
 
+                            {% if is_granted('ROLE_ADMIN') %}
                             <a href="{{ path('empleadoA_editar', {'id':a.id}) }}" role="button" class="btn btn-primary btn-sm">
                                 <i class="fas fa-edit"></i>
                             </a>
                             <a href="#" role="button" class="btn btn-danger btn-sm">
                                 <i class="fas fa-trash-alt"></i>
                             </a>
+                            {% endif %}
 
 
                         </td>
@@ -62,13 +64,14 @@
                                 'App\\Controller\\EmpleadosController::verEmpleadoB', { 'id' : b.id }
                             )) }}
 
-
+                            {% if is_granted('ROLE_ADMIN') %}
                             <a href="{{ path('empleadoB_editar', {'id':b.id}) }}" role="button" class="btn btn-primary btn-sm">
                                 <i class="fas fa-edit"></i>
                             </a>
                             <a href="#" role="button" class="btn btn-danger btn-sm">
                                 <i class="fas fa-trash-alt"></i>
                             </a>
+                            {% endif %}
 
 
                         </td>

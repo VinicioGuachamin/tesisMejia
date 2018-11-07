@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Entity\BachilleratoB;
 use App\Entity\EmpleadoB;
 use App\Entity\PostbachilleratoB;
@@ -15,9 +16,18 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class EmpleadoBController extends Controller
 {
+
+    private $encoder;
+
+    public function __construct(UserPasswordEncoderInterface $encoder)
+    {
+       $this->encoder = $encoder;
+    }
+
     /**
      * FUNCIÓN PARA CREAR UN NUEVO EMPLEADO B
      * @Route("/empleado/b/nuevo", name="empleadoB_nuevo")
@@ -36,6 +46,26 @@ class EmpleadoBController extends Controller
             $em->persist($empleado_b);
             $em->flush();
             $id= $empleado_b->getId();
+
+
+            /*Guardo credenciales de acceso del empleado en la table User */
+            $manager = $this->getDoctrine()->getManager();
+            $user = new User();
+            $user->setUsername(
+                $empleado_b->getCedula()
+            );
+            $user->setPassword(
+                 $this->encoder->encodePassword($user, $empleado_b->getCedula())
+            );
+            $user->setEmail(
+                 $empleado_b->getEmailprincipal()
+            );
+            $user->setRole(
+                $empleado_b->getRol()
+            );
+            $manager->persist($user);
+            $manager->flush();
+
             return $this->redirectToRoute('empleadoB_educacion', array(
                 'id'=>$id
             ));

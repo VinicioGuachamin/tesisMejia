@@ -13,7 +13,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity(repositoryClass="App\Repository\EmpleadoARepository")
  * @UniqueEntity("cedula", message="El numero de cedula ya existe")
  */
-class EmpleadoA
+class EmpleadoA 
 {
     /**
      * @ORM\Id()
@@ -355,6 +355,9 @@ class EmpleadoA
      * @ORM\JoinColumn(nullable=false)
      */
     private $horario;
+
+
+ 
 
     public function __construct()
     {
@@ -1094,6 +1097,8 @@ class EmpleadoA
 
         return $this;
     }
+
+
 
 
 }

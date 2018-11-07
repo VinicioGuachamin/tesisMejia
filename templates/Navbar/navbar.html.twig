@@ -16,25 +16,31 @@
                     <a class="nav-link" href="{{ path('empleados') }}"><i class="fas fa-users"></i> Empleados </a>
                 </li>
                 <li class="nav-item dropdown active">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="fas fa-list-alt"></i> Registrar
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="#">Empleado</a>
-                        <a class="dropdown-item" href="{{ path('empleadoA_nuevo') }}">Empleado A</a>
-                        <a class="dropdown-item" href="{{ path('empleadoB_nuevo') }}">Empleado B</a>
-                        <a class="dropdown-item" href="{{ path('sueldo') }}">Sueldo</a>
-                        <a class="dropdown-item" href="{{ path('horario') }}">Horarios</a>
-                    </div>
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-list-alt"></i> Registrar
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="#">Empleado</a>
+                            <a class="dropdown-item" href="{{ path('empleadoA_nuevo') }}">Empleado A</a>
+                            <a class="dropdown-item" href="{{ path('empleadoB_nuevo') }}">Empleado B</a>
+                            <a class="dropdown-item" href="{{ path('sueldo') }}">Sueldo</a>
+                            <a class="dropdown-item" href="{{ path('horario') }}">Horarios</a>
+                        </div>
+                    {% endif %}
                 </li>
                 <li class="nav-item active">
-                    <a class="nav-link" href="{{ path('control') }}"><i class="fas fa-table"></i> Control </a>
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <a class="nav-link" href="{{ path('control') }}"><i class="fas fa-table"></i> Control </a>
+                    {% endif %}
                 </li>
-                <li class="nav-item">
-                    {#<a class="nav-link" href="{{ path('control') }}">Control</a>#}
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{path('logout')}}"><i class="fas fa-sign-out"></i> Salir </a>
                 </li>
             </ul>
         </div>
     </div>
 
 </nav>
+
+
