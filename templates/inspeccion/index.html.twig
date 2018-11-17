@@ -363,6 +363,7 @@
 		                async: true,
 		                success: function (data)
 		                {
+		                	var iconDelete = "<a href='#'' role='button' class='deleteReg btn btn-outline-danger btn-sm ml-auto' title='eliminar' ><i class='fa fa-trash' aria-hidden='true'></i></a>";
 		                	$('#detalle_reporte_guardar').attr("disabled", false);
 
 		                	$('table tr:not(:first-child)').remove();
@@ -387,7 +388,7 @@
 		                		}
 
 			
-							    $('#table-reportes tr:last').after("<tr><td>"+(indice+1)+"</td><td>"+valor.docente+"</td><td>"+atrasos+"</td><td>"+abondona_aula+"</td> <td>"+cumplimiento_turno+"</td><td>"+valor.observaciones+"</td></tr>");
+							    $('#table-reportes tr:last').after("<tr><td>"+(indice+1)+"</td><td>"+valor.docente+"</td><td>"+atrasos+"</td><td>"+abondona_aula+"</td> <td>"+cumplimiento_turno+"</td><td>"+valor.observaciones+"</td><td>"+iconDelete+"</td></tr>");
 							});
 
 		                    //$('div#ajax-results').html(data.output);
@@ -519,8 +520,6 @@
 			
 							    $('#table-reportes tr:last').after("<tr><td>"+(indice+1)+"</td><td>"+valor.docente+"</td><td>"+atrasos+"</td><td>"+abondona_aula+"</td> <td>"+cumplimiento_turno+"</td><td>"+valor.observaciones+"</td><td>"+iconDelete+"</td></tr>");
 
-
-							   
 							});
 
                 	}else{
