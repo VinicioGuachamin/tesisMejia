@@ -32,9 +32,11 @@
 			        }}
 
 			    </div>
-			    <div class="col-md-1">
+			    <div class="col-md-1" >
 			         <a href="#" role="button" class="find btn btn-outline-success btn-sm ml-auto" title="buscar reporte" ><i class="fa fa-search" aria-hidden="true"></i></a>
+			         <img class="loading" src="{{ asset('img/loader.gif')}}" title='loading' width='25' style="visibility: hidden;">
 			    </div>
+	
 			</div>
 			<div class="row" id="msgAlert"></div>				
 		  
@@ -242,6 +244,7 @@
 
     		
     		console.log("Cargar fecha");
+
     		var f = new Date();
     		var fechaActual = f.getFullYear() + "-"+(f.getMonth()+1)+"-"+f.getDate();
 
@@ -454,7 +457,10 @@
     <script>
 
     	 $(document).on('click', 'a.find', function(){
+    	 	$(".loading").css("visibility","visible");
             that = $(this);
+
+            //Añadimos la imagen de carga en el contenedor
 
             var fecha  =  $("#reporte_fecha").val();
 
@@ -468,8 +474,8 @@
                 async: true,
                 success: function (data)
                 {
-
                 	console.log(data);
+                	$(".loading").css("visibility","hidden");
 
                 	if(data.length > 0 ){
                 		$("#add_report").css("visibility","visible");
@@ -538,9 +544,7 @@
 
                 	}
      
-
-            
-
+     
                 }
             });
 
