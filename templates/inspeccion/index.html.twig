@@ -87,15 +87,17 @@
 	  <div class="card-body">
 
 
-	  	<table class="table table-sm" id="table-reportes">
+	  	<table class="table table-sm" id="table-reportes" style="font-family: -webkit-pictograph;
+    	font-size: inherit;">
 		  <thead>
 		    <tr>
 		      <th scope="col-md-1">#</th>
-		      <th scope="col-md-3">Docente</th>
+		      <th scope="col-md-4">Docente</th>
 		      <th scope="col-md-1">Atrasos</th>
 		      <th scope="col-md-1">Abandono</th>
 		      <th scope="col-md-1">Incumple</th>
-		      <th scope="col-md-5">Observaciones</th>
+		      <th scope="col-md-4">Observaciones</th>
+		      <th scope="col-md-1"></th>
 		    </tr>
 		  </thead>
 		  <tbody>
@@ -490,7 +492,7 @@
 			            $("#reporte_grado").prop('disabled', true);
 			            $("#reporte_paralelos").prop('disabled', true);
 			            $('#reporte_guardar').attr("disabled", true);
-
+			            var iconDelete = "<a href='#'' role='button' class='deleteReg btn btn-outline-danger btn-sm ml-auto' title='eliminar' ><i class='fa fa-trash' aria-hidden='true'></i></a>";
 
 	                	if(data[0].docente == null){
 	                		alert("no tiene rergistros de docentes");
@@ -515,7 +517,10 @@
 		                		}
 
 			
-							    $('#table-reportes tr:last').after("<tr><td>"+(indice+1)+"</td><td>"+valor.docente+"</td><td>"+atrasos+"</td><td>"+abondona_aula+"</td> <td>"+cumplimiento_turno+"</td><td>"+valor.observaciones+"</td></tr>");
+							    $('#table-reportes tr:last').after("<tr><td>"+(indice+1)+"</td><td>"+valor.docente+"</td><td>"+atrasos+"</td><td>"+abondona_aula+"</td> <td>"+cumplimiento_turno+"</td><td>"+valor.observaciones+"</td><td>"+iconDelete+"</td></tr>");
+
+
+							   
 							});
 
                 	}else{
