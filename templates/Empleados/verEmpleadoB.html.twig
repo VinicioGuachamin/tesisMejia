@@ -211,6 +211,55 @@
 
 
                     </fieldset>
+
+
+                    <fieldset class="hide" id="fieldset_3B_{{ empleado_b.id }}">
+                        <strong><legend style="color: #025aa5; font-size:medium "><ins>NIVEL DE INSTRUCCIÓN</ins></legend></strong>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <h5><u><strong>Bachilletaro </strong></u></h5>
+                                        {% for bach in bachillerato_b %}
+                                            <strong>Titulo:</strong>
+                                            <p>{{ bach.titulo }}</p>
+                                            <strong>Institución:</strong>
+                                            <p>{{ bach.institucion }}</p>
+                                            <strong>Fecha de Titulo:</strong>
+                                            <p>{{ bach.fechaTitulo |date('d/m/Y') }}</p>
+                                        {% endfor %}
+                                    </div>
+
+                                    <div class="col-6">
+                                        <h5><u><strong>Post Bachilletaro </strong></u></h5>
+                                        {% for postbach in postbachillerato_b %}
+                                            <strong>Titulo:</strong>
+                                            <p>{{ postbach.titulo }}</p>
+                                            <strong>Institución:</strong>
+                                            <p>{{ postbach.institucion }}</p>
+                                            <strong>Fecha de Titulo:</strong>
+                                            <p>{{ postbach.fechaTitulo |date('d/m/Y') }}</p>
+                                        {% endfor %}
+                                    </div>
+
+                                    <div class="col-6">
+                                        <h5><u><strong>Educacón Superior </strong></u></h5>
+                                        {% for sup in superior_b %}
+                                            <strong>Titulo:</strong>
+                                            <p>{{ sup.titulo }}</p>
+                                            <strong>Institución:</strong>
+                                            <p>{{ sup.institucion }}</p>
+                                            <strong>Reg. Senescyt:</strong>
+                                            <p>{{ sup.registroSenescyt }}</p>
+                                            <strong>Nivel:</strong>
+                                            <p>{{ sup.nivel }}</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </fieldset>
                 </form>
 
 
@@ -219,7 +268,8 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="cerrarB({{ empleado_b.id }})">Cerrar</button>
-                <button type="button" class="btn btn-primary" id="siguiente" onclick="myFunctionB({{ empleado_b.id }})">Siguiente</button>
+                <button type="button" class="btn btn-primary" id="siguienteB{{ empleado_b.id }}" onclick="myFunctionB({{ empleado_b.id }})">Siguiente</button>
+                <button type="button" class="btn btn-primary hide" id="siguiente2B{{ empleado_b.id }}" onclick="myFunction2B({{ empleado_b.id }})">Siguiente</button>
             </div>
         </div>
     </div>
