@@ -47,6 +47,10 @@ class EmpleadoBController extends Controller
             $em->flush();
             $id= $empleado_b->getId();
 
+            $nombre=  $empleado_b->getNombres(); 
+            $apellido =  $empleado_b->getApellidos(); 
+            $username = $nombre . " ". $apellido . " / ".$id;
+
 
             /*Guardo credenciales de acceso del empleado en la table User */
             $manager = $this->getDoctrine()->getManager();
@@ -58,7 +62,7 @@ class EmpleadoBController extends Controller
                  $this->encoder->encodePassword($user, $empleado_b->getCedula())
             );
             $user->setEmail(
-                 $empleado_b->getEmailprincipal()
+                 $username
             );
             $user->setRole(
                 $empleado_b->getRol()

@@ -1,15 +1,556 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello {{ controller_name }}!{% endblock %}
+{% block title %}Reportes {{ controller_name }}!{% endblock %}
+
 
 {% block body %}
 <style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
+    	.contenedor-modal {
+		  position: absolute;
+		  width: 100%;
+		  height: 100%;
+		  text-align: center;
+		}
+
+		.contenedor-modal button {
+		  position: relative;
+		  top: 40%;
+		}
 </style>
 
-<div class="example-wrapper">
-    <h1>Inspección general</h1>
-  
-</div>
+	{{form_start(form, {'action':'' , 'method':'POST' } )}}
+		<div class="card">
+		  <div class="card-header">
+		  	<div class="row">
+			    <div class="col-md-8" style="color: darkblue;">
+			    	Inspector: {{ username }}
+			    </div>
+			      <div class="col-md-3">
+			    	
+					{{ form_widget(form.fecha,
+			        	{'attr':{'class':'form-control form-control-sm' }})
+			        }}
+
+			    </div>
+			    <div class="col-md-1">
+			         <a href="#" role="button" class="find btn btn-outline-success btn-sm ml-auto" ><i class="fa fa-search" aria-hidden="true"></i></a>
+			    </div>
+			</div>
+			<div class="row" id="msgAlert"></div>				
+		  
+		  </div>
+		  <div class="card-body">
+		      <div class="row">
+			    <div class="col">
+			    	{{ form_widget(form.jornada,
+                        {'attr': {class: 'form-control required', 'placeholder': 'Jornada'}  } )
+                    }}
+			   
+			    </div>
+			    <div class="col">
+			    	{{ form_widget(form.grado,
+                        {'attr': {class: 'form-control', 'placeholder': 'Grado'}  } )
+                    }}
+			    </div>
+			     <div class="col">
+			     	{{ form_widget(form.paralelos,
+                        {'attr': {class: 'form-control', 'placeholder': 'Paralelo'}  } )
+                    }}
+			    </div>
+
+			  </div>
+
+			  <br>
+		      <div class="row">
+
+		      	 <div class="col">
+		    		{{ form_widget(form.guardar, {'attr':{'class':'ajax2 btn btn-primary btn-sm'}}) }}
+		    	 </div>
+		      </div>
+
+
+		  </div>
+		 
+		</div>
+		
+
+	{{form_end(form)}}
+
+
+	<div class="card">
+	  <div class="card-header d-flex">
+	    Reporte Diario  
+	     <a href="#victorModal" role="button" class="btn btn-outline-success btn-sm ml-auto" data-toggle="modal"><i class="fa fa-plus" aria-hidden="true"></i></a>
+	  </div>
+	  <div class="card-body">
+
+
+	  	<table class="table" id="table-reportes">
+		  <thead>
+		    <tr>
+		      <th scope="col-md-1">#</th>
+		      <th scope="col-md-3">Docente</th>
+		      <th scope="col-md-1">Atrasos</th>
+		      <th scope="col-md-1">Abandono</th>
+		      <th scope="col-md-1">Incumple</th>
+		      <th scope="col-md-5">Observaciones</th>
+		    </tr>
+		  </thead>
+		  <tbody>
+		  
+		  </tbody>
+		</table>
+
+	
+
+	  </div>
+	</div> <!--Fin card-->
+
+
+	<hr>
+
+	<div id="victorModal" class="modal fade">
+	    <div class="modal-dialog">
+	        <div class="modal-content">
+	            <div class="modal-header">
+	            	Reporte
+	                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	            </div>
+	            <div class="modal-body">
+
+
+	            	{{form_start(form2, {'action':'' , 'method':'POST' , 'attr': {'id': 'form_detalle'}} )}}
+
+
+							<div class="form-row">
+							    <div class="col-md-12 mb-12">
+							      <label for="validationTooltip01">Docente</label>
+							      <select id="select_docente" name="select_docente" class="form-control">
+							        <option selected>Escoja...</option>
+							        {% for docente in docentes %}
+										<option>{{docente |upper }}</option>     
+									{% endfor %}
+							      </select>
+							    </div>
+							    <div class="col-md-4 mb-3">
+							      <label for="validationTooltip02"></label>
+						        	<div class="form-check">
+										<label class="checkbox-inline">
+										  	{{ form_widget(form2.hr1,
+					                        	{'attr': {'type': 'checkbox'}  } )
+					                    	}} 1
+										</label>
+										<label class="checkbox-inline">
+										  {{ form_widget(form2.hr2,
+					                        	{'attr': {'type': 'checkbox'}  } )
+					                    	}} 2
+										</label>
+										<label class="checkbox-inline">
+										  {{ form_widget(form2.hr3,
+					                        	{'attr': {'type': 'checkbox'}  } )
+					                       }} 3
+										</label>
+										<label class="checkbox-inline">
+										  {{ form_widget(form2.hr4,
+					                        	{'attr': {'type': 'checkbox'}  } )
+					                    	}} 4
+										</label>
+										<label class="checkbox-inline">
+										  {{ form_widget(form2.hr5,
+					                        	{'attr': {'type': 'checkbox'}  } )
+					                    	}} 5
+										</label>
+										<label class="checkbox-inline">
+										  {{ form_widget(form2.hr6,
+					                        	{'attr': {'type': 'checkbox'}  } )
+					                    	}} 6
+										</label>
+										<label class="checkbox-inline">
+										  {{ form_widget(form2.hr7,
+					                        	{'attr': {'type': 'checkbox'}  } )
+					                    	}} 7
+										</label>
+										<label class="checkbox-inline">
+										  {{ form_widget(form2.hr8,
+					                        	{'attr': {'type': 'checkbox'}  } )
+					                    	}} 8
+										</label>
+									</div>	
+							    </div>
+							    <div class="col-md-8 mb-3">
+							      <label for="validationTooltipUsername"></label>
+							      <div class="form-check">
+									     <label class="checkbox-inline">
+										  	{{ form_widget(form2.atrasos,
+					                        	{'attr': {'type': 'checkbox'}  } )
+					                    	}} atrasos
+										 </label>
+										 <label class="checkbox-inline">
+										 	{{ form_widget(form2.abondonaAula,
+					                        	{'attr': {'type': 'checkbox'}  } )
+					                    	}} abandono
+										 </label>
+										 <label class="checkbox-inline">
+										  	{{ form_widget(form2.cumplimientoTurno,
+					                        	{'attr': {'type': 'checkbox'}  } )
+					                    	}} falta
+										 </label>
+									</div>
+							
+							      </div>
+							    </div>
+							</div>
+
+						   <div class="form-row">
+						   		<div class="col-md-1">
+						   		</div>
+							   	<div class="col-md-10">
+									<label for="comment">Observaciones</label>
+									{{ form_widget(form2.observaciones,
+				                        {'attr': {class: 'form-control', 'rows': '5'}  } )
+				                    }}
+								</div>
+						   </div>
+						   <br>
+
+						
+						   {{ form_widget(form2.guardar, {'attr':{'class':'ajax btn btn-primary btn-sm '}}) }}
+					
+		
+
+					{{form_end(form2)}}
+
+	            </div>
+
+	        </div>
+	    </div>
+	</div>
+
+
+
+
+
 {% endblock %}
+
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script type="text/javascript">
+
+    	$(document).ready(function(){
+
+    		
+    		console.log("Cargar fecha");
+    		var f = new Date();
+    		var fechaActual = f.getFullYear() + "-"+(f.getMonth()+1)+"-"+f.getDate();
+
+    		console.log(fechaActual);
+ 
+    		$( "#reporte_fecha" ).attr({
+			    value:fechaActual,
+			});
+
+				
+		});
+
+
+    </script>
+
+     <script>
+        $(document).on('click', 'button.ajax', function(){
+            that = $(this);
+
+
+            $('#detalle_reporte_guardar').attr("disabled", true);
+
+             //var data = $("form[name=detalle_reporte]").serialize();    
+             var observaciones =  $("#detalle_reporte_observaciones").val();
+             var docente =  $("#select_docente option:selected").text();
+             var hr1=0;
+             var hr2=0;
+             var hr3=0;
+             var hr4=0;
+             var hr5=0;
+             var hr6=0;
+             var hr7=0;
+             var hr8=0; 
+             var atrasos = 0;
+             var abondonaAula = 0;
+             var cumplimientoTurno = 0;
+
+
+             //var docente =  $("#select_docente option:selected").text();
+
+            if( $('#detalle_reporte_hr1').prop('checked') ) {
+			    hr1 = 1;
+			}
+			if( $('#detalle_reporte_hr2').prop('checked') ) {
+			    hr2 = 1;
+			}
+			if( $('#detalle_reporte_hr3').prop('checked') ) {
+			    hr3 = 1;
+			}
+			if( $('#detalle_reporte_hr4').prop('checked') ) {
+			    hr4 = 1;
+			}
+			if( $('#detalle_reporte_hr5').prop('checked') ) {
+			    hr5 = 1;
+			}
+			if( $('#detalle_reporte_hr6').prop('checked') ) {
+			    hr6 = 1;
+			}
+			if( $('#detalle_reporte_hr7').prop('checked') ) {
+			    hr7 = 1;
+			}
+			if( $('#detalle_reporte_hr8').prop('checked') ) {
+			    hr8 = 1;
+			}
+			if( $('#detalle_reporte_atrasos').prop('checked') ) {
+			    atrasos = 1;
+			}
+			if( $('#detalle_reporte_abondonaAula').prop('checked') ) {
+			    abondonaAula = 1;
+			}
+			if( $('#detalle_reporte_cumplimientoTurno').prop('checked') ) {
+			    cumplimientoTurno = 1;
+			}
+
+			var detalleReporte = {
+				docente:docente,
+				hr1:hr1,
+				hr2:hr2,
+				hr3:hr3,
+				hr4:hr4,
+				hr5:hr5,
+				hr6:hr6,
+				hr7:hr7,
+				hr8:hr8,
+				atrasos:atrasos,
+				abondonaAula:abondonaAula,
+				cumplimientoTurno:cumplimientoTurno,
+				observaciones:observaciones
+			}
+
+          
+            $.ajax({
+                url:'{{ (path('reporte_ajax')) }}',
+                type: "POST",
+                dataType: "json",
+                data: {
+                    "detalleReporte": detalleReporte
+                },
+                async: true,
+                success: function (data)
+                {
+                	console.log("save Exit detalle reporte ");
+                    console.log(data);
+
+                    $("#form_detalle")[0].reset();
+
+                    $.ajax({
+		                url:'{{ (path('reporte_list_ajax')) }}',
+		                type: "POST",
+		                dataType: "json",
+		                data: {
+		                    "idReporte": data
+		                },
+		                async: true,
+		                success: function (data)
+		                {
+		                	$('#detalle_reporte_guardar').attr("disabled", false);
+
+		                	$('table tr:not(:first-child)').remove();
+
+		                	console.log("find all exit");
+		                	console.log(data);
+
+		                	data.forEach( function(valor, indice, array) {
+
+		                		var atrasos= "";
+		                		var abondona_aula= "";
+		                		var cumplimiento_turno= "";
+
+		                		if(valor.atrasos == 1){
+		                			atrasos= "x";
+		                		}
+		                		if(valor.abondona_aula == 1){
+		                			abondona_aula= "x";
+		                		}
+		                		if(valor.cumplimiento_turno == 1){
+		                			cumplimiento_turno= "x";
+		                		}
+
+			
+							    $('#table-reportes tr:last').after("<tr><td>"+(indice+1)+"</td><td>"+valor.docente+"</td><td>"+atrasos+"</td><td>"+abondona_aula+"</td> <td>"+cumplimiento_turno+"</td><td>"+valor.observaciones+"</td></tr>");
+							});
+
+		                    //$('div#ajax-results').html(data.output);
+
+		                }
+		            });
+
+
+                    //$('div#ajax-results').html(data.output);
+
+                }
+            });
+            return false;
+
+        });
+    </script>
+
+
+       <script>
+        $(document).on('click', 'button.ajax2', function(){
+            that = $(this);
+
+            var jornada  =  $("#reporte_jornada").val();
+            var grado  =  $("#reporte_grado").val();
+            var paralelos  =  $("#reporte_paralelos").val();
+            var fecha  =  $("#reporte_fecha").val();
+
+            if(jornada.length > 0 && grado.length > 0 && paralelos.length > 0 ){
+            	 
+            	 $('#reporte_guardar').attr("disabled", true);
+            
+		            $.ajax({
+		                url:'{{ (path('reporte_ajax_2')) }}',
+		                type: "POST",
+		                dataType: "json",
+		                data: {
+		                    "jornada": jornada,
+		                    "grado": grado,
+		                    "paralelos": paralelos,
+		                    "fecha": fecha,
+		                },
+		                async: true,
+		                success: function (data)
+		                {
+		                	console.log("save Exit reporte ");
+		                    console.log(data);
+		                    $("#reporte_jornada").prop('disabled', true);
+		                    $("#reporte_grado").prop('disabled', true);
+		                    $("#reporte_paralelos").prop('disabled', true);
+
+		                    //$('div#ajax-results').html(data.output);
+
+		                }
+		            });
+	      
+
+            }else{
+		     	alert('Llene todos los campos');
+		     	return false;
+		     }
+
+
+        });
+    </script>
+
+
+    <script>
+
+    	 $(document).on('click', 'a.find', function(){
+            that = $(this);
+
+            var fecha  =  $("#reporte_fecha").val();
+
+               $.ajax({
+                url:'{{ (path('reporte_list_ajax4')) }}',
+                type: "POST",
+                dataType: "json",
+                data: {
+                    "fecha": fecha
+                },
+                async: true,
+                success: function (data)
+                {
+
+                	console.log(data);
+
+                	if(data.length > 0 ){
+                		console.log("insetndo registro");
+	
+	                	$('table tr:not(:first-child)').remove();
+
+	                	$("#reporte_jornada").val(data[0].jornada);
+			            $("#reporte_grado").val(data[0].grado);
+			            $("#reporte_paralelos").val(data[0].paralelos);
+			            $("#reporte_jornada").prop('disabled', true);
+			            $("#reporte_grado").prop('disabled', true);
+			            $("#reporte_paralelos").prop('disabled', true);
+			            $('#reporte_guardar').attr("disabled", true);
+
+
+	                	if(data[0].docente == null){
+	                		alert("no tiene rergistros de docentes");
+	                		return false;
+	                	}
+                	
+
+	            	  	data.forEach( function(valor, indice, array) {
+
+		                		var atrasos= "";
+		                		var abondona_aula= "";
+		                		var cumplimiento_turno= "";
+
+		                		if(valor.atrasos == 1){
+		                			atrasos= "x";
+		                		}
+		                		if(valor.abondona_aula == 1){
+		                			abondona_aula= "x";
+		                		}
+		                		if(valor.cumplimiento_turno == 1){
+		                			cumplimiento_turno= "x";
+		                		}
+
+			
+							    $('#table-reportes tr:last').after("<tr><td>"+(indice+1)+"</td><td>"+valor.docente+"</td><td>"+atrasos+"</td><td>"+abondona_aula+"</td> <td>"+cumplimiento_turno+"</td><td>"+valor.observaciones+"</td></tr>");
+							});
+
+                	}else{
+
+                		$('table tr:not(:first-child)').remove();
+                		$('#reporte_guardar').attr("disabled", false);
+                		$('#reporte_jornada').val('');
+                		$('#reporte_grado').val('');
+                		$('#reporte_paralelos').val('');
+                		$("#reporte_jornada").prop('disabled', false);
+			            $("#reporte_grado").prop('disabled', false);
+			            $("#reporte_paralelos").prop('disabled', false);
+                
+
+
+                      	$( "#msgAlert" ).append("<div id='msg' class='alert alert-info' role='alert'>No tiene ningun reporte registrado en esta fecha: "+fecha+" </div>");
+
+                      	window.setTimeout(function() {
+						    $("#msg").fadeTo(400, 0).slideUp(400, function(){
+						        $(this).remove(); 
+						    });
+						}, 4000);
+					
+
+                	}
+     
+
+            
+
+                }
+            });
+
+
+           return false;
+
+
+        });
+    	
+
+    	
+    </script>
+
+
+
+
+{% endblock %}
+

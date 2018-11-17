@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}DetalleReporte index{% endblock %}
+
+{% block body %}
+    <h1>DetalleReporte index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Docente</th>
+                <th>Hr1</th>
+                <th>Hr2</th>
+                <th>Hr3</th>
+                <th>Hr4</th>
+                <th>Hr5</th>
+                <th>Hr6</th>
+                <th>Hr7</th>
+                <th>Hr8</th>
+                <th>Atrasos</th>
+                <th>AbondonaAula</th>
+                <th>CumplimientoTurno</th>
+                <th>Observaciones</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for detalle_reporte in detalle_reportes %}
+            <tr>
+                <td>{{ detalle_reporte.id }}</td>
+                <td>{{ detalle_reporte.docente }}</td>
+                <td>{{ detalle_reporte.hr1 ? 'Yes' : 'No' }}</td>
+                <td>{{ detalle_reporte.hr2 ? 'Yes' : 'No' }}</td>
+                <td>{{ detalle_reporte.hr3 ? 'Yes' : 'No' }}</td>
+                <td>{{ detalle_reporte.hr4 ? 'Yes' : 'No' }}</td>
+                <td>{{ detalle_reporte.hr5 ? 'Yes' : 'No' }}</td>
+                <td>{{ detalle_reporte.hr6 ? 'Yes' : 'No' }}</td>
+                <td>{{ detalle_reporte.hr7 ? 'Yes' : 'No' }}</td>
+                <td>{{ detalle_reporte.hr8 ? 'Yes' : 'No' }}</td>
+                <td>{{ detalle_reporte.atrasos ? 'Yes' : 'No' }}</td>
+                <td>{{ detalle_reporte.abondonaAula ? 'Yes' : 'No' }}</td>
+                <td>{{ detalle_reporte.cumplimientoTurno ? 'Yes' : 'No' }}</td>
+                <td>{{ detalle_reporte.observaciones }}</td>
+                <td>
+                    <a href="{{ path('detalle_reporte_show', {'id': detalle_reporte.id}) }}">show</a>
+                    <a href="{{ path('detalle_reporte_edit', {'id': detalle_reporte.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="15">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('detalle_reporte_new') }}">Create new</a>
+{% endblock %}

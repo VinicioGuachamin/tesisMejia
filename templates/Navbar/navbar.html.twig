@@ -6,6 +6,10 @@
     <div class="container">
         {#<a class="navbar-brand" href="#">Navbar</a>#}
         <img id="imgNav" src="https://upload.wikimedia.org/wikipedia/commons/b/b9/Sello_del_Instituto_Nacional_Mej%C3%ADa.png">
+
+        <div id="user_name" style="visibility: hidden; color: white; font-family: cursive;font-size: unset;    padding-left: 9px;">{{app.user.email}}</div>
+
+
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -47,5 +51,24 @@
     </div>
 
 </nav>
+
+
+{% block javascripts %}
+
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function(){
+            var user = $('#user_name').text();
+            user = user.split(" / ");
+            $("#user_name").text(user[0]); 
+            $("#user_name").css("visibility","visible");
+            console.log(user);
+        });
+
+    </script>
+
+{% endblock %}
+
 
 

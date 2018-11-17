@@ -1,0 +1,74 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}DetalleReporte{% endblock %}
+
+{% block body %}
+    <h1>DetalleReporte</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ detalle_reporte.id }}</td>
+            </tr>
+            <tr>
+                <th>Docente</th>
+                <td>{{ detalle_reporte.docente }}</td>
+            </tr>
+            <tr>
+                <th>Hr1</th>
+                <td>{{ detalle_reporte.hr1 ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr>
+                <th>Hr2</th>
+                <td>{{ detalle_reporte.hr2 ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr>
+                <th>Hr3</th>
+                <td>{{ detalle_reporte.hr3 ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr>
+                <th>Hr4</th>
+                <td>{{ detalle_reporte.hr4 ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr>
+                <th>Hr5</th>
+                <td>{{ detalle_reporte.hr5 ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr>
+                <th>Hr6</th>
+                <td>{{ detalle_reporte.hr6 ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr>
+                <th>Hr7</th>
+                <td>{{ detalle_reporte.hr7 ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr>
+                <th>Hr8</th>
+                <td>{{ detalle_reporte.hr8 ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr>
+                <th>Atrasos</th>
+                <td>{{ detalle_reporte.atrasos ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr>
+                <th>AbondonaAula</th>
+                <td>{{ detalle_reporte.abondonaAula ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr>
+                <th>CumplimientoTurno</th>
+                <td>{{ detalle_reporte.cumplimientoTurno ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr>
+                <th>Observaciones</th>
+                <td>{{ detalle_reporte.observaciones }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('detalle_reporte_index') }}">back to list</a>
+
+    <a href="{{ path('detalle_reporte_edit', {'id': detalle_reporte.id}) }}">edit</a>
+
+    {{ include('detalle_reporte/_delete_form.html.twig') }}
+{% endblock %}
