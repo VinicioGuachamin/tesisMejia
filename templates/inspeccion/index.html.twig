@@ -33,7 +33,7 @@
 
 			    </div>
 			    <div class="col-md-1">
-			         <a href="#" role="button" class="find btn btn-outline-success btn-sm ml-auto" ><i class="fa fa-search" aria-hidden="true"></i></a>
+			         <a href="#" role="button" class="find btn btn-outline-success btn-sm ml-auto" title="buscar reporte" ><i class="fa fa-search" aria-hidden="true"></i></a>
 			    </div>
 			</div>
 			<div class="row" id="msgAlert"></div>				
@@ -80,12 +80,12 @@
 	<div class="card">
 	  <div class="card-header d-flex">
 	    Reporte Diario  
-	     <a href="#victorModal" role="button" class="btn btn-outline-success btn-sm ml-auto" data-toggle="modal"><i class="fa fa-plus" aria-hidden="true"></i></a>
+	     <a  id ="add_report" style="visibility: hidden;" href="#victorModal" role="button" class="btn btn-outline-success btn-sm ml-auto" data-toggle="modal" title="añadir observaciones"><i class="fa fa-plus" aria-hidden="true"></i></a>
 	  </div>
 	  <div class="card-body">
 
 
-	  	<table class="table" id="table-reportes">
+	  	<table class="table table-sm" id="table-reportes">
 		  <thead>
 		    <tr>
 		      <th scope="col-md-1">#</th>
@@ -432,6 +432,8 @@
 		                    $("#reporte_jornada").prop('disabled', true);
 		                    $("#reporte_grado").prop('disabled', true);
 		                    $("#reporte_paralelos").prop('disabled', true);
+		                    $("#add_report").css("visibility","visible");
+
 
 		                    //$('div#ajax-results').html(data.output);
 
@@ -470,6 +472,7 @@
                 	console.log(data);
 
                 	if(data.length > 0 ){
+                		$("#add_report").css("visibility","visible");
                 		console.log("insetndo registro");
 	
 	                	$('table tr:not(:first-child)').remove();
@@ -519,6 +522,8 @@
                 		$("#reporte_jornada").prop('disabled', false);
 			            $("#reporte_grado").prop('disabled', false);
 			            $("#reporte_paralelos").prop('disabled', false);
+
+			            $("#add_report").css("visibility","hidden");
                 
 
 
