@@ -388,7 +388,7 @@
 		                		}
 
 			
-							    $('#table-reportes tr:last').after("<tr><td>"+(indice+1)+"</td><td>"+valor.docente+"</td><td>"+atrasos+"</td><td>"+abondona_aula+"</td> <td>"+cumplimiento_turno+"</td><td>"+valor.observaciones+"</td><td>"+iconDelete+"</td></tr>");
+							    $('#table-reportes tr:last').after("<tr id="+valor.id+"><td>"+(indice+1)+"</td><td>"+valor.docente+"</td><td>"+atrasos+"</td><td>"+abondona_aula+"</td> <td>"+cumplimiento_turno+"</td><td>"+valor.observaciones+"</td><td>"+iconDelete+"</td></tr>");
 							});
 
 		                    //$('div#ajax-results').html(data.output);
@@ -467,7 +467,7 @@
 
             var fecha  =  $("#reporte_fecha").val();
 
-               $.ajax({
+            $.ajax({
                 url:'{{ (path('reporte_list_ajax4')) }}',
                 type: "POST",
                 dataType: "json",
@@ -518,7 +518,7 @@
 		                		}
 
 			
-							    $('#table-reportes tr:last').after("<tr><td>"+(indice+1)+"</td><td>"+valor.docente+"</td><td>"+atrasos+"</td><td>"+abondona_aula+"</td> <td>"+cumplimiento_turno+"</td><td>"+valor.observaciones+"</td><td>"+iconDelete+"</td></tr>");
+							    $('#table-reportes tr:last').after("<tr id="+valor.id+"><td>"+(indice+1)+"</td><td>"+valor.docente+"</td><td>"+atrasos+"</td><td>"+abondona_aula+"</td> <td>"+cumplimiento_turno+"</td><td>"+valor.observaciones+"</td><td>"+iconDelete+"</td></tr>");
 
 							});
 
@@ -553,6 +553,47 @@
             });
 
 
+           return false;
+
+
+        });
+    	
+
+    	
+    </script>
+
+
+
+    <script>
+
+    	 $(document).on('click', 'a.deleteReg', function(){
+            that = $(this);
+
+            eliminar=confirm("¿Deseas eliminar este registro?");
+   			if (eliminar){
+   				var id=that.parent().parent().attr("id");
+	            console.log("Click delete " + id);
+
+	            $.ajax({
+	                url:'{{ (path('detalle_reporte_delete')) }}',
+	                type: "POST",
+	                dataType: "json",
+	                data: {
+	                    "idDetalle": id
+	                },
+	                async: true,
+	                success: function (data)
+	                {
+	                	console.log("Registro eliminado exitosamente: " + data);
+					    that.parent().parent().remove();
+
+
+					          
+	                }
+	            });
+   			}
+
+           
            return false;
 
 

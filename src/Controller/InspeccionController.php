@@ -222,7 +222,7 @@ class InspeccionController extends AbstractController
 
          //Consulta uso de SQL
 
-        $RAW_QUERY = "select detalle_reporte.docente,detalle_reporte.observaciones, detalle_reporte.atrasos, detalle_reporte.atrasos, detalle_reporte.abondona_aula, detalle_reporte.cumplimiento_turno, detalle_reporte.reporte_id , reporte.fecha,reporte.inspector FROM detalle_reporte, reporte WHERE detalle_reporte.reporte_id = reporte.id and reporte.fecha = '".$filtro."' and reporte.id= '".$data."'";
+        $RAW_QUERY = "select detalle_reporte.id, detalle_reporte.docente,detalle_reporte.observaciones, detalle_reporte.atrasos, detalle_reporte.atrasos, detalle_reporte.abondona_aula, detalle_reporte.cumplimiento_turno, detalle_reporte.reporte_id , reporte.fecha,reporte.inspector FROM detalle_reporte, reporte WHERE detalle_reporte.reporte_id = reporte.id and reporte.fecha = '".$filtro."' and reporte.id= '".$data."'";
 
         //and reporte.id = 8
 
@@ -266,7 +266,7 @@ class InspeccionController extends AbstractController
             $idReporte = $result1[0]['id']; 
 
             //Consulta uso de SQL
-            $RAW_QUERY = "select detalle_reporte.docente,detalle_reporte.observaciones, detalle_reporte.atrasos, detalle_reporte.atrasos, detalle_reporte.abondona_aula, detalle_reporte.cumplimiento_turno, detalle_reporte.reporte_id , reporte.fecha,reporte.inspector,reporte.jornada ,reporte.grado ,reporte.paralelos FROM detalle_reporte, reporte WHERE detalle_reporte.reporte_id = reporte.id and reporte.fecha = '".$fecha."' and reporte.id= '".$idReporte."' and reporte.inspector= '".$filtro."'   "  ;
+            $RAW_QUERY = "select detalle_reporte.id, detalle_reporte.docente,detalle_reporte.observaciones, detalle_reporte.atrasos, detalle_reporte.atrasos, detalle_reporte.abondona_aula, detalle_reporte.cumplimiento_turno, detalle_reporte.reporte_id , reporte.fecha,reporte.inspector,reporte.jornada ,reporte.grado ,reporte.paralelos FROM detalle_reporte, reporte WHERE detalle_reporte.reporte_id = reporte.id and reporte.fecha = '".$fecha."' and reporte.id= '".$idReporte."' and reporte.inspector= '".$filtro."'   "  ;
 
 
             $statement = $em->getConnection()->prepare($RAW_QUERY);
@@ -283,6 +283,29 @@ class InspeccionController extends AbstractController
 
 
        
+    }
+
+
+    /**
+     * @Route("/inspeccion/delete", name="detalle_reporte_delete")
+     */
+    public function deleteDetalleReporte(Request $request){ 
+
+        $id = $request->request->get('idDetalle');
+        $em = $this->getDoctrine()->getManager();
+
+        $detalleReporte= $em->getRepository(DetalleReporte::class)->find($id);
+
+        if (!$detalleReporte) {
+            return new JsonResponse("-1");
+        }
+
+        $em->remove($detalleReporte);
+        $em->flush();
+
+
+        return new JsonResponse($id);
+
     }
 
 
