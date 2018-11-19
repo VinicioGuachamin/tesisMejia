@@ -87,25 +87,24 @@
 	  <div class="card-body">
 
 
-	  	<table class="table table-sm" id="table-reportes" style="font-family: -webkit-pictograph;
-    	font-size: inherit;">
-		  <thead>
-		    <tr>
-		      <th scope="col-md-1">#</th>
-		      <th scope="col-md-4">Docente</th>
-		      <th scope="col-md-1">Atrasos</th>
-		      <th scope="col-md-1">Abandono</th>
-		      <th scope="col-md-1">Incumple</th>
-		      <th scope="col-md-4">Observaciones</th>
-		      <th scope="col-md-1"></th>
-		    </tr>
-		  </thead>
-		  <tbody>
-		  
-		  </tbody>
-		</table>
+		  	<table class="table table-sm" id="table-reportes" style="font-family: -webkit-pictograph;
+	    	font-size: inherit;">
+			  <thead>
+			    <tr>
+			      <th scope="col-md-1">#</th>
+			      <th scope="col-md-4">Docente</th>
+			      <th scope="col-md-1">Atrasos</th>
+			      <th scope="col-md-1">Abandono</th>
+			      <th scope="col-md-1">Incumple</th>
+			      <th scope="col-md-4">Observaciones</th>
+			      <th scope="col-md-1"></th>
+			    </tr>
+			  </thead>
+			  <tbody>
+			  
+			  </tbody>
+			</table>
 
-	
 
 	  </div>
 	</div> <!--Fin card-->
@@ -117,22 +116,20 @@
 	    <div class="modal-dialog">
 	        <div class="modal-content">
 	            <div class="modal-header">
-	            	Reporte
+	            	Reporte<span id="idRegistro"></span>
 	                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 	            </div>
 	            <div class="modal-body">
 
 
 	            	{{form_start(form2, {'action':'' , 'method':'POST' , 'attr': {'id': 'form_detalle'}} )}}
-
-
 							<div class="form-row">
 							    <div class="col-md-12 mb-12">
 							      <label for="validationTooltip01">Docente</label>
 							      <select id="select_docente" name="select_docente" class="form-control">
 							        <option selected>Escoja...</option>
-							        {% for docente in docentes %}
-										<option>{{docente |upper }}</option>     
+							        {% for key, docente in docentes %}
+										<option value="{{key}}">{{docente |upper }}</option>     
 									{% endfor %}
 							      </select>
 							    </div>
@@ -216,12 +213,9 @@
 								</div>
 						   </div>
 						   <br>
-
 						
 						   {{ form_widget(form2.guardar, {'attr':{'class':'ajax btn btn-primary btn-sm '}}) }}
-					
 		
-
 					{{form_end(form2)}}
 
 	            </div>
@@ -230,9 +224,7 @@
 	    </div>
 	</div>
 
-
-
-
+	
 
 {% endblock %}
 
@@ -240,7 +232,11 @@
 {% block javascripts %}
     {{ parent() }}
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    
+    <!--Script para cargar funcionalidad  al cargar la pagina-->
     <script type="text/javascript">
+
+    	var globalRegistros;
 
     	$(document).ready(function(){
 
@@ -256,16 +252,36 @@
 			    value:fechaActual,
 			});
 
+			$(document).on('click', '#add_report', function(){
+
+				 $("#detalle_reporte_guardar").addClass("ajax");
+				 $("#detalle_reporte_guardar").removeClass("updateRegistro");
+				 $('#idRegistro').text("");
+
+
+				$("#form_detalle")[0].reset();
+				//document.getElementById('select_docente').options.length = 0;
+				document.getElementById('select_docente').selectedIndex  = 0;
+
+					$("#select_docente option").each(function(){
+            			$(this).removeAttr("selected");
+
+					});
+			
+
+			})
+
+	
+
 				
 		});
 
-
     </script>
 
-     <script>
+    <!--Script para guardar el detalle_reporte  de los docentes-->
+    <script>
         $(document).on('click', 'button.ajax', function(){
             that = $(this);
-
 
             $('#detalle_reporte_guardar').attr("disabled", true);
 
@@ -349,7 +365,8 @@
                 success: function (data)
                 {
                 	console.log("save Exit detalle reporte ");
-                    console.log(data);
+                    console.log("id detalle_Reporte: "+data);
+                    
 
                     $("#form_detalle")[0].reset();
 
@@ -363,13 +380,22 @@
 		                async: true,
 		                success: function (data)
 		                {
+
+		                	window.globalRegistros=data;
+                    		console.log(window.globalRegistros);
+
 		                	var iconDelete = "<a href='#'' role='button' class='deleteReg btn btn-outline-danger btn-sm ml-auto' title='eliminar' ><i class='fa fa-trash' aria-hidden='true'></i></a>";
+
+		                	var iconEdit = "<a role='button' class='editReg btn btn-outline-warning btn-sm ml-auto' title='editar' href='#victorModal' data-toggle='modal' ><i class='fa fa-edit' aria-hidden='true'></i></a>";
+
 		                	$('#detalle_reporte_guardar').attr("disabled", false);
 
 		                	$('table tr:not(:first-child)').remove();
 
 		                	console.log("find all exit");
 		                	console.log(data);
+
+		           
 
 		                	data.forEach( function(valor, indice, array) {
 
@@ -388,7 +414,7 @@
 		                		}
 
 			
-							    $('#table-reportes tr:last').after("<tr id="+valor.id+"><td>"+(indice+1)+"</td><td>"+valor.docente+"</td><td>"+atrasos+"</td><td>"+abondona_aula+"</td> <td>"+cumplimiento_turno+"</td><td>"+valor.observaciones+"</td><td>"+iconDelete+"</td></tr>");
+							    $('#table-reportes tr:last').after("<tr id="+valor.id+"><td>"+(indice+1)+"</td><td>"+valor.docente+"</td><td>"+atrasos+"</td><td>"+abondona_aula+"</td> <td>"+cumplimiento_turno+"</td><td>"+valor.observaciones+"</td><td>"+iconEdit+iconDelete+"</td></tr>");
 							});
 
 		                    //$('div#ajax-results').html(data.output);
@@ -406,8 +432,8 @@
         });
     </script>
 
-
-       <script>
+    <!--Script para guardar la informacion general de reporte  del inspector-->
+    <script>
         $(document).on('click', 'button.ajax2', function(){
             that = $(this);
 
@@ -456,10 +482,10 @@
         });
     </script>
 
-
+    <!--Script para buscar reportes segun la fecha-->
     <script>
 
-    	 $(document).on('click', 'a.find', function(){
+    	$(document).on('click', 'a.find', function(){
     	 	$(".loading").css("visibility","visible");
             that = $(this);
 
@@ -479,10 +505,12 @@
                 {
                 	console.log(data);
                 	$(".loading").css("visibility","hidden");
+                	window.globalRegistros=data;
+                	console.log(window.globalRegistros);
 
                 	if(data.length > 0 ){
                 		$("#add_report").css("visibility","visible");
-                		console.log("insetndo registro");
+                		console.log("insertando registro");
 	
 	                	$('table tr:not(:first-child)').remove();
 
@@ -494,6 +522,9 @@
 			            $("#reporte_paralelos").prop('disabled', true);
 			            $('#reporte_guardar').attr("disabled", true);
 			            var iconDelete = "<a href='#'' role='button' class='deleteReg btn btn-outline-danger btn-sm ml-auto' title='eliminar' ><i class='fa fa-trash' aria-hidden='true'></i></a>";
+
+			            var iconEdit = "<a role='button' class='editReg btn btn-outline-warning btn-sm ml-auto' title='editar' href='#victorModal' data-toggle='modal' ><i class='fa fa-edit' aria-hidden='true'></i></a>";
+
 
 	                	if(data[0].docente == null){
 	                		alert("no tiene rergistros de docentes");
@@ -518,9 +549,9 @@
 		                		}
 
 			
-							    $('#table-reportes tr:last').after("<tr id="+valor.id+"><td>"+(indice+1)+"</td><td>"+valor.docente+"</td><td>"+atrasos+"</td><td>"+abondona_aula+"</td> <td>"+cumplimiento_turno+"</td><td>"+valor.observaciones+"</td><td>"+iconDelete+"</td></tr>");
+							    $('#table-reportes tr:last').after("<tr id="+valor.id+"><td>"+(indice+1)+"</td><td>"+valor.docente+"</td><td>"+atrasos+"</td><td>"+abondona_aula+"</td> <td>"+cumplimiento_turno+"</td><td>"+valor.observaciones+"</td><td>"+iconEdit+iconDelete+"</td></tr>");
 
-							});
+						});
 
                 	}else{
 
@@ -556,24 +587,18 @@
            return false;
 
 
-        });
-    	
-
-    	
+        });  	
     </script>
 
 
-
+    <!--Script para eliminar reportes segun la fecha-->
     <script>
-
-    	 $(document).on('click', 'a.deleteReg', function(){
+     	$(document).on('click', 'a.deleteReg', function(){
             that = $(this);
-
             eliminar=confirm("¿Deseas eliminar este registro?");
    			if (eliminar){
    				var id=that.parent().parent().attr("id");
 	            console.log("Click delete " + id);
-
 	            $.ajax({
 	                url:'{{ (path('detalle_reporte_delete')) }}',
 	                type: "POST",
@@ -586,21 +611,294 @@
 	                {
 	                	console.log("Registro eliminado exitosamente: " + data);
 					    that.parent().parent().remove();
+					    console.log();
+
+					     window.globalRegistros.forEach( function(valor, indice, array) {
+			            	if(valor['id'] == id ){
+			          			window.globalRegistros.splice(indice, 1)  
+			          			console.log(window.globalRegistros);   		             		
+			            	}
+				
+						});
+
+
+					    //window.globalRegistros.splice(2, 1)
+
+					    //window.globalRegistros.removeItem('banana');
+					    //
 
 
 					          
 	                }
 	            });
    			}
-
            
+           return false;
+        });
+    </script>
+
+    <!--Script para cargar da edicion cada registro de los reportes-->
+    <script>
+
+    	$(document).on('click', 'a.editReg', function(){
+            that = $(this);
+
+            $("#detalle_reporte_guardar").removeClass("ajax");
+            $("#detalle_reporte_guardar").addClass("updateRegistro");
+
+            
+			document.getElementById('select_docente').selectedIndex  = 0;
+
+				$("#select_docente option").each(function(){
+        			$(this).removeAttr("selected");
+
+				});
+
+
+			var id=that.parent().parent().attr("id");
+            console.log("Click edit " + id);
+            $('#idRegistro').text(id);
+            console.log(window.globalRegistros);
+
+
+     
+
+            window.globalRegistros.forEach( function(valor, indice, array) {
+            	if(valor['id'] == id ){
+            		console.log(valor);
+
+            		$("#detalle_reporte_observaciones").val(valor['observaciones']);
+
+            		$("#select_docente option").each(function(){
+            			
+            			if($(this).text() == valor['docente']){
+        
+            				$("#select_docente option[value="+$(this).attr('value')+"]").attr("selected", true);
+            			}
+            			
+					   //console.log('opcion '+$(this).text()+' valor '+ $(this).attr('value'))
+					});
+
+					if( valor.atrasos == 1 ) {
+						$('#detalle_reporte_atrasos').prop('checked',true)   
+					}else{
+						$('#detalle_reporte_atrasos').prop('checked',false) 
+					}
+            		if(valor.abondona_aula == 1){
+            			$('#detalle_reporte_abondonaAula').prop('checked',true)
+            		}else{
+            			$('#detalle_reporte_abondonaAula').prop('checked',false)
+            		}
+            		if(valor.cumplimiento_turno == 1){
+            			 $('#detalle_reporte_cumplimientoTurno').prop('checked',true)
+            		}else{
+            			 $('#detalle_reporte_cumplimientoTurno').prop('checked',false)
+            		}
+
+            		if( valor.hr1 == 1 ) {
+						$('#detalle_reporte_hr1').prop('checked',true)   
+					}else{
+						$('#detalle_reporte_hr1').prop('checked',false) 
+					}
+					if( valor.hr2 == 1 ) {
+						$('#detalle_reporte_hr2').prop('checked',true)   
+					}else{
+						$('#detalle_reporte_hr2').prop('checked',false) 
+					}
+					if( valor.hr3 == 1 ) {
+						$('#detalle_reporte_hr3').prop('checked',true)   
+					}else{
+						$('#detalle_reporte_hr3').prop('checked',false) 
+					}
+					if( valor.hr4 == 1 ) {
+						$('#detalle_reporte_hr4').prop('checked',true)   
+					}else{
+						$('#detalle_reporte_hr4').prop('checked',false) 
+					}
+					if( valor.hr5 == 1 ) {
+						$('#detalle_reporte_hr5').prop('checked',true)   
+					}else{
+						$('#detalle_reporte_hr5').prop('checked',false) 
+					}
+					if( valor.hr6 == 1 ) {
+						$('#detalle_reporte_hr6').prop('checked',true)   
+					}else{
+						$('#detalle_reporte_hr6').prop('checked',false) 
+					}
+					if( valor.hr7 == 1 ) {
+						$('#detalle_reporte_hr7').prop('checked',true)   
+					}else{
+						$('#detalle_reporte_hr7').prop('checked',false) 
+					}
+					if( valor.hr8 == 1 ) {
+						$('#detalle_reporte_hr8').prop('checked',true)   
+					}else{
+						$('#detalle_reporte_hr8').prop('checked',false) 
+					}
+
+	     		             		
+            	}
+	
+			});
+
+     		           
            return false;
 
 
-        });
-    	
+        });	  	
+    </script>
 
-    	
+
+      <!--Script para editar reportes segun la fecha-->
+   
+    <script>
+
+            
+     	$(document).on('click', 'button.updateRegistro', function(){
+            that = $(this);
+            $('#detalle_reporte_guardar').attr("disabled", true);
+
+            var id= $('#idRegistro').text();
+            //var id=that.parent().parent().attr("id");
+            var observaciones =  $("#detalle_reporte_observaciones").val();
+             var docente =  $("#select_docente option:selected").text();
+	         var hr1=0;
+	         var hr2=0;
+	         var hr3=0;
+	         var hr4=0;
+	         var hr5=0;
+	         var hr6=0;
+	         var hr7=0;
+	         var hr8=0; 
+	         var atrasos = 0;
+	         var abondonaAula = 0;
+	         var cumplimientoTurno = 0;
+	          if( $('#detalle_reporte_hr1').prop('checked') ) {
+			    hr1 = 1;
+			}
+			if( $('#detalle_reporte_hr2').prop('checked') ) {
+			    hr2 = 1;
+			}
+			if( $('#detalle_reporte_hr3').prop('checked') ) {
+			    hr3 = 1;
+			}
+			if( $('#detalle_reporte_hr4').prop('checked') ) {
+			    hr4 = 1;
+			}
+			if( $('#detalle_reporte_hr5').prop('checked') ) {
+			    hr5 = 1;
+			}
+			if( $('#detalle_reporte_hr6').prop('checked') ) {
+			    hr6 = 1;
+			}
+			if( $('#detalle_reporte_hr7').prop('checked') ) {
+			    hr7 = 1;
+			}
+			if( $('#detalle_reporte_hr8').prop('checked') ) {
+			    hr8 = 1;
+			}
+			if( $('#detalle_reporte_atrasos').prop('checked') ) {
+			    atrasos = 1;
+			}
+			if( $('#detalle_reporte_abondonaAula').prop('checked') ) {
+			    abondonaAula = 1;
+			}
+			if( $('#detalle_reporte_cumplimientoTurno').prop('checked') ) {
+			    cumplimientoTurno = 1;
+			}
+				var detalleReporte = {
+				docente:docente,
+				hr1:hr1,
+				hr2:hr2,
+				hr3:hr3,
+				hr4:hr4,
+				hr5:hr5,
+				hr6:hr6,
+				hr7:hr7,
+				hr8:hr8,
+				atrasos:atrasos,
+				abondonaAula:abondonaAula,
+				cumplimientoTurno:cumplimientoTurno,
+				observaciones:observaciones
+			}
+
+
+
+            console.log("update");
+            	$.ajax({
+	                url:'{{ (path('detalle_reporte_edit')) }}',
+	                type: "POST",
+	                dataType: "json",
+	                data: {
+	                    "detalleReporte": detalleReporte,
+	                    "id":id
+	          
+	                },
+	                async: true,
+	                success: function (data)
+	                {
+	                	console.log("Registro editado exitosamente: " + data);	
+	                	$('#detalle_reporte_guardar').attr("disabled", false);
+	                	$("#form_detalle")[0].reset();
+
+	                	$.ajax({
+			                url:'{{ (path('reporte_list_ajax')) }}',
+			                type: "POST",
+			                dataType: "json",
+			                data: {
+			                    "idReporte": data
+			                },
+			                async: true,
+			                success: function (data)
+			                {
+
+			                	window.globalRegistros=data;
+	                    		console.log(window.globalRegistros);
+
+			                	var iconDelete = "<a href='#'' role='button' class='deleteReg btn btn-outline-danger btn-sm ml-auto' title='eliminar' ><i class='fa fa-trash' aria-hidden='true'></i></a>";
+
+			                	var iconEdit = "<a role='button' class='editReg btn btn-outline-warning btn-sm ml-auto' title='editar' href='#victorModal' data-toggle='modal' ><i class='fa fa-edit' aria-hidden='true'></i></a>";
+
+			                	$('#detalle_reporte_guardar').attr("disabled", false);
+
+			                	$('table tr:not(:first-child)').remove();
+
+			                	console.log("find all exit");
+			                	console.log(data);
+
+			           
+
+			                	data.forEach( function(valor, indice, array) {
+
+			                		var atrasos= "";
+			                		var abondona_aula= "";
+			                		var cumplimiento_turno= "";
+
+			                		if(valor.atrasos == 1){
+			                			atrasos= "x";
+			                		}
+			                		if(valor.abondona_aula == 1){
+			                			abondona_aula= "x";
+			                		}
+			                		if(valor.cumplimiento_turno == 1){
+			                			cumplimiento_turno= "x";
+			                		}
+
+				
+								    $('#table-reportes tr:last').after("<tr id="+valor.id+"><td>"+(indice+1)+"</td><td>"+valor.docente+"</td><td>"+atrasos+"</td><td>"+abondona_aula+"</td> <td>"+cumplimiento_turno+"</td><td>"+valor.observaciones+"</td><td>"+iconEdit+iconDelete+"</td></tr>");
+								});
+
+		                    //$('div#ajax-results').html(data.output);
+
+			                }
+			            });
+				    
+			          
+	                }
+	            });
+        
+           return false;
+        });
     </script>
 
 

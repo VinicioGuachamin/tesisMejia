@@ -65,6 +65,7 @@ class InspeccionController extends AbstractController
                 $docentes[] = $docente; 
             }
         }
+
         return ($docentes);
     }
 
@@ -222,7 +223,7 @@ class InspeccionController extends AbstractController
 
          //Consulta uso de SQL
 
-        $RAW_QUERY = "select detalle_reporte.id, detalle_reporte.docente,detalle_reporte.observaciones, detalle_reporte.atrasos, detalle_reporte.atrasos, detalle_reporte.abondona_aula, detalle_reporte.cumplimiento_turno, detalle_reporte.reporte_id , reporte.fecha,reporte.inspector FROM detalle_reporte, reporte WHERE detalle_reporte.reporte_id = reporte.id and reporte.fecha = '".$filtro."' and reporte.id= '".$data."'";
+        $RAW_QUERY = "select detalle_reporte.id, detalle_reporte.docente,detalle_reporte.observaciones, detalle_reporte.atrasos, detalle_reporte.atrasos, detalle_reporte.abondona_aula, detalle_reporte.cumplimiento_turno, detalle_reporte.hr1, detalle_reporte.hr2, detalle_reporte.hr3, detalle_reporte.hr4, detalle_reporte.hr5, detalle_reporte.hr6, detalle_reporte.hr7, detalle_reporte.hr8, detalle_reporte.reporte_id , reporte.fecha,reporte.inspector FROM detalle_reporte, reporte WHERE detalle_reporte.reporte_id = reporte.id and reporte.fecha = '".$filtro."' and reporte.id= '".$data."'";
 
         //and reporte.id = 8
 
@@ -266,7 +267,7 @@ class InspeccionController extends AbstractController
             $idReporte = $result1[0]['id']; 
 
             //Consulta uso de SQL
-            $RAW_QUERY = "select detalle_reporte.id, detalle_reporte.docente,detalle_reporte.observaciones, detalle_reporte.atrasos, detalle_reporte.atrasos, detalle_reporte.abondona_aula, detalle_reporte.cumplimiento_turno, detalle_reporte.reporte_id , reporte.fecha,reporte.inspector,reporte.jornada ,reporte.grado ,reporte.paralelos FROM detalle_reporte, reporte WHERE detalle_reporte.reporte_id = reporte.id and reporte.fecha = '".$fecha."' and reporte.id= '".$idReporte."' and reporte.inspector= '".$filtro."'   "  ;
+            $RAW_QUERY = "select detalle_reporte.id, detalle_reporte.docente,detalle_reporte.observaciones, detalle_reporte.atrasos, detalle_reporte.atrasos, detalle_reporte.abondona_aula, detalle_reporte.cumplimiento_turno,  detalle_reporte.hr1, detalle_reporte.hr2, detalle_reporte.hr3, detalle_reporte.hr4, detalle_reporte.hr5, detalle_reporte.hr6, detalle_reporte.hr7, detalle_reporte.hr8, detalle_reporte.reporte_id , reporte.fecha,reporte.inspector,reporte.jornada ,reporte.grado ,reporte.paralelos FROM detalle_reporte, reporte WHERE detalle_reporte.reporte_id = reporte.id and reporte.fecha = '".$fecha."' and reporte.id= '".$idReporte."' and reporte.inspector= '".$filtro."'   "  ;
 
 
             $statement = $em->getConnection()->prepare($RAW_QUERY);
@@ -280,9 +281,7 @@ class InspeccionController extends AbstractController
             return new JsonResponse($result);
 
         }
-
-
-       
+   
     }
 
 
@@ -306,6 +305,39 @@ class InspeccionController extends AbstractController
 
         return new JsonResponse($id);
 
+    }
+
+
+     /**
+     * @Route("/inspeccion/edit", name="detalle_reporte_edit")
+     */
+    public function editDetalleReporte(Request $request){
+        $data = $request->request->get('detalleReporte');
+        $id = $request->request->get('id');
+
+        $detalleReporte = $this->getDoctrine()->getRepository(DetalleReporte::class)->find($id);
+        $reporte = $detalleReporte->getReporte();
+
+
+        $detalleReporte->setDocente($data['docente']);
+        $detalleReporte->setHr1($data['hr1']);
+        $detalleReporte->setHr2($data['hr2']);
+        $detalleReporte->setHr3($data['hr3']);
+        $detalleReporte->setHr4($data['hr4']);
+        $detalleReporte->setHr5($data['hr5']);
+        $detalleReporte->setHr6($data['hr6']);
+        $detalleReporte->setHr7($data['hr7']);
+        $detalleReporte->setHr8($data['hr8']);
+        $detalleReporte->setAtrasos($data['atrasos']);
+        $detalleReporte->setAbondonaAula($data['abondonaAula']);
+        $detalleReporte->setCumplimientoTurno($data['cumplimientoTurno']);
+        $detalleReporte->setObservaciones($data['observaciones']);
+
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->flush();
+
+
+        return new JsonResponse($reporte->getId());
     }
 
 
