@@ -17,25 +17,30 @@
 		  top: 40%;
 		}
 </style>
-
 	{{form_start(form, {'action':'' , 'method':'POST' } )}}
+		<br>
 		<div class="card">
 		  <div class="card-header">
 		  	<div class="row">
-			    <div class="col-md-8" style="color: darkblue;">
-			    	Inspector: {{ username }}
-			    </div>
-			      <div class="col-md-3">
+		  		<div class="col-md-3">
 			    	
 					{{ form_widget(form.fecha,
 			        	{'attr':{'class':'form-control form-control-sm' }})
 			        }}
 
 			    </div>
-			    <div class="col-md-1" >
-			         <a href="#" role="button" class="find btn btn-outline-success btn-sm ml-auto" title="buscar reporte" ><i class="fa fa-search" aria-hidden="true"></i></a>
+		  		<div class="col-md-7" >
+			         <a href="#" role="button" class="find btn btn-outline-success btn-sm ml-auto" title="buscar reporte" ><i class="fa fa-search" aria-hidden="true"></i> Buscar reporte</a>
 			         <img class="loading" src="{{ asset('img/loader.gif')}}" title='loading' width='25' style="visibility: hidden;">
 			    </div>
+
+	
+
+			    <div class="col-md-2" style="color: darkblue;">
+			    	Inspector: {{ username }}
+			    </div>
+			    
+			    
 	
 			</div>
 			<div class="row" id="msgAlert"></div>				
@@ -82,7 +87,7 @@
 	<div class="card">
 	  <div class="card-header d-flex">
 	    Reporte Diario  
-	     <a  id ="add_report" style="visibility: hidden;" href="#victorModal" role="button" class="btn btn-outline-success btn-sm ml-auto" data-toggle="modal" title="añadir observaciones"><i class="fa fa-plus" aria-hidden="true"></i></a>
+	     <a  id ="add_report" style="visibility: hidden;" href="#victorModal" role="button" class="btn btn-outline-success btn-sm ml-auto" data-toggle="modal" title="añadir observaciones"><i class="fa fa-plus" aria-hidden="true"></i> Añadir</a>
 	  </div>
 	  <div class="card-body">
 

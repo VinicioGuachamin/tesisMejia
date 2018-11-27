@@ -10,6 +10,15 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+
+use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\Encoder\XmlEncoder;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+
+use Symfony\Component\HttpFoundation\JsonResponse;
+
+
 /**
  * @Route("/detalle/reporte")
  */
@@ -22,6 +31,37 @@ class DetalleReporteController extends AbstractController
     {
         return $this->render('detalle_reporte/index.html.twig', ['detalle_reportes' => $detalleReporteRepository->findAll()]);
     }
+
+
+         /**
+     * @Route("/list/ajax", name="detalle_reportes_ajax")
+     */
+    public function list(Request $request)
+    {
+
+        $id = $request->request->get('id');
+
+        //Consulta uso de SQL
+        $RAW_QUERY = "select * from detalle_reporte WHERE reporte_id = '".$id."' ";
+
+        $em = $this->getDoctrine()->getManager();
+        $statement = $em->getConnection()->prepare($RAW_QUERY);
+        $statement->execute();
+        $detalleReportes = $statement->fetchAll();
+
+        $encoders = array(new XmlEncoder(), new JsonEncoder());
+        $normalizers = array(new ObjectNormalizer());
+        $serializer = new Serializer($normalizers, $encoders);
+
+        $data = $serializer->serialize($detalleReportes, 'json');
+
+
+
+       return new JsonResponse($data);
+
+
+    }
+
 
     /**
      * @Route("/new", name="detalle_reporte_new", methods="GET|POST")

@@ -1,43 +1,307 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Reporte index{% endblock %}
+{% block title %}Reportes{% endblock %}
 
 {% block body %}
-    <h1>Reporte index</h1>
+<!--DataTables-->
+<link href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" rel="stylesheet">  
+    <br>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Fecha</th>
-                <th>Inspector</th>
-                <th>Jornada</th>
-                <th>Grado</th>
-                <th>Paralelos</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for reporte in reportes %}
-            <tr>
-                <td>{{ reporte.id }}</td>
-                <td>{{ reporte.fecha ? reporte.fecha|date('Y-m-d H:i:s') : '' }}</td>
-                <td>{{ reporte.inspector }}</td>
-                <td>{{ reporte.jornada }}</td>
-                <td>{{ reporte.grado }}</td>
-                <td>{{ reporte.paralelos }}</td>
-                <td>
-                    <a href="{{ path('reporte_show', {'id': reporte.id}) }}">show</a>
-                    <a href="{{ path('reporte_edit', {'id': reporte.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="7">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    <div class="card">
+        <div class="card-header">
+            <div class="row align-items-center">
+     
+                  <div class="col-md-3">
+                    
+                    <input type="date" id="fecha_reporte" name="fecha_reporte" required="required" class="form-control form-control-sm">
 
-    <a href="{{ path('reporte_new') }}">Create new</a>
+                </div>
+                <div class="col-md" >
+                     <a href="#" role="button" class="find btn btn-outline-success btn-sm ml-auto" title="buscar reporte" ><i class="fa fa-search" aria-hidden="true"></i> Buscar reportes</a>
+                     <img class="loading" src="{{ asset('img/loader.gif')}}" title='loading' width='25' style="visibility: hidden; padding-left: 5px;">
+                </div>
+    
+            </div>
+            <div class="row" id="msgAlert"></div>               
+          
+        </div>
+        <div class="card-body">
+
+                <table class="table table-sm" id="table-reportes" style="font-family: -webkit-pictograph;
+                font-size: inherit;">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Inspector</th>
+                            <th>Jornada</th>
+                            <th>Grado</th>
+                            <th>Paralelos</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for reporte in reportes %}
+
+                        <tr id='{{ reporte.id }}' >
+                            <td >{{ reporte.fecha ? reporte.fecha|date('Y-m-d') : '' }}</td>
+                            <td >{{ reporte.inspector }}</td>
+                            <td >{{ reporte.jornada }}</td>
+                            <td >{{ reporte.grado }}</td>
+                            <td >{{ reporte.paralelos }}</td>
+           
+                            <td>
+                                <a href='#reportes_new_modal' data-toggle='modal' class="view-reportes" style="color: #dead18;" title="visualizar"><i class="fa fa-file"></i></a>
+                         
+                            </td>
+                        </tr>
+                    {% else %}
+                        
+                    {% endfor %}
+                    </tbody>
+                </table>
+               
+
+    
+            
+        </div>
+         
+    </div>
+
+
+    <div id="reportes_new_modal" class="modal fade">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="width: min-content;">
+                <div class="modal-header">
+                    <div> <i class='fa fa-file' ></i> Reportes </div> 
+                    <img class="loading2" src="{{ asset('img/loader.gif')}}" title='loading' width='25' style="visibility: hidden; padding-left: 5px;">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+
+                    <table class="table table-condensed table-striped" id="table-detalle-reportes">
+                      <thead class="thead-light">
+                        <tr>
+                          <th scope="col">docente</th>
+                          <th scope="col">h1</th>
+                          <th scope="col">h2</th>
+                          <th scope="col">h3</th>
+                          <th scope="col">h4</th>
+                          <th scope="col">h5</th>
+                          <th scope="col">h6</th>
+                          <th scope="col">h7</th>
+                          <th scope="col">h8</th>
+                          <th scope="col">atrasos</th>
+                          <th scope="col">abandono</th>
+                          <th scope="col">falta</th>
+                          <th scope="col">observaciones</th>
+
+                        </tr>
+                      </thead>
+                      <tbody>
+                 
+                      </tbody>
+                    </table>
+
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+
+
+        
+
+{% endblock %}
+
+
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <!--Datatables-->
+    <script src=" https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+
+    <!--Script para cargar funcionalidad  al cargar la pagina-->
+    <script type="text/javascript">
+
+        $(document).ready(function(){
+
+            var f = new Date();
+            var fechaActual = f.getFullYear() + "-"+(f.getMonth()+1)+"-"+f.getDate();
+ 
+            $( "#fecha_reporte" ).attr({
+                value:fechaActual,
+            });
+
+            $('#table-reportes').DataTable({
+                "language": {
+                  "url": "//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json"
+                }
+            });
+   
+                
+        });
+
+    </script>
+
+
+    <!--Script para buscar reportes por fecha-->
+    <script>
+        $(document).on('click', 'a.find', function(){
+            that = $(this);
+            $(".loading").css("visibility","visible");
+            var fecha  =  $("#fecha_reporte").val();
+
+            $.ajax({
+                url:'{{ (path('reportes_ajax')) }}',
+                type: "POST",
+                dataType: "json",
+                data: {
+                    "fecha": fecha
+                },
+                async: true,
+                success: function (data)
+                {
+                    console.log("success");
+                    $(".loading").css("visibility","hidden");                  
+
+    
+                    var result = JSON.parse(data);
+                    console.log(result);
+
+                    var accion = "<a href='#reportes_new_modal' class='view-reportes' data-toggle='modal' title='visualizar' style='color: #dead18;' ><i class='fa fa-file' ></i></a>";
+
+
+                    var table = $('#table-reportes').DataTable();
+                    table
+                        .clear()
+                        .draw();
+
+                    result.forEach(function(reporte, index) {
+
+                        table.row.add([ 
+                            fecha, 
+                            reporte.inspector,
+                            reporte.jornada,
+                            reporte.grado,
+                            reporte.paralelos,
+                            accion]).node().id = reporte.id ;
+
+                            table.draw( false );
+
+                    });
+
+
+                }
+            });
+
+        
+            return false;
+
+        });
+
+    </script>
+
+
+    <script>
+        $(document).on('click', 'a.view-reportes', function(){
+            that = $(this);
+
+             $(".registro").remove();
+             $(".loading2").css("visibility","visible");
+     
+     
+            var id=that.parent().parent().attr("id");
+            console.log(id);
+               $.ajax({
+                    url:'{{ (path('detalle_reportes_ajax')) }}',
+                    type: "POST",
+                    dataType: "json",
+                    data: {
+                        "id": id
+                    },
+                    async: true,
+                    success: function (data)
+                    {
+                        var result = JSON.parse(data);
+                        console.log(result);
+                         $(".loading2").css("visibility","hidden");     
+
+                        //<th scope="row">Guchamin Vinicio</th>
+
+                
+
+
+                        result.forEach(function(reporte, index) {
+
+                            var atrasos= "";
+                            var abondona_aula= "";
+                            var cumplimiento_turno= "";
+
+                            var hr1= "";
+                            var hr2= "";
+                            var hr3= "";
+                            var hr4= "";
+                            var hr5= "";
+                            var hr6= "";
+                            var hr7= "";
+                            var hr8= "";
+
+                            if(reporte.atrasos == 1){
+                                atrasos= "x";
+                            }
+                            if(reporte.abondona_aula == 1){
+                                abondona_aula= "x";
+                            }
+                            if(reporte.cumplimiento_turno == 1){
+                                cumplimiento_turno= "x";
+                            }
+                            if(reporte.hr1 == 1){
+                                hr1= "x";
+                            }
+                            if(reporte.hr2 == 1){
+                                hr2= "x";
+                            }
+                            if(reporte.hr3 == 1){
+                                hr3= "x";
+                            }
+                            if(reporte.hr4 == 1){
+                                hr4= "x";
+                            }
+                            if(reporte.hr5 == 1){
+                                hr5= "x";
+                            }
+                            if(reporte.hr6 == 1){
+                                hr6= "x";
+                            }
+                            if(reporte.hr7 == 1){
+                                hr7= "x";
+                            }
+                            if(reporte.hr8 == 1){
+                                hr8= "x";
+                            }
+
+
+                            $('#table-detalle-reportes tr:last').after("<tr class='registro'><th>"+reporte.docente+"</th><td>"+hr1+"</td><td>"+hr2+"</td><td>"+hr3+"</td><td>"+hr4+"</td><td>"+hr4+"</td><td>"+hr6+"</td><td>"+hr7+"</td><td>"+hr8+"</td><td>"+atrasos+"</td><td>"+abondona_aula+"</td> <td>"+cumplimiento_turno+"</td><td>"+reporte.observaciones+"</td></tr>");
+
+
+                        });
+
+                                    
+                    }
+                });
+
+        
+            return false;
+
+        });
+
+    </script>
+
+
+
+
 {% endblock %}

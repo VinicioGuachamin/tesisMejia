@@ -45,6 +45,7 @@ security:
         - { path: ^/empleado, roles: ROLE_ADMIN }
         - { path: ^/horario, roles: ROLE_ADMIN }
         - { path: ^/sueldo, roles: ROLE_ADMIN }
+        - { path: ^/reporte, roles: ROLE_ADMIN }
         - { path: ^/inspeccion, roles: ROLE_USER}
 
 
