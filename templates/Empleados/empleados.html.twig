@@ -25,7 +25,7 @@
                 </thead>
                 <tbody>
                 {% for a in empleados_a %}
-                    <tr>
+                    <tr id='{{ a.id }}' >
                         <td>{{ a.apellidos }}</td>
                         <td>{{ a.nombres }}</td>
                         <td>{{ a.tipoempleado }}</td>
@@ -39,11 +39,13 @@
                             {% if is_granted('ROLE_ADMIN') %}
                             <a href="{{ path('empleadoA_editar', {'id':a.id}) }}" role="button" class="btn btn-primary btn-sm">
                                 <i class="fas fa-edit"></i>
-                            </a>
+                            </a>                            
 
                             {{ render(controller(
                                 'App\\Controller\\EmpleadoAController::vistaEliminarEmpleadoA', { 'id' : a.id }
                             )) }}
+
+                            <a href='#modal-reset-1' data-toggle='modal' class="reset-user" style="color: #dead18;" title="resetear password"><i class="fa fa-cog"></i></a>
 
                             {% endif %}
 
@@ -55,7 +57,7 @@
                 {% endfor %}
 
                 {% for b in empleados_b %}
-                    <tr>
+                    <tr id="{{ b.id }}">
                         <td>{{ b.apellidos }}</td>
                         <td>{{ b.nombres }}</td>
                         <td>{{ b.tipoempleado }}</td>
@@ -70,13 +72,13 @@
                             <a href="{{ path('empleadoB_editar', {'id':b.id}) }}" role="button" class="btn btn-primary btn-sm">
                                 <i class="fas fa-edit"></i>
                             </a>
+
                             {{ render(controller(
                                 'App\\Controller\\EmpleadoBController::vistaEliminarEmpleadoB', { 'id' : b.id }
                             )) }}
 
+                             <a href='#modal-reset-1' data-toggle='modal' class="reset-user" style="color: #dead18;" title="resetear password"><i class="fa fa-cog"></i></a>
                             {% endif %}
-
-
 
                         </td>
                     </tr>
@@ -88,6 +90,47 @@
             </table>
         </div>
     </div>
+
+
+    <div id="modal-reset-1" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <i class="fas fa-edit"></i>Cambiar contraseña
+                    <div id="cod" style="visibility: hidden" ></div>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="row" id="msgAlert1"></div>   
+
+                    <form id="form-reset-1">
+                        <div class="form-group row">
+                            <label for="pass1" class="col-sm-4 col-form-label">Nueva contraseña</label>
+                            <div class="col-sm-8">
+                            <input type="password" class="form-control" id="pass1" placeholder="Nueva contraseña">
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="pass2" class="col-sm-4 col-form-label">Repite contraseña</label>
+                            <div class="col-sm-8">
+                            <input type="password" class="form-control" id="pass2" placeholder="Repite contraseña">
+                            </div>
+                        </div>
+                         
+                    </form>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="resetPass btn btn-primary">Cambiar contraseña</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
 
 {% endblock %}
 
@@ -152,5 +195,79 @@
             document.getElementById('siguiente2B'+id).classList.add('hide');
 
         }
+    </script>
+
+    <script>
+        $(document).on('click', 'a.reset-user', function(){
+            that = $(this);
+            var id=that.parent().parent().attr("id");
+            var nombre= $(this).parents("tr").find("td").eq(0).text();
+            var apellido= $(this).parents("tr").find("td").eq(1).text();
+
+            $("#cod").html(apellido+" "+nombre+" / " +id);
+
+          
+            return false;            
+                         
+        });
+
+    </script>
+
+     <script>
+
+        $(document).on('click', 'button.resetPass', function(event){
+            that = $(this);
+            var id= $('#cod').text();
+            console.log(id);
+        
+
+            $('button.resetPass').attr("disabled", true);
+
+            var password1  =  $("#pass1").val();
+            var password2  =  $("#pass2").val();
+
+            if(password1 == password2){
+                
+
+                $.ajax({
+                    url:'/reset/password/user',
+                    type: "POST",
+                    dataType: "json",
+                    data: {
+                        "id": id,
+                        "password": password1
+                    },
+                    async: true,
+                    success: function (data)
+                    {
+                        $('button.resetPass').attr("disabled", false);
+                        $("#form-reset-1")[0].reset();
+
+                        
+                        $( "#msgAlert1" ).append("<div id='msg' class='alert alert-info' role='alert'>"+data+" </div>");
+
+                        window.setTimeout(function() {
+                            $("#msg").fadeTo(400, 0).slideUp(400, function(){
+                                $(this).remove(); 
+                            });
+                        }, 4000);
+
+        
+            
+                    }
+                });
+          
+
+            }else{
+
+                alert("Las contraseñas no coinciden");
+            }
+
+
+            return false;           
+
+        });
+
+    
     </script>
 {% endblock %}

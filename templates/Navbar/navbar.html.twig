@@ -119,6 +119,7 @@
 
     	$(document).on('click', 'button.reset', function(){
             console.log({{app.user.id}});
+            console.log("general");
             $('button.reset').attr("disabled", true);
 
             var password1  =  $("#inputPassword").val();

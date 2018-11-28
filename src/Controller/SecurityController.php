@@ -70,4 +70,35 @@ class SecurityController extends AbstractController
        
     }
 
+
+    /**
+    * @Route("/reset/password/user", name="reset-password-user")
+    */
+    public function resetPasswordUser(Request $request)
+    {
+        $password = $request->request->get('password');
+
+        $email = $request->request->get('id');
+
+        $userArray = $this->getDoctrine()->getRepository(User::class)->findBy(
+            ['email' => $email]
+        );
+
+        $user = $userArray[0];
+
+
+   
+        $user->setPassword(
+             $this->encoder->encodePassword($user, $password)
+        );
+
+        /*Guardo credenciales de acceso del empleado en la table User */
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->flush();
+
+
+        return new JsonResponse("Aviso! Hemos actualizado su contraseña correctamente");
+       
+    }
+
 }
