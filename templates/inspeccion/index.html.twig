@@ -21,7 +21,7 @@
 		<br>
 		<div class="card">
 		  <div class="card-header">
-		  	<div class="row">
+		  	<div class="row ">
 		  		<div class="col-md-3">
 			    	
 					{{ form_widget(form.fecha,
@@ -29,21 +29,21 @@
 			        }}
 
 			    </div>
-		  		<div class="col-md-7" >
+		  		<div class="col-md-5" >
 			         <a href="#" role="button" class="find btn btn-outline-success btn-sm ml-auto" title="buscar reporte" ><i class="fa fa-search" aria-hidden="true"></i> Buscar reporte</a>
 			         <img class="loading" src="{{ asset('img/loader.gif')}}" title='loading' width='25' style="visibility: hidden;">
 			    </div>
 
 	
 
-			    <div class="col-md-2" style="color: darkblue;">
+			    <div class="col-md-4" style="color: darkblue;">
 			    	Inspector: {{ username }}
 			    </div>
 			    
 			    
 	
 			</div>
-			<div class="row" id="msgAlert"></div>				
+			<div class="row" id="msgAlertIns"></div>				
 		  
 		  </div>
 		  <div class="card-body">
@@ -573,7 +573,7 @@
                 
 
 
-                      	$( "#msgAlert" ).append("<div id='msg' class='alert alert-info' role='alert'>No tiene ningun reporte registrado en esta fecha: "+fecha+" </div>");
+                      	$( "#msgAlertIns" ).append("<div id='msg' class='alert alert-info' role='alert'>No tiene ningun reporte registrado en esta fecha: "+fecha+" </div>");
 
                       	window.setTimeout(function() {
 						    $("#msg").fadeTo(400, 0).slideUp(400, function(){
