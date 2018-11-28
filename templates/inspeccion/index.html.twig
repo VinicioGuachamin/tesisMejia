@@ -18,6 +18,7 @@
 		}
 </style>
 	{{form_start(form, {'action':'' , 'method':'POST' } )}}
+		
 		<br>
 		<div class="card">
 		  <div class="card-header">
@@ -77,10 +78,8 @@
 
 
 		  </div>
-		 
 		</div>
 		
-
 	{{form_end(form)}}
 
 
@@ -114,9 +113,9 @@
 	  </div>
 	</div> <!--Fin card-->
 
-
 	<hr>
 
+	<!--VENTANA MODAL -->
 	<div id="victorModal" class="modal fade">
 	    <div class="modal-dialog">
 	        <div class="modal-content">
@@ -245,42 +244,31 @@
 
     	$(document).ready(function(){
 
-    		
-    		console.log("Cargar fecha");
-
     		var f = new Date();
     		var fechaActual = f.getFullYear() + "-"+(f.getMonth()+1)+"-"+f.getDate();
 
-    		console.log(fechaActual);
- 
     		$( "#reporte_fecha" ).attr({
 			    value:fechaActual,
 			});
 
 			$(document).on('click', '#add_report', function(){
 
-				 $("#detalle_reporte_guardar").addClass("ajax");
-				 $("#detalle_reporte_guardar").removeClass("updateRegistro");
-				 $('#idRegistro').text("");
-
+				$("#detalle_reporte_guardar").addClass("ajax");
+				$("#detalle_reporte_guardar").removeClass("updateRegistro");
+				$('#idRegistro').text("");
 
 				$("#form_detalle")[0].reset();
 				//document.getElementById('select_docente').options.length = 0;
 				document.getElementById('select_docente').selectedIndex  = 0;
 
-					$("#select_docente option").each(function(){
-            			$(this).removeAttr("selected");
+				$("#select_docente option").each(function(){
+        			$(this).removeAttr("selected");
 
-					});
+				});
 			
-
 			})
-
-	
-
-				
+		
 		});
-
     </script>
 
     <!--Script para guardar el detalle_reporte  de los docentes-->
@@ -369,10 +357,7 @@
                 async: true,
                 success: function (data)
                 {
-                	console.log("save Exit detalle reporte ");
-                    console.log("id detalle_Reporte: "+data);
-                    
-
+               
                     $("#form_detalle")[0].reset();
 
                     $.ajax({
@@ -387,20 +372,15 @@
 		                {
 
 		                	window.globalRegistros=data;
-                    		console.log(window.globalRegistros);
-
+                    	
 		                	var iconDelete = "<a href='#'' role='button' class='deleteReg btn btn-outline-danger btn-sm ml-auto' title='eliminar' ><i class='fa fa-trash' aria-hidden='true'></i></a>";
 
 		                	var iconEdit = "<a role='button' class='editReg btn btn-outline-warning btn-sm ml-auto' title='editar' href='#victorModal' data-toggle='modal' ><i class='fa fa-edit' aria-hidden='true'></i></a>";
 
 		                	$('#detalle_reporte_guardar').attr("disabled", false);
 
-		                	$('table tr:not(:first-child)').remove();
-
-		                	console.log("find all exit");
-		                	console.log(data);
-
-		           
+		                	$('table tr:not(:first-child)').remove();		                	
+		
 
 		                	data.forEach( function(valor, indice, array) {
 
@@ -417,18 +397,14 @@
 		                		if(valor.cumplimiento_turno == 1){
 		                			cumplimiento_turno= "x";
 		                		}
-
 			
 							    $('#table-reportes tr:last').after("<tr id="+valor.id+"><td>"+(indice+1)+"</td><td>"+valor.docente+"</td><td>"+atrasos+"</td><td>"+abondona_aula+"</td> <td>"+cumplimiento_turno+"</td><td>"+valor.observaciones+"</td><td>"+iconEdit+iconDelete+"</td></tr>");
 							});
-
-		                    //$('div#ajax-results').html(data.output);
 
 		                }
 		            });
 
 
-                    //$('div#ajax-results').html(data.output);
 
                 }
             });
@@ -464,15 +440,11 @@
 		                async: true,
 		                success: function (data)
 		                {
-		                	console.log("save Exit reporte ");
-		                    console.log(data);
+		               
 		                    $("#reporte_jornada").prop('disabled', true);
 		                    $("#reporte_grado").prop('disabled', true);
 		                    $("#reporte_paralelos").prop('disabled', true);
 		                    $("#add_report").css("visibility","visible");
-
-
-		                    //$('div#ajax-results').html(data.output);
 
 		                }
 		            });
@@ -508,14 +480,14 @@
                 async: true,
                 success: function (data)
                 {
-                	console.log(data);
+                	
                 	$(".loading").css("visibility","hidden");
                 	window.globalRegistros=data;
-                	console.log(window.globalRegistros);
+                	
 
                 	if(data.length > 0 ){
                 		$("#add_report").css("visibility","visible");
-                		console.log("insertando registro");
+                
 	
 	                	$('table tr:not(:first-child)').remove();
 
@@ -571,8 +543,6 @@
 
 			            $("#add_report").css("visibility","hidden");
                 
-
-
                       	$( "#msgAlertIns" ).append("<div id='msg' class='alert alert-info' role='alert'>No tiene ningun reporte registrado en esta fecha: "+fecha+" </div>");
 
                       	window.setTimeout(function() {
@@ -595,7 +565,6 @@
         });  	
     </script>
 
-
     <!--Script para eliminar reportes segun la fecha-->
     <script>
      	$(document).on('click', 'a.deleteReg', function(){
@@ -603,7 +572,7 @@
             eliminar=confirm("¿Deseas eliminar este registro?");
    			if (eliminar){
    				var id=that.parent().parent().attr("id");
-	            console.log("Click delete " + id);
+	           
 	            $.ajax({
 	                url:'{{ (path('detalle_reporte_delete')) }}',
 	                type: "POST",
@@ -614,26 +583,18 @@
 	                async: true,
 	                success: function (data)
 	                {
-	                	console.log("Registro eliminado exitosamente: " + data);
+	                	
 					    that.parent().parent().remove();
-					    console.log();
+				
 
 					     window.globalRegistros.forEach( function(valor, indice, array) {
 			            	if(valor['id'] == id ){
 			          			window.globalRegistros.splice(indice, 1)  
-			          			console.log(window.globalRegistros);   		             		
+			          			   		             		
 			            	}
 				
 						});
-
-
-					    //window.globalRegistros.splice(2, 1)
-
-					    //window.globalRegistros.removeItem('banana');
-					    //
-
-
-					          
+  
 	                }
 	            });
    			}
@@ -661,16 +622,13 @@
 
 
 			var id=that.parent().parent().attr("id");
-            console.log("Click edit " + id);
+           
             $('#idRegistro').text(id);
-            console.log(window.globalRegistros);
-
-
+          
      
-
             window.globalRegistros.forEach( function(valor, indice, array) {
             	if(valor['id'] == id ){
-            		console.log(valor);
+            		
 
             		$("#detalle_reporte_observaciones").val(valor['observaciones']);
 
@@ -681,7 +639,7 @@
             				$("#select_docente option[value="+$(this).attr('value')+"]").attr("selected", true);
             			}
             			
-					   //console.log('opcion '+$(this).text()+' valor '+ $(this).attr('value'))
+			
 					});
 
 					if( valor.atrasos == 1 ) {
@@ -753,12 +711,9 @@
         });	  	
     </script>
 
-
-      <!--Script para editar reportes segun la fecha-->
-   
+    <!--Script para editar reportes segun la fecha-->
     <script>
-
-            
+ 
      	$(document).on('click', 'button.updateRegistro', function(){
             that = $(this);
             $('#detalle_reporte_guardar').attr("disabled", true);
@@ -829,7 +784,6 @@
 
 
 
-            console.log("update");
             	$.ajax({
 	                url:'{{ (path('detalle_reporte_edit')) }}',
 	                type: "POST",
@@ -842,7 +796,7 @@
 	                async: true,
 	                success: function (data)
 	                {
-	                	console.log("Registro editado exitosamente: " + data);	
+	              
 	                	$('#detalle_reporte_guardar').attr("disabled", false);
 	                	$("#form_detalle")[0].reset();
 
@@ -858,7 +812,7 @@
 			                {
 
 			                	window.globalRegistros=data;
-	                    		console.log(window.globalRegistros);
+	                    	
 
 			                	var iconDelete = "<a href='#'' role='button' class='deleteReg btn btn-outline-danger btn-sm ml-auto' title='eliminar' ><i class='fa fa-trash' aria-hidden='true'></i></a>";
 
@@ -867,11 +821,6 @@
 			                	$('#detalle_reporte_guardar').attr("disabled", false);
 
 			                	$('table tr:not(:first-child)').remove();
-
-			                	console.log("find all exit");
-			                	console.log(data);
-
-			           
 
 			                	data.forEach( function(valor, indice, array) {
 
@@ -893,7 +842,6 @@
 								    $('#table-reportes tr:last').after("<tr id="+valor.id+"><td>"+(indice+1)+"</td><td>"+valor.docente+"</td><td>"+atrasos+"</td><td>"+abondona_aula+"</td> <td>"+cumplimiento_turno+"</td><td>"+valor.observaciones+"</td><td>"+iconEdit+iconDelete+"</td></tr>");
 								});
 
-		                    //$('div#ajax-results').html(data.output);
 
 			                }
 			            });
@@ -905,9 +853,6 @@
            return false;
         });
     </script>
-
-
-
 
 {% endblock %}
 
