@@ -5,6 +5,12 @@
 {% block body %}
 <style>
     .error {color:red;}
+
+    #title{
+          color: cornflowerblue;
+          font-size: xx-large;
+          font-family: cursive;
+    }
 </style>
 
 <div class="text-center">
@@ -16,7 +22,7 @@
 
     <form class="form-signin" action="{{path('login')}}"  method="POST">
       <img class="mb-4" src="https://upload.wikimedia.org/wikipedia/commons/b/b9/Sello_del_Instituto_Nacional_Mej%C3%ADa.png" alt="" width="72" height="72">
-      <h1 class="h3 mb-3 font-weight-normal">Inicio de sesión</h1>
+      <h1 class="h3 mb-6 font-weight-normal"  id="title">Inicio de sesión</h1>
       <label for="inputEmail" class="sr-only">Cedula</label>
       <input type="text" id="inputEmail" class="form-control" name="_username" value="{{last_username}}"  placeholder="Cedula de identidad" required="" autofocus="">
       <label for="inputPassword" class="sr-only">Password</label>
@@ -29,8 +35,35 @@
         </label>
       </div>
       <button class="btn btn-lg btn-primary btn-block" type="submit">Entrar</button>
-      <p class="mt-5 mb-3 text-muted">© 2018-2019</p>
+      <a href="#" id="forget" style="background-color: rgba(0,123,255,.5); color:white" >¿Ha olvidado su contraseña?</a>
+       <div id="msgAlert"></div>
+      <br>
+      <p class="mt-5 mb-3" style="color:black">© 2018-2019</p>
     </form>
 
 </div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+
+  <script type="text/javascript">
+    $(document).on('click', '#forget', function(){
+
+    $( "#msgAlert" ).append("<div id='msg' class='alert alert-danger' role='alert'>!Comuniquese con el administrador¡ </div>");
+
+          window.setTimeout(function() {
+						    $("#msg").fadeTo(400, 0).slideUp(400, function(){
+						        $(this).remove(); 
+						    });
+						}, 4000);
+
+            return false;
+    
+    });
+
+  
+
+  </script>
+
 {% endblock %}

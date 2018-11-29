@@ -10,18 +10,67 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\Encoder\XmlEncoder;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+
+use Symfony\Component\HttpFoundation\JsonResponse;
+
+
 /**
  * @Route("/reporte")
  */
 class ReporteController extends AbstractController
 {
     /**
-     * @Route("/", name="reporte_index", methods="GET")
+     * @Route("/", name="reporte", methods="GET")
      */
     public function index(ReporteRepository $reporteRepository): Response
+
     {
-        return $this->render('reporte/index.html.twig', ['reportes' => $reporteRepository->findAll()]);
+        return $this->render('reporte/index.html.twig', [
+            'reportes' => $reporteRepository->findAll()
+
+        ]);
+
     }
+
+
+
+     /**
+     * @Route("/list/ajax", name="reportes_ajax")
+     */
+    public function list(Request $request, ReporteRepository $reporteRepository): Response
+    {
+
+        $fecha = $request->request->get('fecha');
+
+        //Consulta uso de SQL
+        $RAW_QUERY = "select * from reporte WHERE fecha = '".$fecha."' ";
+
+        $em = $this->getDoctrine()->getManager();
+        $statement = $em->getConnection()->prepare($RAW_QUERY);
+        $statement->execute();
+        $reportes = $statement->fetchAll();
+
+        $encoders = array(new XmlEncoder(), new JsonEncoder());
+        $normalizers = array(new ObjectNormalizer());
+        $serializer = new Serializer($normalizers, $encoders);
+
+        $data = $serializer->serialize($reportes, 'json');
+
+ 
+        return new JsonResponse($data);
+
+        
+
+    }
+
+
+
+
+
 
     /**
      * @Route("/new", name="reporte_new", methods="GET|POST")
