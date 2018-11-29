@@ -47,6 +47,11 @@ class Horario
     private $sabado;
 
     /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $domingo;
+
+    /**
      * @ORM\OneToMany(targetEntity="App\Entity\EmpleadoA", mappedBy="horario")
      */
     private $empleado_a;
@@ -123,12 +128,24 @@ class Horario
 
     public function getSabado(): ?string
     {
-        return $this->viernes;
+        return $this->sabado;
     }
 
     public function setSabado(string $sabado): self
     {
         $this->sabado = $sabado;
+
+        return $this;
+    }
+
+    public function getDomingo(): ?string
+    {
+        return $this->domingo;
+    }
+
+    public function setDomingo(string $domingo): self
+    {
+        $this->domingo = $domingo;
 
         return $this;
     }

@@ -115,6 +115,20 @@
                 //format: 'HH:mm',
             });
 
+            $('#domingoTime_1').datetimepicker({
+                format: 'LT'
+            });
+            $('#domingoTime_2').datetimepicker({
+                format: 'LT'
+            });
+            $('#domingoTime_3').datetimepicker({
+                format: 'LT'
+            });
+            $('#domingoTime_4').datetimepicker({
+                format: 'LT',
+                //format: 'HH:mm',
+            });
+
 
             $("#guardarHorario").click( function(){
                 var lunes = [];
@@ -123,6 +137,7 @@
                 var jueves = [];
                 var viernes = [];
                 var sabado = [];
+                var domingo = [];
 
                 lunes.push($("#lunesTime_1").find("input").val());
                 lunes.push($("#lunesTime_2").find("input").val());
@@ -154,13 +169,18 @@
                 sabado.push($("#sabadoTime_3").find("input").val());
                 sabado.push($("#sabadoTime_4").find("input").val());
 
+                domingo.push($("#domingoTime_1").find("input").val());
+                domingo.push($("#domingoTime_2").find("input").val());
+                domingo.push($("#domingoTime_3").find("input").val());
+                domingo.push($("#domingoTime_4").find("input").val());
+
                 console.log(lunes.toString());
                 console.log(martes.toString());
                 console.log(miercoles.toString());
                 console.log(jueves.toString());
                 console.log(viernes.toString());
                 console.log(sabado.toString());
-
+                console.log(domingo.toString());
 
                 $.ajax({
                     url:'{{ (path('crearHorarioAjax')) }}',
@@ -173,6 +193,7 @@
                         "jueves": jueves.toString(),
                         "viernes": viernes.toString(),
                         "sabado": sabado.toString(),
+                        "domingo": domingo.toString(),
                     },
                     success: function (data)
                     {

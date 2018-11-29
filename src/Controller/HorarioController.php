@@ -54,6 +54,7 @@ class HorarioController extends Controller
         $jueves = $request->request->get('jueves');
         $viernes = $request->request->get('viernes');
         $sabado = $request->request->get('sabado');
+        $domingo = $request->request->get('domingo');
 
         $tableHorario = new Horario();
         $tableHorario->setLunes($lunes);
@@ -62,6 +63,7 @@ class HorarioController extends Controller
         $tableHorario->setJueves($jueves);
         $tableHorario->setViernes($viernes);
         $tableHorario->setSabado($sabado);
+        $tableHorario->setDomingo($domingo);
 
         $em = $this->getDoctrine()->getManager();
         $em->persist($tableHorario);

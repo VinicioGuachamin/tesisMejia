@@ -5,6 +5,8 @@
 {% block stylesheets %}
     {{ parent() }}
     <link href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" type="text/css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css" type="text/css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/select/1.2.7/css/select.dataTables.min.css" type="text/css" rel="stylesheet" />
 {% endblock %}
 
 {% block body %}
@@ -14,18 +16,35 @@
         <input type="file" id="files" name="files"/>
         <br><br>
         <button type="button" class="btn btn-primary" id="calcularHorarios">Calcular</button>
-        {#<table id="example" class="display" cellspacing="0" width="100%">#}
-            {#<thead>#}
-            {#<tr>#}
-                {#<th>Codigo</th>#}
-                {#<th>Nombre</th>#}
-                {#<th>Puesto</th>#}
-                {#<th>Dia</th>#}
-                {#<th>Hora</th>#}
-                {#<th>Cedula</th>#}
-            {#</tr>#}
-            {#</thead>#}
-        {#</table>#}
+        <br><br>
+        <div class="row">
+            <div class="col">
+                <table id="example" class="hover" cellspacing="0" width="100%">
+                    <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Nombres</th>
+                        <th>Apellidos</th>
+                        <th>Tipo Empleado</th>
+                        <th>Fecha</th>
+                        <th>Tiempo Atraso</th>
+                        <th>Tiempo Antes</th>
+                        <th>Tiempo Extra</th>
+                        <th>No Justificado</th>
+                    </tr>
+                    </thead>
+
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <br><br>
+                <button type="button" class="btn btn-primary" id="guardar">Guardar</button>
+                <br><br>
+            </div>
+        </div>
+
     </div>
 {% endblock %}
 
@@ -36,11 +55,20 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xls/0.7.6/xls.core.min.js"></script>
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.flash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.print.min.js"></script>
+    <script src="https://cdn.datatables.net/select/1.2.7/js/dataTables.select.min.js"></script>
     <script>
         $(document).ready(function(){
 
             var dataExcel = [];
             var dataBase = [];
+            //var dataExcelProcesada = [];
 
             //OBTENER TODOS LOS EMPLEADOS CON HORARIOS DE LA BASE DE DATOS
             $('#files').change(handleFile);
@@ -163,6 +191,675 @@
                 return arrayFromObject(groups);
             }
 
+            //FUNCION PARA CALCULAR EL ATRASO Y HORAS EXTRAS
+            var dataExcelProcesada = [];
+            function CalculoHorarioDia(horarioBase, groupDia, database) {
+                //Transformo de string a array y luego elimino los elementos vacios
+                //var horarioBase = dataBase[m].viernes.split(",").filter(function(e){return e});
+                //console.log(horarioBase);
+                //console.log(groupDia);
+                var horarioExcel = [];
+
+                //VALIDACIÓN DE LOS HORARIOS DEL ARCHIVO EXCEL
+                if (horarioBase.length == 4){
+
+                    if (groupDia.length == 4){ //CASO HORARIOS EXCEL = 4
+
+                        var horaMayor = convert24horas(groupDia[0]["Hora Marca"].substr(11));
+                        var horaMenor = convert24horas(groupDia[1]["Hora Marca"].substr(11));
+                        var tiempo = tiempoEntrehoras(horaMayor, horaMenor);
+                        if(parseInt(tiempo.split(":")[0])>1){
+
+                            horarioExcel.push(groupDia[0]);
+                            var horaMayor = convert24horas(groupDia[2]["Hora Marca"].substr(11));
+                            var horaMenor = convert24horas(groupDia[3]["Hora Marca"].substr(11));
+                            var tiempo = tiempoEntrehoras(horaMayor, horaMenor);
+                            if(parseInt(tiempo.split(":")[0])>1){
+                                var horaMayor = convert24horas(groupDia[1]["Hora Marca"].substr(11));
+                                var horaMenor = convert24horas(groupDia[2]["Hora Marca"].substr(11));
+                                var tiempo = tiempoEntrehoras(horaMayor, horaMenor);
+                                if(parseInt(tiempo.split(":")[0])<=1){
+                                    horarioExcel.push(groupDia[1]);
+                                    horarioExcel.push(groupDia[2]);
+                                    horarioExcel.push(groupDia[3]);
+                                }else {
+                                    horarioExcel.push(groupDia[3]);
+                                }
+                            }else{
+                                var horaMayor = convert24horas(groupDia[1]["Hora Marca"].substr(11));
+                                var horaMenor = convert24horas(groupDia[3]["Hora Marca"].substr(11));
+                                var tiempo = tiempoEntrehoras(horaMayor, horaMenor);
+                                if(parseInt(tiempo.split(":")[0])>1){
+                                    horarioExcel.push(groupDia[1]);
+                                    horarioExcel.push(groupDia[3]);
+                                }else {
+                                    horarioExcel.push(groupDia[3]);
+                                }
+                            }
+
+                        }else {
+
+                            horarioExcel.push(groupDia[0]);
+                            var horaMayor = convert24horas(groupDia[0]["Hora Marca"].substr(11));
+                            var horaMenor = convert24horas(groupDia[2]["Hora Marca"].substr(11));
+                            var tiempo = tiempoEntrehoras(horaMayor, horaMenor);
+                            if(parseInt(tiempo.split(":")[0])>1){
+                                var horaMayor = convert24horas(groupDia[2]["Hora Marca"].substr(11));
+                                var horaMenor = convert24horas(groupDia[3]["Hora Marca"].substr(11));
+                                var tiempo = tiempoEntrehoras(horaMayor, horaMenor);
+                                if(parseInt(tiempo.split(":")[0])>1){
+                                    horarioExcel.push(groupDia[2]);
+                                    horarioExcel.push(groupDia[3]);
+                                }else {
+                                    horarioExcel.push(groupDia[3]);
+                                }
+                            }else {
+                                var horaMayor = convert24horas(groupDia[0]["Hora Marca"].substr(11));
+                                var horaMenor = convert24horas(groupDia[3]["Hora Marca"].substr(11));
+                                var tiempo = tiempoEntrehoras(horaMayor, horaMenor);
+                                if(parseInt(tiempo.split(":")[0])>1){
+                                    horarioExcel.push(groupDia[3]);
+                                }
+                            }
+
+                        }
+
+                        //console.log(horarioExcel);
+
+                    }else {
+                        if (groupDia.length < 4){ //CASO HORARIOS EXCEL < 4
+                            if(groupDia.length == 3){
+                                var horaMayor = convert24horas(groupDia[0]["Hora Marca"].substr(11));
+                                var horaMenor = convert24horas(groupDia[groupDia.length-1]["Hora Marca"].substr(11));
+                                var tiempo = tiempoEntrehoras(horaMayor, horaMenor);
+                                if(parseInt(tiempo.split(":")[0])>1){
+                                    horarioExcel.push(groupDia[0]);
+                                    horarioExcel.push(groupDia[groupDia.length-1]);
+                                }else{
+                                    horarioExcel.push(groupDia[groupDia.length-1]);
+                                }
+                            }
+
+                            if(groupDia.length == 2){
+                                var horaMayor = convert24horas(groupDia[0]["Hora Marca"].substr(11));
+                                var horaMenor = convert24horas(groupDia[1]["Hora Marca"].substr(11));
+                                var tiempo = tiempoEntrehoras(horaMayor, horaMenor);
+                                if(parseInt(tiempo.split(":")[0])>1){
+                                    horarioExcel.push(groupDia[0]);
+                                    horarioExcel.push(groupDia[1]);
+                                }else{
+                                    horarioExcel.push(groupDia[0]);
+                                }
+                            }
+
+                            if(groupDia.length == 1){
+                                horarioExcel.push(groupDia[0]);
+                            }
+
+                            //console.log(horarioExcel);
+
+                        }else { //CASO HORARIOS EXCEL > 4
+                            var horaMayor = convert24horas(groupDia[0]["Hora Marca"].substr(11));
+                            var horaMenor = convert24horas(groupDia[groupDia.length-1]["Hora Marca"].substr(11));
+                            var tiempo = tiempoEntrehoras(horaMayor, horaMenor);
+                            if(parseInt(tiempo.split(":")[0])>1){
+                                horarioExcel.push(groupDia[0]);
+                                horarioExcel.push(groupDia[groupDia.length-1]);
+                            }else{
+                                horarioExcel.push(groupDia[groupDia.length-1]);
+                            }
+                            //console.log(horarioExcel);
+                        }
+                    }
+
+                }else {
+                    if (horarioBase.length == 2){
+                        if (groupDia.length == 2) { //CASO HORARIOS EXCEL = 2
+                            var horaMayor = convert24horas(groupDia[0]["Hora Marca"].substr(11));
+                            var horaMenor = convert24horas(groupDia[1]["Hora Marca"].substr(11));
+                            var tiempo = tiempoEntrehoras(horaMayor, horaMenor);
+                            if(parseInt(tiempo.split(":")[0])>1){
+                                horarioExcel.push(groupDia[0]);
+                                horarioExcel.push(groupDia[1]);
+                            }else{
+                                horarioExcel.push(groupDia[0]);
+                            }
+                            //console.log(horarioExcel);
+                        }else {
+                            if (groupDia.length < 2) { //CASO HORARIOS EXCEL < 2
+                                horarioExcel.push(groupDia[0]);
+                                console.log(horarioExcel);
+                            }else {
+                                if (groupDia.length > 2) { //CASO HORARIOS EXCEL > 2
+                                    var horaMayor = convert24horas(groupDia[0]["Hora Marca"].substr(11));
+                                    var horaMenor = convert24horas(groupDia[groupDia.length-1]["Hora Marca"].substr(11));
+                                    var tiempo = tiempoEntrehoras(horaMayor, horaMenor);
+                                    if(parseInt(tiempo.split(":")[0])>1){
+                                        horarioExcel.push(groupDia[0]);
+                                        horarioExcel.push(groupDia[groupDia.length-1]);
+                                    }else{
+                                        horarioExcel.push(groupDia[groupDia.length-1]);
+                                    }
+                                    //console.log(horarioExcel);
+                                }
+                            }
+                        }
+
+                    }else {
+                        console.log("Horario ingresado no valido");
+                    }
+                }
+
+                console.log(horarioExcel);
+                console.log(horarioBase);
+                console.log("ssssssssssssssssss");
+                console.log(database);
+
+                //CALCULO DEL TIEMPO ATRASOS O EXTRA
+                var atraso= 0;
+                if(horarioBase.length == 4){
+                    if(horarioExcel.length == 4){
+                        //Horario de entrada
+                        console.log(convert24horas(horarioBase[0]));
+                        console.log(convert24horas(horarioExcel[3]["Hora Marca"].substr(11)));
+                        var hora_1 = calculaHorarios(convert24horas(horarioBase[0]), convert24horas(horarioExcel[3]["Hora Marca"].substr(11)));
+                        if (hora_1[0] == "DESPUES"){
+                            var itemexcelprocesado_1 = {
+                                "codigoBiometrico": database.codbiometrico,
+                                "nombres": database.nombres,
+                                "apellidos": database.apellidos,
+                                "tipoempleado": database.tipoempleado,
+                                "fecha": horarioExcel[3]["Hora Marca"],
+                                "atraso": "Timbra: "+hora_1[1]+" min ATRASO (Hora entrada)",
+                                "tiempoExtra": "-",
+                                "tiempoAntes": "-",
+                                "active": "0"
+                            }
+                            atraso = hora_1[1];
+                        }else {
+                            var itemexcelprocesado_1 = {
+                                "codigoBiometrico": database.codbiometrico,
+                                "nombres": database.nombres,
+                                "apellidos": database.apellidos,
+                                "tipoempleado": database.tipoempleado,
+                                "fecha": horarioExcel[3]["Hora Marca"],
+                                "atraso": "-",
+                                "tiempoExtra": "-",
+                                "tiempoAntes": "-",
+                                "active": "0"
+                            }
+                        }
+                        dataExcelProcesada.push(itemexcelprocesado_1);
+
+                        //Horario de salida almuerzo
+                        console.log(convert24horas(horarioBase[1]));
+                        console.log(convert24horas(horarioExcel[2]["Hora Marca"].substr(11)));
+                        var hora_2 = calculaHorarios(convert24horas(horarioBase[1]), convert24horas(horarioExcel[2]["Hora Marca"].substr(11)));
+                        if (hora_2[0] == "ANTES"){
+                            var itemexcelprocesado_2 = {
+                                "codigoBiometrico": database.codbiometrico,
+                                "nombres": database.nombres,
+                                "apellidos": database.apellidos,
+                                "tipoempleado": database.tipoempleado,
+                                "fecha": horarioExcel[2]["Hora Marca"],
+                                "atraso": "-",
+                                "tiempoExtra": "-",
+                                "tiempoAntes": "Timbra: " +hora_2[1]+" min ANTES (Hora salida almuerzo)",
+                                "active": "0"
+                            }
+                        }else {
+                            var itemexcelprocesado_2= {
+                                "codigoBiometrico": database.codbiometrico,
+                                "nombres": database.nombres,
+                                "apellidos": database.apellidos,
+                                "tipoempleado": database.tipoempleado,
+                                "fecha": horarioExcel[2]["Hora Marca"],
+                                "atraso": "-",
+                                "tiempoExtra": "-",
+                                "tiempoAntes": "-",
+                                "active": "0"
+                            }
+                        }
+                        dataExcelProcesada.push(itemexcelprocesado_2);
+
+                        //Horario de entrada almuerzo
+                        console.log(convert24horas(horarioBase[2]));
+                        console.log(convert24horas(horarioExcel[1]["Hora Marca"].substr(11)));
+                        var hora_3 = calculaHorarios(convert24horas(horarioBase[2]), convert24horas(horarioExcel[1]["Hora Marca"].substr(11)));
+                        if (hora_3[0] == "DESPUES"){
+                            var itemexcelprocesado_3 = {
+                                "codigoBiometrico": database.codbiometrico,
+                                "nombres": database.nombres,
+                                "apellidos": database.apellidos,
+                                "tipoempleado": database.tipoempleado,
+                                "fecha": horarioExcel[1]["Hora Marca"],
+                                "atraso": "Timbra: "+ hora_3[1]+ " min DESPUÉS (Hora entrada almuerzo)",
+                                "tiempoExtra": "-",
+                                "tiempoAntes": "-",
+                                "active": "0"
+                            }
+                        }else {
+                            var itemexcelprocesado_3 = {
+                                "codigoBiometrico": database.codbiometrico,
+                                "nombres": database.nombres,
+                                "apellidos": database.apellidos,
+                                "tipoempleado": database.tipoempleado,
+                                "fecha": horarioExcel[1]["Hora Marca"],
+                                "atraso": "-",
+                                "tiempoExtra": "-",
+                                "tiempoAntes": "-",
+                                "active": "0"
+                            }
+                        }
+                        dataExcelProcesada.push(itemexcelprocesado_3);
+
+                        //Horario Salida
+                        console.log(convert24horas(horarioBase[3]));
+                        console.log(convert24horas(horarioExcel[0]["Hora Marca"].substr(11)));
+                        var hora_4 = calculaHorarios(convert24horas(horarioBase[3]), convert24horas(horarioExcel[0]["Hora Marca"].substr(11)));
+                        if (hora_4[0] == "DESPUES"){
+                            var itemexcelprocesado_4 = {
+                                "codigoBiometrico": database.codbiometrico,
+                                "nombres": database.nombres,
+                                "apellidos": database.apellidos,
+                                "tipoempleado": database.tipoempleado,
+                                "fecha": horarioExcel[0]["Hora Marca"],
+                                "atraso": "-",
+                                "tiempoExtra": "Timbra: "+ hora_4[1]+" min EXTRA (Hora salida)",
+                                "tiempoAntes": "-",
+                                "active": "0"
+                            }
+                        }else {
+                            if (hora_4[0] == "ANTES"){
+                                var itemexcelprocesado_4 = {
+                                    "codigoBiometrico": database.codbiometrico,
+                                    "nombres": database.nombres,
+                                    "apellidos": database.apellidos,
+                                    "tipoempleado": database.tipoempleado,
+                                    "fecha": horarioExcel[0]["Hora Marca"],
+                                    "atraso": "-",
+                                    "tiempoExtra": "-",
+                                    "tiempoAntes": "Timbra: "+ hora_4[1]+ " min ANTES (Hora salida)",
+                                    "active": "0"
+                                }
+                            }else {
+                                var itemexcelprocesado_4 = {
+                                    "codigoBiometrico": database.codbiometrico,
+                                    "nombres": database.nombres,
+                                    "apellidos": database.apellidos,
+                                    "tipoempleado": database.tipoempleado,
+                                    "fecha": horarioExcel[0]["Hora Marca"],
+                                    "atraso": "-",
+                                    "tiempoExtra": "-",
+                                    "tiempoAntes": "-",
+                                    "active": "0"
+                                }
+                            }
+
+                        }
+                        dataExcelProcesada.push(itemexcelprocesado_4);
+                    }
+
+                    if(horarioExcel.length == 2){
+                        //Horario de entrada
+                        console.log(convert24horas(horarioBase[0]));
+                        console.log(convert24horas(horarioExcel[1]["Hora Marca"].substr(11)));
+                        var hora_5 = calculaHorarios(convert24horas(horarioBase[0]), convert24horas(horarioExcel[1]["Hora Marca"].substr(11)));
+                        if (hora_5[0] == "DESPUES"){
+                            var itemexcelprocesado_5 = {
+                                "codigoBiometrico": database.codbiometrico,
+                                "nombres": database.nombres,
+                                "apellidos": database.apellidos,
+                                "tipoempleado": database.tipoempleado,
+                                "fecha": horarioExcel[1]["Hora Marca"],
+                                "atraso": "Timbra: "+hora_5[1]+" min ATRASO (Hora entrada)",
+                                "tiempoExtra": "-",
+                                "tiempoAntes": "-",
+                                "active": "0"
+                            }
+                            atraso = hora_5[1];
+                        }else {
+                            var itemexcelprocesado_5 = {
+                                "codigoBiometrico": database.codbiometrico,
+                                "nombres": database.nombres,
+                                "apellidos": database.apellidos,
+                                "tipoempleado": database.tipoempleado,
+                                "fecha": horarioExcel[1]["Hora Marca"],
+                                "atraso": "-",
+                                "tiempoExtra": "-",
+                                "tiempoAntes": "-",
+                                "active": "0"
+                            }
+                        }
+                        dataExcelProcesada.push(itemexcelprocesado_5);
+
+                        //Horario Salida
+                        console.log(convert24horas(horarioBase[3]));
+                        console.log(convert24horas(horarioExcel[0]["Hora Marca"].substr(11)));
+                        var hora_6 = calculaHorarios(convert24horas(horarioBase[3]), convert24horas(horarioExcel[0]["Hora Marca"].substr(11)));
+                        if (hora_6[0] == "DESPUES"){
+                            var itemexcelprocesado_6 = {
+                                "codigoBiometrico": database.codbiometrico,
+                                "nombres": database.nombres,
+                                "apellidos": database.apellidos,
+                                "tipoempleado": database.tipoempleado,
+                                "fecha": horarioExcel[0]["Hora Marca"],
+                                "atraso": "-",
+                                "tiempoExtra": "Timbra: "+ hora_6[1]+ " min EXTRA (Hora salida)",
+                                "tiempoAntes": "-",
+                                "active": "0"
+                            }
+                        }else {
+                            if (hora_6[0] == "ANTES"){
+                                var itemexcelprocesado_6 = {
+                                    "codigoBiometrico": database.codbiometrico,
+                                    "nombres": database.nombres,
+                                    "apellidos": database.apellidos,
+                                    "tipoempleado": database.tipoempleado,
+                                    "fecha": horarioExcel[0]["Hora Marca"],
+                                    "atraso": "-",
+                                    "tiempoExtra": "-",
+                                    "tiempoAntes": "Timbra: " + hora_6[1] + " min ANTES (Hora salida)",
+                                    "active": "0"
+                                }
+                            }else {
+                                var itemexcelprocesado_6 = {
+                                    "codigoBiometrico": database.codbiometrico,
+                                    "nombres": database.nombres,
+                                    "apellidos": database.apellidos,
+                                    "fecha": horarioExcel[0]["Hora Marca"],
+                                    "atraso": "-",
+                                    "tiempoExtra": "-",
+                                    "tiempoAntes": "-",
+                                    "active": "0"
+                                }
+                            }
+
+                        }
+                        dataExcelProcesada.push(itemexcelprocesado_6);
+                    }
+
+                    if(horarioExcel.length == 1){
+                        console.log("Solo ha timbrado una vez");
+                        var hormenor = convert24horas(horarioBase[0]);
+                        var hormayor = convert24horas(horarioBase[3]);
+                        var lapsotiempo = tiempoEntrehoras(hormayor, hormenor);
+                        console.log(lapsotiempo);
+                        var lapsotiempominutos = transformaHoras(lapsotiempo);
+                        console.log(parseInt(lapsotiempominutos/2));
+                        var lapsotiempominutosEnHoras = transformaMinutos(parseInt(lapsotiempominutos/2));
+                        console.log(lapsotiempominutosEnHoras);
+                        var horamedia = (parseInt(hormenor.split(":")[0]) + parseInt(lapsotiempominutosEnHoras.split(":")[0])) + ":"+hormenor.split(":")[1];
+                        console.log(horamedia);
+                        var horexcel = convert24horas(horarioExcel[0]["Hora Marca"].substr(11));
+                        console.log(horexcel);
+                        if(horexcel.split(":")[0]<= horamedia.split(":")[0]){
+                            console.log("hora atraseo");
+                            var hora_aux_3 = calculaHorarios(convert24horas(horarioBase[0]), convert24horas(horarioExcel[0]["Hora Marca"].substr(11)));
+                            if (hora_aux_3[0] == "DESPUES"){
+                                var itemexcelprocesado_aux_3 = {
+                                    "codigoBiometrico": database.codbiometrico,
+                                    "nombres": database.nombres,
+                                    "apellidos": database.apellidos,
+                                    "tipoempleado": database.tipoempleado,
+                                    "fecha": horarioExcel[0]["Hora Marca"],
+                                    "atraso": "Solo timbra una vez: "+ hora_aux_3[1]+ " min ATRASO (Hora entrada)",
+                                    "tiempoExtra": "-",
+                                    "tiempoAntes": "-",
+                                    "active": "0"
+                                }
+                                atraso = hora_aux_3[1];
+                            }else {
+                                var itemexcelprocesado_aux_3 = {
+                                    "codigoBiometrico": database.codbiometrico,
+                                    "nombres": database.nombres,
+                                    "apellidos": database.apellidos,
+                                    "tipoempleado": database.tipoempleado,
+                                    "fecha": horarioExcel[0]["Hora Marca"],
+                                    "atraso": "Solo timbra una vez hora entrada",
+                                    "tiempoExtra": "Solo timbra una vez hora entrada",
+                                    "tiempoAntes": "Solo timbra una vez hora entrada",
+                                    "active": "0"
+                                }
+                            }
+                            dataExcelProcesada.push(itemexcelprocesado_aux_3);
+                        }else{
+                            console.log("hora despues");
+                            console.log(convert24horas(horarioBase[1]));
+                            console.log(convert24horas(horarioExcel[0]["Hora Marca"].substr(11)));
+                            var hora_aux_4 = calculaHorarios(convert24horas(horarioBase[3]), convert24horas(horarioExcel[0]["Hora Marca"].substr(11)));
+                            if (hora_aux_4[0] == "DESPUES"){
+                                var itemexcelprocesado_aux_4 = {
+                                    "codigoBiometrico": database.codbiometrico,
+                                    "nombres": database.nombres,
+                                    "apellidos": database.apellidos,
+                                    "tipoempleado": database.tipoempleado,
+                                    "fecha": horarioExcel[0]["Hora Marca"],
+                                    "atraso": "-",
+                                    "tiempoExtra": "Solo timbra una vez: "+ hora_aux_4[1]+" min EXTRA (Hora Salida)",
+                                    "tiempoAntes": "-",
+                                    "active": "0"
+                                }
+                            }else {
+                                if (hora_aux_4[0] == "ANTES"){
+                                    var itemexcelprocesado_aux_4 = {
+                                        "codigoBiometrico": database.codbiometrico,
+                                        "nombres": database.nombres,
+                                        "apellidos": database.apellidos,
+                                        "tipoempleado": database.tipoempleado,
+                                        "fecha": horarioExcel[0]["Hora Marca"],
+                                        "atraso": "-",
+                                        "tiempoExtra": "-",
+                                        "tiempoAntes": "Solo timbra una vez: "+hora_aux_4[1]+ " min ANTES (Hora Salida)",
+                                        "active": "0"
+                                    }
+                                }else {
+                                    var itemexcelprocesado_aux_4 = {
+                                        "codigoBiometrico": database.codbiometrico,
+                                        "nombres": database.nombres,
+                                        "apellidos": database.apellidos,
+                                        "tipoempleado": database.tipoempleado,
+                                        "fecha": horarioExcel[0]["Hora Marca"],
+                                        "atraso": "Solo timbra una vez hora salida",
+                                        "tiempoExtra": "Solo timbra una vez hora salida",
+                                        "tiempoAntes": "Solo timbra una vez hora salida",
+                                        "active": "0"
+                                    }
+                                }
+
+                            }
+                            dataExcelProcesada.push(itemexcelprocesado_aux_4);
+                        }
+                    }
+                }
+
+                if(horarioBase.length == 2){
+                    if(horarioExcel.length == 2){
+                        //Horario de entrada
+                        console.log(convert24horas(horarioBase[0]));
+                        console.log(convert24horas(horarioExcel[1]["Hora Marca"].substr(11)));
+                        var hora_8 = calculaHorarios(convert24horas(horarioBase[0]), convert24horas(horarioExcel[1]["Hora Marca"].substr(11)));
+                        if (hora_8[0] == "DESPUES"){
+                            var itemexcelprocesado_8 = {
+                                "codigoBiometrico": database.codbiometrico,
+                                "nombres": database.nombres,
+                                "apellidos": database.apellidos,
+                                "tipoempleado": database.tipoempleado,
+                                "fecha": horarioExcel[1]["Hora Marca"],
+                                "atraso": "Timbra: "+hora_8[1] +" min ATRASO (Hora entrada)",
+                                "tiempoExtra": "-",
+                                "tiempoAntes": "-",
+                                "active": "0"
+                            }
+                            atraso = hora_8[1];
+                        }else {
+                            var itemexcelprocesado_8 = {
+                                "codigoBiometrico": database.codbiometrico,
+                                "nombres": database.nombres,
+                                "apellidos": database.apellidos,
+                                "tipoempleado": database.tipoempleado,
+                                "fecha": horarioExcel[1]["Hora Marca"],
+                                "atraso": "-",
+                                "tiempoExtra": "-",
+                                "tiempoAntes": "-",
+                                "active": "0"
+                            }
+                        }
+                        dataExcelProcesada.push(itemexcelprocesado_8);
+
+                        //Horario Salida
+                        console.log(convert24horas(horarioBase[1]));
+                        console.log(convert24horas(horarioExcel[0]["Hora Marca"].substr(11)));
+                        var hora_9 = calculaHorarios(convert24horas(horarioBase[1]), convert24horas(horarioExcel[0]["Hora Marca"].substr(11)));
+                        if (hora_9[0] == "DESPUES"){
+                            var itemexcelprocesado_9 = {
+                                "codigoBiometrico": database.codbiometrico,
+                                "nombres": database.nombres,
+                                "apellidos": database.apellidos,
+                                "tipoempleado": database.tipoempleado,
+                                "fecha": horarioExcel[0]["Hora Marca"],
+                                "atraso": "-",
+                                "tiempoExtra": "Timbra: "+hora_9[1]+" min EXTRA (Hora salida)",
+                                "tiempoAntes": "-",
+                                "active": "0"
+                            }
+                        }else {
+                            if (hora_9[0] == "ANTES"){
+                                var itemexcelprocesado_9 = {
+                                    "codigoBiometrico": database.codbiometrico,
+                                    "nombres": database.nombres,
+                                    "apellidos": database.apellidos,
+                                    "tipoempleado": database.tipoempleado,
+                                    "fecha": horarioExcel[0]["Hora Marca"],
+                                    "atraso": "-",
+                                    "tiempoExtra": "-",
+                                    "tiempoAntes": "Timbra: "+ hora_9[1] + " min ANTES (Hora salida)",
+                                    "active": "0"
+                                }
+                            }else {
+                                var itemexcelprocesado_9 = {
+                                    "codigoBiometrico": database.codbiometrico,
+                                    "nombres": database.nombres,
+                                    "apellidos": database.apellidos,
+                                    "tipoempleado": database.tipoempleado,
+                                    "fecha": horarioExcel[0]["Hora Marca"],
+                                    "atraso": "-",
+                                    "tiempoExtra": "-",
+                                    "tiempoAntes": "-",
+                                    "active": "0"
+                                }
+                            }
+
+                        }
+                        dataExcelProcesada.push(itemexcelprocesado_9);
+                    }
+                    if(horarioExcel.length == 1){
+                        console.log("Solo ha timbrado una vez");
+                        var hormenor = convert24horas(horarioBase[0]);
+                        var hormayor = convert24horas(horarioBase[1]);
+                        var lapsotiempo = tiempoEntrehoras(hormayor, hormenor);
+                        console.log(lapsotiempo);
+                        var lapsotiempominutos = transformaHoras(lapsotiempo);
+                        console.log(parseInt(lapsotiempominutos/2));
+                        var lapsotiempominutosEnHoras = transformaMinutos(parseInt(lapsotiempominutos/2));
+                        console.log(lapsotiempominutosEnHoras);
+                        var horamedia = (parseInt(hormenor.split(":")[0]) + parseInt(lapsotiempominutosEnHoras.split(":")[0])) + ":"+hormenor.split(":")[1];
+                        console.log(horamedia);
+                        var horexcel = convert24horas(horarioExcel[0]["Hora Marca"].substr(11));
+                        console.log(horexcel);
+                        if(horexcel.split(":")[0]<= horamedia.split(":")[0]){
+                            console.log("hora atraseo");
+                            var hora_aux_2 = calculaHorarios(convert24horas(horarioBase[0]), convert24horas(horarioExcel[0]["Hora Marca"].substr(11)));
+                            if (hora_aux_2[0] == "DESPUES"){
+                                var itemexcelprocesado_aux_2 = {
+                                    "codigoBiometrico": database.codbiometrico,
+                                    "nombres": database.nombres,
+                                    "apellidos": database.apellidos,
+                                    "tipoempleado": database.tipoempleado,
+                                    "fecha": horarioExcel[0]["Hora Marca"],
+                                    "atraso": "Solo timbra una vez: "+ hora_aux_2[1]+ " min ATRASO (Hora entrada)",
+                                    "tiempoExtra": "-",
+                                    "tiempoAntes": "-",
+                                    "active": "0"
+                                }
+                                atraso = hora_aux_2[1];
+                            }else {
+                                var itemexcelprocesado_aux_2 = {
+                                    "codigoBiometrico": database.codbiometrico,
+                                    "nombres": database.nombres,
+                                    "apellidos": database.apellidos,
+                                    "tipoempleado": database.tipoempleado,
+                                    "fecha": horarioExcel[0]["Hora Marca"],
+                                    "atraso": "Solo timbra una vez hora entrada",
+                                    "tiempoExtra": "Solo timbra una vez hora entrada",
+                                    "tiempoAntes": "Solo timbra una vez hora entrada",
+                                    "active": "0"
+                                }
+                            }
+                            dataExcelProcesada.push(itemexcelprocesado_aux_2);
+                        }else{
+                            console.log("hora despues");
+                            console.log(convert24horas(horarioBase[1]));
+                            console.log(convert24horas(horarioExcel[0]["Hora Marca"].substr(11)));
+                            var hora_aux_1 = calculaHorarios(convert24horas(horarioBase[1]), convert24horas(horarioExcel[0]["Hora Marca"].substr(11)));
+                            if (hora_aux_1[0] == "DESPUES"){
+                                var itemexcelprocesado_aux_1 = {
+                                    "codigoBiometrico": database.codbiometrico,
+                                    "nombres": database.nombres,
+                                    "apellidos": database.apellidos,
+                                    "tipoempleado": database.tipoempleado,
+                                    "fecha": horarioExcel[0]["Hora Marca"],
+                                    "atraso": "-",
+                                    "tiempoExtra": "Solo timbra una vez: "+ hora_aux_1[1]+" min EXTRA (Hora Salida)",
+                                    "tiempoAntes": "-",
+                                    "active": "0"
+                                }
+                            }else {
+                                if (hora_aux_1[0] == "ANTES"){
+                                    var itemexcelprocesado_aux_1 = {
+                                        "codigoBiometrico": database.codbiometrico,
+                                        "nombres": database.nombres,
+                                        "apellidos": database.apellidos,
+                                        "tipoempleado": database.tipoempleado,
+                                        "fecha": horarioExcel[0]["Hora Marca"],
+                                        "atraso": "-",
+                                        "tiempoExtra": "-",
+                                        "tiempoAntes": "Solo timbra una vez: "+hora_aux_1[1]+ " min ANTES (Hora Salida)",
+                                        "active": "0"
+                                    }
+                                }else {
+                                    var itemexcelprocesado_aux_1 = {
+                                        "codigoBiometrico": database.codbiometrico,
+                                        "nombres": database.nombres,
+                                        "apellidos": database.apellidos,
+                                        "tipoempleado": database.tipoempleado,
+                                        "fecha": horarioExcel[0]["Hora Marca"],
+                                        "atraso": "Solo timbra una vez hora salida",
+                                        "tiempoExtra": "Solo timbra una vez hora salida",
+                                        "tiempoAntes": "Solo timbra una vez hora salida",
+                                        "active": "0"
+                                    }
+                                }
+
+                            }
+                            dataExcelProcesada.push(itemexcelprocesado_aux_1);
+                        }
+                       /* var itemexcelprocesado_10 = {
+                            "codigoBiometrico": database.codbiometrico,
+                            "nombres": database.nombres,
+                            "apellidos": database.apellidos,
+                            "fecha": horarioExcel[0]["Hora Marca"],
+                            "atraso": "Timbra una vez",
+                            "tiempoExtra": "Timbra una vez",
+                            "tiempoAntes": "Timbra una vez",
+                            "active": "0"
+                        }
+                        dataExcelProcesada.push(itemexcelprocesado_10);*/
+                    }
+                }
+                return atraso;
+            }
+
             //FUNCIÓN PARA EL BOTON CALCULAR
             $('#calcularHorarios').on("click", function() {
                 var groupEmpleadosDias = [];
@@ -180,43 +877,422 @@
                 for (var m=0; m<dataBase.length; m++){
                     for (var n=0; n<groupEmpleadosDias.length; n++){
                         if (dataBase[m].codbiometrico == groupEmpleadosDias[n][0][0]['Código']){
-                            for(var key in groupEmpleadosDias[n]){
-                                var newKey = groupEmpleadosDias[n][key];
-                                //console.log(groupEmpleadosDias[n][key][0]['Día']);
-                                switch (groupEmpleadosDias[n][key][0]['Día']){
-                                    case "1":
-                                        console.log(groupEmpleadosDias[n][key][0]['Día']);
+                            /*console.log("--------------------");
+                            var horarioBase = dataBase[m].viernes.split(",").filter(function(e){return e});
+                            console.log(horarioBase);
+                            var horarioBasesa = dataBase[m].sabado.split(",").filter(function(e){return e});
+                            console.log(horarioBasesa);*/
+
+                            var sumatraso = 0;
+
+                            if (dataBase[m].lunes.split(",").filter(function(e){return e}).length != 0) {
+                                console.log("Lunes");
+                                for(var key in groupEmpleadosDias[n]){
+                                    var groupDia = groupEmpleadosDias[n][key];
+                                    if (groupDia[0]['Día'] == "1"){
+                                        console.log("Dia: "+ groupEmpleadosDias[n][key][0]['Día']);
+                                        //Transformo de string a array y luego elimino los elementos vacios
+                                        var horarioBase = dataBase[m].lunes.split(",").filter(function(e){return e});
+                                        var lunesatraso = CalculoHorarioDia(horarioBase, groupDia, dataBase[m]);
+                                        sumatraso = sumatraso + lunesatraso;
                                         break;
-                                    case "2":
-                                        console.log(groupEmpleadosDias[n][key][0]['Día']);
-                                        break;
-                                    case "3":
-                                        console.log(groupEmpleadosDias[n][key][0]['Día']);
-                                        break;
-                                    case "4":
-                                        console.log(groupEmpleadosDias[n][key][0]['Día']);
-                                        break;
-                                    case "5":
-                                        console.log(groupEmpleadosDias[n][key][0]['Día']);
-                                        console.log(groupEmpleadosDias[n][key]);
-                                        break;
-                                    case "6":
-                                        console.log(groupEmpleadosDias[n][key][0]['Día']);
-                                        break;
+                                    }else {
+                                        if (groupEmpleadosDias[n].length-1 == parseInt(key)){
+                                            console.log("Este día lunes no ha timbrado");
+                                            /*var itemexcelprocesado_11 = {
+                                                "codigoBiometrico": dataBase[m].codbiometrico,
+                                                "nombres": dataBase[m].nombres,
+                                                "apellidos": dataBase[m].apellidos,
+                                                "fecha": "Lunes",
+                                                "atraso": "Falta",
+                                                "tiempoExtra": "Falta",
+                                                "tiempoAntes": "Falta",
+                                                "active": "0"
+                                            }
+                                            dataExcelProcesada.push(itemexcelprocesado_11);*/
+                                        }
+                                    }
                                 }
-
                             }
-
+                            if (dataBase[m].martes.split(",").filter(function(e){return e}).length != 0) {
+                                console.log("martes");
+                                for(var key in groupEmpleadosDias[n]){
+                                    var groupDia = groupEmpleadosDias[n][key];
+                                    if (groupDia[0]['Día'] == "2"){
+                                        console.log("Dia: "+ groupEmpleadosDias[n][key][0]['Día']);
+                                        //Transformo de string a array y luego elimino los elementos vacios
+                                        var horarioBase = dataBase[m].martes.split(",").filter(function(e){return e});
+                                        var martesatraso = CalculoHorarioDia(horarioBase, groupDia,dataBase[m]);
+                                        sumatraso = sumatraso + martesatraso;
+                                        break;
+                                    }else {
+                                        if (groupEmpleadosDias[n].length-1 == parseInt(key)){
+                                            console.log("Este día martes no ha timbrado");
+                                        }
+                                    }
+                                }
+                            }
+                            if (dataBase[m].miercoles.split(",").filter(function(e){return e}).length != 0) {
+                                console.log("miercoles");
+                                for(var key in groupEmpleadosDias[n]){
+                                    var groupDia = groupEmpleadosDias[n][key];
+                                    if (groupDia[0]['Día'] == "3"){
+                                        console.log("Dia: "+ groupEmpleadosDias[n][key][0]['Día']);
+                                        //Transformo de string a array y luego elimino los elementos vacios
+                                        var horarioBase = dataBase[m].miercoles.split(",").filter(function(e){return e});
+                                        var miercolesatraso = CalculoHorarioDia(horarioBase, groupDia,dataBase[m]);
+                                        sumatraso = sumatraso + miercolesatraso;
+                                        break;
+                                    }else {
+                                        if (groupEmpleadosDias[n].length-1 == parseInt(key)){
+                                            console.log("Este día miercoles no ha timbrado");
+                                        }
+                                    }
+                                }
+                            }
+                            if (dataBase[m].jueves.split(",").filter(function(e){return e}).length != 0) {
+                                console.log("jueves");
+                                for(var key in groupEmpleadosDias[n]){
+                                    var groupDia = groupEmpleadosDias[n][key];
+                                    if (groupDia[0]['Día'] == "4"){
+                                        console.log("Dia: "+ groupEmpleadosDias[n][key][0]['Día']);
+                                        //Transformo de string a array y luego elimino los elementos vacios
+                                        var horarioBase = dataBase[m].jueves.split(",").filter(function(e){return e});
+                                        var juevesatraso = CalculoHorarioDia(horarioBase, groupDia,dataBase[m]);
+                                        sumatraso = sumatraso + juevesatraso;
+                                        break;
+                                    }else {
+                                        if (groupEmpleadosDias[n].length-1 == parseInt(key)){
+                                            console.log("Este día jueves no ha timbrado");
+                                        }
+                                    }
+                                }
+                            }
+                            if (dataBase[m].viernes.split(",").filter(function(e){return e}).length != 0) {
+                                console.log("viernes");
+                                for(var key in groupEmpleadosDias[n]){
+                                    var groupDia = groupEmpleadosDias[n][key];
+                                    if (groupDia[0]['Día'] == "5"){
+                                        console.log("Dia: "+ groupEmpleadosDias[n][key][0]['Día']);
+                                        //Transformo de string a array y luego elimino los elementos vacios
+                                        var horarioBase = dataBase[m].viernes.split(",").filter(function(e){return e});
+                                        var viernesatraso = CalculoHorarioDia(horarioBase, groupDia,dataBase[m]);
+                                        sumatraso = sumatraso + viernesatraso;
+                                        break;
+                                    }else {
+                                        if (groupEmpleadosDias[n].length-1 == parseInt(key)){
+                                            console.log("Este día viernes no ha timbrado");
+                                        }
+                                    }
+                                }
+                            }
+                            if (dataBase[m].sabado.split(",").filter(function(e){return e}).length != 0) {
+                                console.log("sabado");
+                                for(var key in groupEmpleadosDias[n]){
+                                    var groupDia = groupEmpleadosDias[n][key];
+                                    if (groupDia[0]['Día'] == "6"){
+                                        console.log("Dia: "+ groupEmpleadosDias[n][key][0]['Día']);
+                                        //Transformo de string a array y luego elimino los elementos vacios
+                                        var horarioBase = dataBase[m].sabado.split(",").filter(function(e){return e});
+                                        var sabadoatraso = CalculoHorarioDia(horarioBase, groupDia,dataBase[m]);
+                                        sumatraso = sumatraso + sabadoatraso;
+                                        break;
+                                    }else {
+                                        if (groupEmpleadosDias[n].length-1 == parseInt(key)){
+                                            console.log("Este día sabado no ha timbrado");
+                                        }
+                                    }
+                                }
+                            }
+                            if (dataBase[m].domingo.split(",").filter(function(e){return e}).length != 0) {
+                                console.log("domingo");
+                                for(var key in groupEmpleadosDias[n]){
+                                    var groupDia = groupEmpleadosDias[n][key];
+                                    if (groupDia[0]['Día'] == "0"){
+                                        console.log("Dia: "+ groupEmpleadosDias[n][key][0]['Día']);
+                                        //Transformo de string a array y luego elimino los elementos vacios
+                                        var horarioBase = dataBase[m].domingo.split(",").filter(function(e){return e});
+                                        var domingoatraso = CalculoHorarioDia(horarioBase, groupDia,dataBase[m]);
+                                        sumatraso = sumatraso + domingoatraso;
+                                        break;
+                                    }else {
+                                        if (groupEmpleadosDias[n].length-1 == parseInt(key)){
+                                            console.log("Este día domingo no ha timbrado");
+                                        }
+                                    }
+                                }
+                            }
+                            var itematraso = {
+                                "codigoBiometrico":  "-",
+                                "nombres": dataBase[m].nombres,
+                                "apellidos": dataBase[m].apellidos,
+                                "tipoempleado": dataBase[m].tipoempleado,
+                                "fecha": "-",
+                                "atraso": "TOTAL ATRASOS SEMANA: "+ sumatraso +" min",
+                                "tiempoExtra": "-",
+                                "tiempoAntes": "-",
+                                "active": "-"
+                            }
+                            console.log("SUMA ATRASOS: " + sumatraso);
+                            dataExcelProcesada.push(itematraso);
                         }else {
                             console.log("no coincide");
                         }
                     }
                 }
+                console.log(dataExcelProcesada);
+                var dat = dataExcelProcesada;
+                $('#example').DataTable( {
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
+                    },
+                    data: dat,
+                    columns: [
+                        {"data" : "codigoBiometrico"},
+                        {"data" : "nombres"},
+                        {"data" : "apellidos"},
+                        {"data" : "tipoempleado"},
+                        {"data" : "fecha"},
+                        {"data" : "atraso"},
+                        {"data" : "tiempoAntes"},
+                        {"data" : "tiempoExtra"},
+                        {
+                            "data":   "active",
+                            render: function ( data, type, row ) {
+                                if (data != "-"){
+                                    if ( type === 'display' ) {
+                                        return '<input type="checkbox" class="editor-active">';
+                                    }
+                                }
+
+                                return data;
+                            },
+                            className: "dt-body-center"
+                        }
+                    ],
+                    order:false,
+                    select: {
+                        style: 'os',
+                        selector: 'td:not(:last-child)' // no row selection on last column
+                    },
+                    rowCallback: function ( row, data ) {
+                        // Set the checked state of the checkbox in the table
+                        $('input.editor-active', row).prop( 'checked', data.active == 1 );
+                    },
+                    dom: 'Bfrtip',
+                    buttons: [
+                        'copy','excel', 'pdf', 'print',
+                    ],
+
+                } );
 
             });
 
+
+
+            $('#guardar').click( function () {
+                console.log("Boton guardar");
+                var empleadosNoJustificados = [];
+                var queryInsert = "";
+                var oTable = $('#example').DataTable();
+                var dataes = oTable.rows().nodes();
+                $.each(dataes, function (index, value) {
+
+                    if ($(this).find('input').prop('checked') == true){
+                        console.log(value);
+                        //console.log(value.getElementsByTagName("td"));
+                        var itemNoJustificado = {
+                            "codigoBiometrico":  value.getElementsByTagName("td")[0].innerText,
+                            "nombres": value.getElementsByTagName("td")[1].innerText,
+                            "apellidos": value.getElementsByTagName("td")[2].innerText,
+                            "tipoempleado": value.getElementsByTagName("td")[3].innerText,
+                            "fecha": value.getElementsByTagName("td")[4].innerText,
+                            "atraso": value.getElementsByTagName("td")[5].innerText,
+                            "tiempoExtra": value.getElementsByTagName("td")[6].innerText,
+                            "tiempoAntes": value.getElementsByTagName("td")[7].innerText
+                        }
+                        empleadosNoJustificados.push(itemNoJustificado);
+                        console.log(convertDateTime(value.getElementsByTagName("td")[4].innerText));
+                        var insert = "INSERT INTO asistencias (codigobiometrico, nombres, apellidos, tipoempleado, fecha, tiempoatraso, tiempoantes, tiempoextra) " +
+                            "VALUES ('" + value.getElementsByTagName("td")[0].innerText + "', '"+value.getElementsByTagName("td")[1].innerText+"', '"+value.getElementsByTagName("td")[2].innerText+"', " +
+                            "'"+value.getElementsByTagName("td")[3].innerText+"','"+convertDateTime(value.getElementsByTagName("td")[4].innerText)+"', '"+value.getElementsByTagName("td")[5].innerText+"', " +
+                            "'"+value.getElementsByTagName("td")[6].innerText+"', '"+value.getElementsByTagName("td")[7].innerText+"');";
+                        queryInsert = queryInsert + insert;
+                    }
+
+                });
+                console.log(queryInsert);
+                console.log(empleadosNoJustificados);
+                $.ajax({
+                    url:'{{ (path('insertAsistenciaNoJustificado')) }}',
+                    type: "POST",
+                    dataType: "JSON",
+                    data: {
+                        "queryInsert": queryInsert
+                    },
+                    success: function (data)
+                    {
+                        console.log(data);
+                        //window.location= '{{ path("horario") }}';
+                    },
+                    error:  function (xhr, ajaxOptions, thrownError){
+                        console.log(xhr.status);
+                        console.log(thrownError);
+                    }
+                });
+            });
         });
 
+        function convertDateTime(datetime) {
+            var fecha = datetime.split(" ")[0];
+            var tiempo = datetime.split(" ")[1];
+
+            var ano = fecha.split("-")[2];
+            var mes = fecha.split("-")[1];
+            var dia = fecha.split("-")[0];
+
+            return ano +"-"+ mes +"-"+ dia +" "+ tiempo;
+        }
+
+        //FUNCION PARA CONVERTIR HORA A 24HORAS
+        function convert24horas(hora) {
+            const [time, modifier] = hora.split(' ');
+            let [hours, minutes] = time.split(':');
+
+            if (hours.split("").length == 1) {
+                //console.log("0"+hours);
+                hours = "0"+hours;
+            }
+            if (hours === '12') {
+                hours = '00';
+            }
+
+            if (modifier === 'p.m.' || modifier === 'PM') {
+                hours = parseInt(hours, 10) + 12;
+            }
+
+            return hours + ':' + minutes;
+        }
+
+
+        //FUNCION PARA RESTAR DOS HORAS
+        function tiempoEntrehoras(horaMayor, horaMenor) {
+            var menorMinutos = horaMenor.split(":")[1];
+            var menorHoras = horaMenor.split(":")[0];
+            var mayorMinutos = horaMayor.split(":")[1];
+            var mayorHoras = horaMayor.split(":")[0];
+            var transcurridoMinutos = mayorMinutos - menorMinutos;
+            var transcurridoHoras = mayorHoras - menorHoras;
+
+            if (transcurridoMinutos < 0) {
+                transcurridoHoras--;
+                transcurridoMinutos = 60 + transcurridoMinutos;
+            }
+
+            var horas = transcurridoHoras.toString();
+            var minutos = transcurridoMinutos.toString();
+
+            if (horas.length < 2) {
+                horas = "0"+horas;
+            }
+
+            if (minutos.length < 2) {
+                minutos = "0"+minutos;
+            }
+
+            return horas+":"+minutos;
+        }
+
+        //FUNCIÓN PARA TRANSFORMAR MINUTOS A HORAS:MINUTOS
+        function transformaMinutos(time) {
+            var hours = Math.floor( time / 60 );
+            var minutes = time - (hours*60);
+            console.log(hours);
+            console.log(minutes);
+            //var seconds = time % 60;
+
+            //Anteponiendo un 0 a los minutos si son menos de 10
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+
+            //Anteponiendo un 0 a los horas si son menos de 10
+            hours = hours < 10 ? '0' + hours : hours;
+
+            return hours + ":" + minutes;
+        }
+
+        //FUNCIÓN PARA TRANSFORMAR HORAS:MINUTOS A MINUTOS
+        function transformaHoras(hora) {
+            var hor = parseInt(hora.split(":")[0]);
+            var min = parseInt(hora.split(":")[1]);
+            return (hor*60)+min;
+        }
+
+        //FUNCIÓN QUE CALCULA ATRASOS Y HORAS EXTRAS
+        function calculaHorarios(horabase, horacomparar){
+            var numhorabase = horabase.split(":")[0];
+            var numhoracomparar = horacomparar.split(":")[0];
+            var numminutobase = horabase.split(":")[1];
+            var numminutocomparar = horacomparar.split(":")[1];
+            var retornotiempo = [];
+            var tiempo;
+            var descripciontiempo;
+            //console.log(parseInt(numhorabase));
+            //console.log(parseInt(numhoracomparar));
+
+            //TIEMPO ANTES DE LA HORA BASE
+            if (numhorabase > numhoracomparar){
+                tiempo = tiempoEntrehoras(horabase, horacomparar);
+                descripciontiempo = "ANTES";
+                retornotiempo.push(descripciontiempo);
+                var hor = parseInt(tiempo.split(":")[0]);
+                var min = parseInt(tiempo.split(":")[1]);
+                tiempo = (hor*60)+min;
+                retornotiempo.push(tiempo);
+            }
+            //TIEMPO DESPUÉS DE LA HORA BASE
+            if (numhorabase < numhoracomparar){
+                tiempo = tiempoEntrehoras(horacomparar, horabase);
+                descripciontiempo = "DESPUES";
+                retornotiempo.push(descripciontiempo);
+                var hor = parseInt(tiempo.split(":")[0]);
+                var min = parseInt(tiempo.split(":")[1]);
+                tiempo = (hor*60)+min;
+                retornotiempo.push(tiempo);
+            }
+            //TIEMPO IGUAL DE LA HORA BASE
+            if (numhorabase == numhoracomparar){
+                if (numminutobase > numminutocomparar){
+                    tiempo = tiempoEntrehoras(horabase, horacomparar);
+                    descripciontiempo = "ANTES";
+                    retornotiempo.push(descripciontiempo);
+                    var hor = parseInt(tiempo.split(":")[0]);
+                    var min = parseInt(tiempo.split(":")[1]);
+                    tiempo = (hor*60)+min;
+                    retornotiempo.push(tiempo);
+                }
+                if (numminutobase < numminutocomparar){
+                    tiempo = tiempoEntrehoras(horacomparar, horabase)
+                    descripciontiempo = "DESPUES";
+                    retornotiempo.push(descripciontiempo);
+                    var hor = parseInt(tiempo.split(":")[0]);
+                    var min = parseInt(tiempo.split(":")[1]);
+                    tiempo = (hor*60)+min;
+                    retornotiempo.push(tiempo);
+                }
+                if (numminutobase == numminutocomparar){
+                    tiempo = tiempoEntrehoras(horacomparar, horabase)
+                    descripciontiempo = "IGUAL";
+                    retornotiempo.push(descripciontiempo);
+                    var hor = parseInt(tiempo.split(":")[0]);
+                    var min = parseInt(tiempo.split(":")[1]);
+                    tiempo = (hor*60)+min;
+                    retornotiempo.push(tiempo);
+                }
+            }
+
+            console.log(retornotiempo);
+            return retornotiempo;
+        }
 
 
     </script>
