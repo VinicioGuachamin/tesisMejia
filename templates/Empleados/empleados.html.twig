@@ -10,6 +10,7 @@
 
 {% block body %}
 <br>
+    <div id="msgAlert1"></div>
     <div class="row">
         <div class="col-12">
 
@@ -45,7 +46,7 @@
                                 'App\\Controller\\EmpleadoAController::vistaEliminarEmpleadoA', { 'id' : a.id }
                             )) }}
 
-                            <a href='#modal-reset-1' data-toggle='modal' class="reset-user" style="color: #dead18;" title="resetear password"><i class="fa fa-cog"></i></a>
+                            <a href='#'  class="reset-user" style="color: #dead18;" title="resetear password"><i class="fa fa-cog"></i></a>
 
                             {% endif %}
 
@@ -77,7 +78,7 @@
                                 'App\\Controller\\EmpleadoBController::vistaEliminarEmpleadoB', { 'id' : b.id }
                             )) }}
 
-                             <a href='#modal-reset-1' data-toggle='modal' class="reset-user" style="color: #dead18;" title="resetear password"><i class="fa fa-cog"></i></a>
+                             <a href='#' class="reset-user" style="color: #dead18;" title="resetear password"><i class="fa fa-cog"></i></a>
                             {% endif %}
 
                         </td>
@@ -91,44 +92,6 @@
         </div>
     </div>
 
-
-    <div id="modal-reset-1" class="modal fade">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <i class="fas fa-edit"></i>Cambiar contraseña
-                    <div id="cod" style="visibility: hidden" ></div>
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="row" id="msgAlert1"></div>   
-
-                    <form id="form-reset-1">
-                        <div class="form-group row">
-                            <label for="pass1" class="col-sm-4 col-form-label">Nueva contraseña</label>
-                            <div class="col-sm-8">
-                            <input type="password" class="form-control" id="pass1" placeholder="Nueva contraseña">
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="pass2" class="col-sm-4 col-form-label">Repite contraseña</label>
-                            <div class="col-sm-8">
-                            <input type="password" class="form-control" id="pass2" placeholder="Repite contraseña">
-                            </div>
-                        </div>
-                         
-                    </form>
-
-                </div>
-
-                <div class="modal-footer">
-                    <button type="submit" class="resetPass btn btn-primary">Cambiar contraseña</button>
-                </div>
-
-            </div>
-        </div>
-    </div>
 
 
 
@@ -204,7 +167,42 @@
             var nombre= $(this).parents("tr").find("td").eq(0).text();
             var apellido= $(this).parents("tr").find("td").eq(1).text();
 
-            $("#cod").html(apellido+" "+nombre+" / " +id);
+            var cod=apellido+" "+nombre+" / " +id;
+
+
+            var eliminar=confirm("¿Deseas resetear el password de "+apellido+" "+nombre+" ?.");
+            if (eliminar){
+
+                    $.ajax({
+                        url:'/reset/password/user',
+                        type: "POST",
+                        dataType: "json",
+                        data: {
+                            "id": cod
+                        },
+                        async: true,
+                        success: function (data)
+                        {
+                            
+                            
+                            $( "#msgAlert1" ).append("<div id='msg' class='alert alert-info' role='alert'>"+data+" </div>");
+
+                            window.setTimeout(function() {
+                                $("#msg").fadeTo(400, 0).slideUp(400, function(){
+                                    $(this).remove(); 
+                                });
+                            }, 4000);
+
+            
+                
+                        }
+                    });
+          
+
+
+            }
+
+
 
           
             return false;            
@@ -218,7 +216,7 @@
         $(document).on('click', 'button.resetPass', function(event){
             that = $(this);
             var id= $('#cod').text();
-            console.log(id);
+          
         
 
             $('button.resetPass').attr("disabled", true);
