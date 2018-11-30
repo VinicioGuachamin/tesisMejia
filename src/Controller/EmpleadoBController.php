@@ -49,7 +49,7 @@ class EmpleadoBController extends Controller
 
             $nombre=  $empleado_b->getNombres(); 
             $apellido =  $empleado_b->getApellidos(); 
-            $username = $nombre . " ". $apellido . " / ".$id;
+            $username = $nombre . " ". $apellido . " / C.I. ".$empleado_b->getCedula();
 
 
             /*Guardo credenciales de acceso del empleado en la table User */
