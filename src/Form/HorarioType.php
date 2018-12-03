@@ -17,6 +17,7 @@ class HorarioType extends AbstractType
             ->add('miercoles')
             ->add('jueves')
             ->add('viernes')
+            ->add('guardar', SubmitType::class)
         ;
     }
 

@@ -19,6 +19,11 @@ class Horario
     /**
      * @ORM\Column(type="string", length=255)
      */
+    private $nombre;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
     private $lunes;
 
     /**
@@ -65,6 +70,24 @@ class Horario
     {
         return $this->id;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getNombre()
+    {
+        return $this->nombre;
+    }
+
+    /**
+     * @param mixed $nombre
+     */
+    public function setNombre($nombre): void
+    {
+        $this->nombre = $nombre;
+    }
+
+
 
     public function getLunes(): ?string
     {

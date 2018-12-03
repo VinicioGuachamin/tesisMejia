@@ -4,6 +4,7 @@
 
 {% block stylesheets %}
     {{ parent() }}
+    <link href="{{ asset('css/styles.css') }}" type="text/css" rel="stylesheet" />
     <link href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" type="text/css" rel="stylesheet" />
     <link href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css" type="text/css" rel="stylesheet" />
     <link href="https://cdn.datatables.net/select/1.2.7/css/select.dataTables.min.css" type="text/css" rel="stylesheet" />
@@ -12,12 +13,11 @@
 {% block body %}
     <div class="container">
         <br>
-        <h3>Suba el archivo excel</h3>
         <input type="file" id="files" name="files"/>
         <br><br>
-        <button type="button" class="btn btn-primary" id="calcularHorarios">Calcular</button>
+        <button type="button" class="btn btn-primary" id="calcularHorarios" disabled>Calcular</button>
         <br><br>
-        <div class="row">
+        <div class="row hide" id="tableExcel">
             <div class="col">
                 <table id="example" class="hover" cellspacing="0" width="100%">
                     <thead>
@@ -37,7 +37,7 @@
                 </table>
             </div>
         </div>
-        <div class="row">
+        <div class="row hide" id="btnGuardar" style="text-align: center">
             <div class="col">
                 <br><br>
                 <button type="button" class="btn btn-primary" id="guardar">Guardar</button>
@@ -114,18 +114,8 @@
                             console.log("XLSX");
                             //console.log(result);
                             dataExcel = result;
+                            document.getElementById("calcularHorarios").removeAttribute("disabled");
 
-                            // $('#example').dataTable( {
-                            //     data : result,
-                            //     columns: [
-                            //         {"data" : "Código"},
-                            //         {"data" : "Nombre"},
-                            //         {"data" : "Puesto"},
-                            //         {"data" : "Día"},
-                            //         {"data" : "Hora Marca"},
-                            //         {"data" : "Núm. Identificación"}
-                            //     ],
-                            // });
                         };
                         reader.readAsArrayBuffer(f);
                     }else{
@@ -144,18 +134,7 @@
                                     //console.log(oJS);
 
                                     dataExcel = oJS;
-
-                                    // $('#example').dataTable( {
-                                    //     data : oJS,
-                                    //     columns: [
-                                    //         {"data" : "Código"},
-                                    //         {"data" : "Nombre"},
-                                    //         {"data" : "Puesto"},
-                                    //         {"data" : "Día"},
-                                    //         {"data" : "Hora Marca"},
-                                    //         {"data" : 'Núm. Identificación'}
-                                    //     ],
-                                    // });
+                                    document.getElementById("calcularHorarios").removeAttribute("disabled");
                                 });
                             }
                             // Dígale a JS que comience a leer el archivo ... Podría retrasarlo si lo desea
@@ -865,6 +844,9 @@
                 var groupEmpleadosDias = [];
                 var groupDataExcel = groupBy(dataExcel, dataExcel => dataExcel.Código);
 
+                $('#tableExcel').removeClass("hide");
+                $('#btnGuardar').removeClass("hide");
+
                 for (var i=0; i<groupDataExcel.length; i++){
                     groupEmpleadosDias.push(
                         groupBy(groupDataExcel[i], function(item)  {
@@ -1071,6 +1053,9 @@
                         }
                     ],
                     order:false,
+                    paging: true,
+                    pageLength: 10,
+                    pagingType : 'full_numbers',
                     select: {
                         style: 'os',
                         selector: 'td:not(:last-child)' // no row selection on last column
@@ -1079,7 +1064,7 @@
                         // Set the checked state of the checkbox in the table
                         $('input.editor-active', row).prop( 'checked', data.active == 1 );
                     },
-                    dom: 'Bfrtip',
+                    dom: 'Blfrtip',
                     buttons: [
                         'copy','excel', 'pdf', 'print',
                     ],
@@ -1133,7 +1118,7 @@
                     success: function (data)
                     {
                         console.log(data);
-                        //window.location= '{{ path("horario") }}';
+                        window.location= '{{ path("asistencia") }}';
                     },
                     error:  function (xhr, ajaxOptions, thrownError){
                         console.log(xhr.status);

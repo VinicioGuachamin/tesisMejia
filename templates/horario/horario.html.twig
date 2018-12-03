@@ -6,20 +6,56 @@
     {{ parent() }}
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.1/css/tempusdominus-bootstrap-4.min.css" />
+    <link href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" type="text/css" rel="stylesheet" />
 {% endblock %}
 
 {% block body %}
-    <div class="row" id="horario">
-        <div class="col-md-1"></div>
-        <div class="col-md-10">
-
-            {{ render(controller(
-                'App\\Controller\\HorarioController::crearHorario'
-            )) }}
-
+    <div class="row" id="horario" style="text-align: right">
+        <div class="col">
+            <button type="button" class="btn btn-info" id="btnAgregarHorario">
+                <i class="fas fa-plus"></i> Agregar sueldo
+            </button>
         </div>
-        <div class="col-md-1"></div>
     </div>
+
+    <br>
+    <table id="tableHorarios" class="hover" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Lunes</th>
+            <th>Martes</th>
+            <th>Miércoles</th>
+            <th>Jueves</th>
+            <th>Viernes</th>
+            <th>Sábado</th>
+            <th>Domingo</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for hor in horarios %}
+            <tr>
+                <td>{{ hor.nombre }}</td>
+                <td>{{ hor.lunes }}</td>
+                <td>{{ hor.martes  }}</td>
+                <td>{{ hor.miercoles  }}</td>
+                <td>{{ hor.jueves  }}</td>
+                <td>{{ hor.viernes  }}</td>
+                <td>{{ hor.sabado  }}</td>
+                <td>{{ hor.domingo  }}</td>
+                <td>
+                    <a href="{{ path('horario_vista_editar', {'id':hor.id}) }}" id="editar{{ hor.id }}" role="button" class="btn btn-primary btn-sm">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                </td>
+            </tr>
+        {% else %}
+            No users have been found.
+        {% endfor %}
+
+        </tbody>
+    </table>
 {% endblock %}
 
 {% block javascripts %}
@@ -27,183 +63,23 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.0-alpha14/js/tempusdominus-bootstrap-4.min.js"></script>
-
+    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript">
 
         $(document).ready(function() {
-            $('#lunesTime_1').datetimepicker({
-                format: 'LT'
-            });
-            $('#lunesTime_2').datetimepicker({
-                format: 'LT'
-            });
-            $('#lunesTime_3').datetimepicker({
-                format: 'LT'
-            });
-            $('#lunesTime_4').datetimepicker({
-                format: 'LT',
-                //format: 'HH:mm',
+            $("#btnAgregarHorario").click( function(){
+                window.location= '{{ path("horario_nuevo") }}';
             });
 
-            $('#martesTime_1').datetimepicker({
-                format: 'LT'
-            });
-            $('#martesTime_2').datetimepicker({
-                format: 'LT'
-            });
-            $('#martesTime_3').datetimepicker({
-                format: 'LT'
-            });
-            $('#martesTime_4').datetimepicker({
-                format: 'LT',
-                //format: 'HH:mm',
-            });
-
-            $('#miercolesTime_1').datetimepicker({
-                format: 'LT'
-            });
-            $('#miercolesTime_2').datetimepicker({
-                format: 'LT'
-            });
-            $('#miercolesTime_3').datetimepicker({
-                format: 'LT'
-            });
-            $('#miercolesTime_4').datetimepicker({
-                format: 'LT',
-                //format: 'HH:mm',
-            });
-
-            $('#juevesTime_1').datetimepicker({
-                format: 'LT'
-            });
-            $('#juevesTime_2').datetimepicker({
-                format: 'LT'
-            });
-            $('#juevesTime_3').datetimepicker({
-                format: 'LT'
-            });
-            $('#juevesTime_4').datetimepicker({
-                format: 'LT',
-                //format: 'HH:mm',
-            });
-
-            $('#viernesTime_1').datetimepicker({
-                format: 'LT'
-            });
-            $('#viernesTime_2').datetimepicker({
-                format: 'LT'
-            });
-            $('#viernesTime_3').datetimepicker({
-                format: 'LT'
-            });
-            $('#viernesTime_4').datetimepicker({
-                format: 'LT',
-                //format: 'HH:mm',
-            });
-
-            $('#sabadoTime_1').datetimepicker({
-                format: 'LT'
-            });
-            $('#sabadoTime_2').datetimepicker({
-                format: 'LT'
-            });
-            $('#sabadoTime_3').datetimepicker({
-                format: 'LT'
-            });
-            $('#sabadoTime_4').datetimepicker({
-                format: 'LT',
-                //format: 'HH:mm',
-            });
-
-            $('#domingoTime_1').datetimepicker({
-                format: 'LT'
-            });
-            $('#domingoTime_2').datetimepicker({
-                format: 'LT'
-            });
-            $('#domingoTime_3').datetimepicker({
-                format: 'LT'
-            });
-            $('#domingoTime_4').datetimepicker({
-                format: 'LT',
-                //format: 'HH:mm',
-            });
-
-
-            $("#guardarHorario").click( function(){
-                var lunes = [];
-                var martes = [];
-                var miercoles = [];
-                var jueves = [];
-                var viernes = [];
-                var sabado = [];
-                var domingo = [];
-
-                lunes.push($("#lunesTime_1").find("input").val());
-                lunes.push($("#lunesTime_2").find("input").val());
-                lunes.push($("#lunesTime_3").find("input").val());
-                lunes.push($("#lunesTime_4").find("input").val());
-
-                martes.push($("#martesTime_1").find("input").val());
-                martes.push($("#martesTime_2").find("input").val());
-                martes.push($("#martesTime_3").find("input").val());
-                martes.push($("#martesTime_4").find("input").val());
-
-                miercoles.push($("#miercolesTime_1").find("input").val());
-                miercoles.push($("#miercolesTime_2").find("input").val());
-                miercoles.push($("#miercolesTime_3").find("input").val());
-                miercoles.push($("#miercolesTime_4").find("input").val());
-
-                jueves.push($("#juevesTime_1").find("input").val());
-                jueves.push($("#juevesTime_2").find("input").val());
-                jueves.push($("#juevesTime_3").find("input").val());
-                jueves.push($("#juevesTime_4").find("input").val());
-
-                viernes.push($("#viernesTime_1").find("input").val());
-                viernes.push($("#viernesTime_2").find("input").val());
-                viernes.push($("#viernesTime_3").find("input").val());
-                viernes.push($("#viernesTime_4").find("input").val());
-
-                sabado.push($("#sabadoTime_1").find("input").val());
-                sabado.push($("#sabadoTime_2").find("input").val());
-                sabado.push($("#sabadoTime_3").find("input").val());
-                sabado.push($("#sabadoTime_4").find("input").val());
-
-                domingo.push($("#domingoTime_1").find("input").val());
-                domingo.push($("#domingoTime_2").find("input").val());
-                domingo.push($("#domingoTime_3").find("input").val());
-                domingo.push($("#domingoTime_4").find("input").val());
-
-                console.log(lunes.toString());
-                console.log(martes.toString());
-                console.log(miercoles.toString());
-                console.log(jueves.toString());
-                console.log(viernes.toString());
-                console.log(sabado.toString());
-                console.log(domingo.toString());
-
-                $.ajax({
-                    url:'{{ (path('crearHorarioAjax')) }}',
-                    type: "POST",
-                    dataType: "JSON",
-                    data: {
-                        "lunes": lunes.toString(),
-                        "martes": martes.toString(),
-                        "miercoles": miercoles.toString(),
-                        "jueves": jueves.toString(),
-                        "viernes": viernes.toString(),
-                        "sabado": sabado.toString(),
-                        "domingo": domingo.toString(),
-                    },
-                    success: function (data)
-                    {
-                        console.log(data);
-                        window.location= '{{ path("horario") }}';
+            $(document).ready(function() {
+                $('#tableHorarios').DataTable({
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
                     }
                 });
-            });
-        } );
+            } );
 
+        } );
 
     </script>
 {% endblock %}

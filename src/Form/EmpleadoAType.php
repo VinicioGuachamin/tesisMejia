@@ -164,7 +164,7 @@ class EmpleadoAType extends AbstractType
             ->add('horario', EntityType::class, array(
                 'placeholder' => 'Seleccione...',
                 'class' => Horario::class,
-                'choice_label' => 'id'))
+                'choice_label' => 'nombre'))
             ->add('valor', TextType::class, array('mapped'=>false))
             //->add('canton')
             //->add('parroquia')

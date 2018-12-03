@@ -53,14 +53,14 @@ class ControlController extends Controller
      */
     public function insertarNoJustificados(Request $request)
     {
-            $queryInsert = $request->request->get('queryInsert');
-            $em1 = $this->getDoctrine()->getManager();
-            $RAW_QUERY1 = $queryInsert;
-            $statement1 = $em1->getConnection()->prepare($RAW_QUERY1);
-            $statement1->execute();
-            //$asistencia = $statement1->fetchAll();
+        $queryInsert = $request->request->get('queryInsert');
+        $em1 = $this->getDoctrine()->getManager();
+        $RAW_QUERY1 = $queryInsert;
+        $statement1 = $em1->getConnection()->prepare($RAW_QUERY1);
+        $statement1->execute();
+        //$asistencia = $statement1->fetchAll();
 
-
+        //return $this->redirectToRoute('asistencia');
         return new JsonResponse('{ "data": "ok" }');
         //return $this->redirectToRoute('empleados');
     }

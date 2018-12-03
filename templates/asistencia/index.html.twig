@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Asistencia{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" type="text/css" rel="stylesheet" />
+{% endblock %}
+
+{% block body %}
+    <br>
+    <table id="tableAsistencia" class="hover" cellspacing="0" width="100%">
+        <thead>
+        <tr>
+            <th>Código</th>
+            <th>Nombres</th>
+            <th>Apellidos</th>
+            <th>Tipos Empleados</th>
+            <th>Fecha</th>
+            <th>Atraso</th>
+            <th>Antes</th>
+            <th>Extra</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for asis in asistencia %}
+            <tr>
+                <td>{{ asis.codigobiometrico }}</td>
+                <td>{{ asis.nombres }}</td>
+                <td>{{ asis.apellidos }}</td>
+                <td>{{ asis.tipoempleado }}</td>
+                <td>{{ asis.fecha | date("m/d/Y H:i:s") }}</td>
+                <td>{{ asis.tiempoatraso }}</td>
+                <td>{{ asis.tiempoantes }}</td>
+                <td>{{ asis.tiempoextra }}</td>
+                <td>{{ render(controller(
+                        'App\\Controller\\AsistenciaController::vistaEliminarAsistencia', { 'id' : asis.id }
+                    )) }}
+                </td>
+            </tr>
+        {% else %}
+            No users have been found.
+        {% endfor %}
+
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+            $('#tableAsistencia').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
+                }
+            });
+        } );
+
+
+    </script>
+{% endblock %}

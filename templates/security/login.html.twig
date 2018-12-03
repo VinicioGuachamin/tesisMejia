@@ -29,16 +29,12 @@
       <input type="password" name="_password" id="inputPassword" class="form-control" placeholder="Password" required="">
       {# Ruta a la que redirige si hay éxito #}
       <input type="hidden" name="_target_path" value="{{ path('empleados') }}" />
-      <div class="checkbox mb-3">
-        <label>
-          <input type="checkbox" value="remember-me"> Recordar
-        </label>
-      </div>
+
       <button class="btn btn-lg btn-primary btn-block" type="submit">Entrar</button>
-      <a href="#" id="forget" style="background-color: rgba(0,123,255,.5); color:white" >¿Ha olvidado su contraseña?</a>
+      <a href="#" id="forget" style="color:white" >¿Ha olvidado su contraseña?</a>
        <div id="msgAlert"></div>
       <br>
-      <p class="mt-5 mb-3" style="color:black">© 2018-2019</p>
+     <!-- <p class="mt-5 mb-3" style="color:black">© 2018-2019</p>-->
     </form>
 
 </div>
