@@ -76,7 +76,7 @@ class SecurityController extends AbstractController
     */
     public function resetPasswordUser(Request $request)
     {
-        $password = $request->request->get('password');
+     
 
         $email = $request->request->get('id');
 
@@ -86,8 +86,10 @@ class SecurityController extends AbstractController
 
         $user = $userArray[0];
 
+        $password = $user->getUsername();
 
-   
+
+    
         $user->setPassword(
              $this->encoder->encodePassword($user, $password)
         );
@@ -97,7 +99,7 @@ class SecurityController extends AbstractController
         $entityManager->flush();
 
 
-        return new JsonResponse("Aviso! Hemos actualizado su contraseña correctamente");
+        return new JsonResponse("Aviso! Hemos actualizado la contraseña por defecto correctamente");
        
     }
 

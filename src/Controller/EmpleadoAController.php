@@ -58,7 +58,7 @@ class EmpleadoAController extends Controller
 
             $nombre=  $empleado_a->getNombres(); 
             $apellido =  $empleado_a->getApellidos(); 
-            $username = $nombre . " ". $apellido . " / ".$id;
+            $username = $nombre . " ". $apellido . " / C.I. ".$empleado_a->getCedula();
 
             /*Guardo credenciales de acceso del empleado en la table User */
             $manager = $this->getDoctrine()->getManager();
