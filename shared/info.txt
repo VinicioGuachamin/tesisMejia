@@ -49,3 +49,64 @@
     "Canal": "IN",
     "Idioma": "es-EC"
 },
+
+
+-----
+
+ {
+    "Codigo": 1,
+    "UrlAsistente": "/Documento/ListaCertificados/{idSubCategoria}",
+    "UrlOrigen": "/Documento/ListaSubCategoriaCertificados/{idCategoria}",
+    "Titulo": "Cuentas",
+    "Subtitulo": "",
+    "Flujo": "ProductoCertificadoCuentas",
+    "TextoCancelar": "Cancelar",
+    "UrlCancelar": "/Documento/ListaSubCategoriaCertificados/{idCategoria}",
+    "TextoContinuar": "Continuar",
+    "UrlContinuar": "/Documento/CertificadoProductoCuenta/Bancario/{idCertificado}",
+    "Pasos": 3,
+    "PasoActual": 1,
+    "Critico": false,
+    "Canal": "IN",
+    "Idioma": "es-EC",
+    "TipoSegundoFactor":null,
+    "UrlRegresar":null
+  },
+  {
+    "Codigo": 2,
+    "UrlAsistente": "/Documento/CertificadoProductoCuenta/Bancario/{idCertificado}",
+    "UrlOrigen": "/Documento/ListaCertificados/{idSubCategoria}",
+    "Titulo": "Certificado de Cuenta",
+    "Subtitulo": "",
+    "Flujo": "ProductoCertificadoCuentas",
+    "TextoCancelar": "Cancelar",
+    "UrlCancelar": "/Documento/ListaCertificados/{idSubCategoria}",
+    "TextoContinuar": "Continuar",
+    "UrlContinuar": "/Documento/CertificadoProductoCuenta/ConfirmacionDatos",
+    "Pasos": 3,
+    "PasoActual": 2,
+    "Critico": false,
+    "Canal": "IN",
+    "Idioma": "es-EC",
+    "TipoSegundoFactor":null,
+    "UrlRegresar":null
+  },
+   {
+    "Codigo": 2,
+    "UrlAsistente": "/Documento/CertificadoProductoCuenta/ConfirmacionDatos",
+    "UrlOrigen": "/Documento/CertificadoProductoCuenta/Bancario/{idCertificado}",
+    "Titulo": "Confirmación de Datos",
+    "Subtitulo": "",
+    "Flujo": "ProductoCertificadoCuentas",
+    "TextoCancelar": "Cancelar",
+    "UrlCancelar": "/Documento/CertificadoProductoCuenta/Bancario/{idCertificado}",
+    "TextoContinuar": "Continuar",
+    "UrlContinuar": "/Documento/Listado",
+    "Pasos": 3,
+    "PasoActual": 3,
+    "Critico": false,
+    "Canal": "IN",
+    "Idioma": "es-EC",
+    "TipoSegundoFactor":null,
+    "UrlRegresar":null
+  }
