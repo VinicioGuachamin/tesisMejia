@@ -1,0 +1,693 @@
+/************************************************************************/
+/*  OBJETO: Script dinámico de creación de asistente                    */
+/*  DESCRIPCION:                                                        */
+/*  Creación de asistente para Producto Certificado Cuentas             */
+/*  Permite insertar por múltiples canales e idiomas                    */
+/*                                                                      */
+/*  NOTA:                                                               */
+/*  - Si el registro no existe, lo inserta.                             */
+/*  - Si el registro ya existe, no actualiza ni duplica.                */
+/*  - Solo muestra mensaje indicando que ya existe.                     */
+/************************************************************************/
+
+USE pr_canales
+GO
+
+SET NOCOUNT ON
+GO
+
+/*=======================================================================
+  1. PARÁMETROS CONFIGURABLES
+========================================================================*/
+
+DECLARE @Flujo VARCHAR(100) = 'ProductoCertificadoCuentas'
+
+-- Puedes usar: 'IN', 'BK', 'BM', 'IN,BK', 'IN,BK,BM', etc.
+DECLARE @Canales VARCHAR(200) = 'IN'
+
+-- Puedes usar: 'es-EC', 'en-US', 'es-EC,en-US' o 'ALL'
+DECLARE @Idiomas VARCHAR(200) = 'es-EC,en-US'
+
+/*=======================================================================
+  2. TABLAS TEMPORALES DE CONTROL
+========================================================================*/
+
+DECLARE @canales TABLE (
+    Canal VARCHAR(20) PRIMARY KEY
+)
+
+DECLARE @idiomas TABLE (
+    Idioma VARCHAR(20) PRIMARY KEY,
+    id_id_idioma INT NULL
+)
+
+DECLARE @data TABLE (
+    Codigo INT,
+
+    UrlAsistente VARCHAR(300),
+    UrlOrigen VARCHAR(300),
+    UrlCancelar VARCHAR(300),
+    UrlContinuar VARCHAR(300),
+
+    TituloEs NVARCHAR(200),
+    SubtituloEs NVARCHAR(300),
+    TextoCancelarEs NVARCHAR(100),
+    TextoContinuarEs NVARCHAR(100),
+
+    TituloEn NVARCHAR(200),
+    SubtituloEn NVARCHAR(300),
+    TextoCancelarEn NVARCHAR(100),
+    TextoContinuarEn NVARCHAR(100),
+
+    Flujo VARCHAR(100),
+    Pasos INT,
+    PasoActual INT,
+    Critico BIT,
+
+    TipoSegundoFactor VARCHAR(50) NULL,
+    UrlRegresar VARCHAR(300) NULL
+)
+
+DECLARE @rutas TABLE (
+    Url VARCHAR(300) PRIMARY KEY,
+    Verbo VARCHAR(10),
+    CrearMenu BIT,
+    MenuNombreEs NVARCHAR(200) NULL,
+    MenuNombreEn NVARCHAR(200) NULL,
+    Orden INT NULL
+)
+
+/*=======================================================================
+  3. CARGA DE CANALES
+========================================================================*/
+
+INSERT INTO @canales (Canal)
+SELECT DISTINCT LTRIM(RTRIM(value))
+FROM STRING_SPLIT(@Canales, ',')
+WHERE LTRIM(RTRIM(value)) <> ''
+
+IF NOT EXISTS (SELECT 1 FROM @canales)
+BEGIN
+    RAISERROR('Debe configurar al menos un canal en @Canales.', 16, 1)
+    RETURN
+END
+
+/*=======================================================================
+  4. CARGA DE IDIOMAS
+========================================================================*/
+
+IF UPPER(LTRIM(RTRIM(@Idiomas))) = 'ALL'
+BEGIN
+    INSERT INTO @idiomas (Idioma)
+    VALUES ('es-EC'), ('en-US')
+END
+ELSE
+BEGIN
+    INSERT INTO @idiomas (Idioma)
+    SELECT DISTINCT LTRIM(RTRIM(value))
+    FROM STRING_SPLIT(@Idiomas, ',')
+    WHERE LTRIM(RTRIM(value)) <> ''
+END
+
+UPDATE i
+SET i.id_id_idioma = wi.id_id_idioma
+FROM @idiomas i
+INNER JOIN dbo.wp_idioma wi
+    ON wi.id_nemonico = i.Idioma
+
+IF EXISTS (SELECT 1 FROM @idiomas WHERE id_id_idioma IS NULL)
+BEGIN
+    SELECT 'Idioma no encontrado en dbo.wp_idioma: ' + Idioma AS Error
+    FROM @idiomas
+    WHERE id_id_idioma IS NULL
+
+    RAISERROR('Existen idiomas configurados que no están registrados en dbo.wp_idioma.', 16, 1)
+    RETURN
+END
+
+IF EXISTS (
+    SELECT 1
+    FROM @idiomas
+    WHERE Idioma NOT IN ('es-EC', 'en-US')
+)
+BEGIN
+    SELECT 'Idioma sin traducción configurada en el script: ' + Idioma AS Error
+    FROM @idiomas
+    WHERE Idioma NOT IN ('es-EC', 'en-US')
+
+    RAISERROR('El script solo tiene traducciones configuradas para es-EC y en-US.', 16, 1)
+    RETURN
+END
+
+/*=======================================================================
+  5. DATA BASE DEL JSON CON TRADUCCIONES
+========================================================================*/
+
+INSERT INTO @data (
+    Codigo,
+    UrlAsistente,
+    UrlOrigen,
+    UrlCancelar,
+    UrlContinuar,
+
+    TituloEs,
+    SubtituloEs,
+    TextoCancelarEs,
+    TextoContinuarEs,
+
+    TituloEn,
+    SubtituloEn,
+    TextoCancelarEn,
+    TextoContinuarEn,
+
+    Flujo,
+    Pasos,
+    PasoActual,
+    Critico,
+    TipoSegundoFactor,
+    UrlRegresar
+)
+VALUES
+(
+    1,
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/ListaSubCategoriaCertificados/{idCategoria}',
+    '/Documento/ListaSubCategoriaCertificados/{idCategoria}',
+    '/Documento/CertificadoProductoCuenta/Bancario/{idCertificado}',
+
+    N'Cuentas',
+    N'',
+    N'Cancelar',
+    N'Continuar',
+
+    N'Accounts',
+    N'',
+    N'Cancel',
+    N'Continue',
+
+    'ProductoCertificadoCuentas',
+    3,
+    1,
+    0,
+    NULL,
+    NULL
+),
+(
+    2,
+    '/Documento/CertificadoProductoCuenta/Bancario/{idCertificado}',
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/CertificadoProductoCuenta/ConfirmacionDatos',
+
+    N'Certificado de Cuenta',
+    N'',
+    N'Cancelar',
+    N'Continuar',
+
+    N'Account Certificate',
+    N'',
+    N'Cancel',
+    N'Continue',
+
+    'ProductoCertificadoCuentas',
+    3,
+    2,
+    0,
+    NULL,
+    NULL
+),
+(
+    2,
+    '/Documento/CertificadoProductoCuenta/ConfirmacionDatos',
+    '/Documento/CertificadoProductoCuenta/Bancario/{idCertificado}',
+    '/Documento/CertificadoProductoCuenta/Bancario/{idCertificado}',
+    '/Documento/Listado',
+
+    N'Confirmación de Datos',
+    N'',
+    N'Cancelar',
+    N'Continuar',
+
+    N'Data Confirmation',
+    N'',
+    N'Cancel',
+    N'Continue',
+
+    'ProductoCertificadoCuentas',
+    3,
+    3,
+    0,
+    NULL,
+    NULL
+)
+
+/*=======================================================================
+  6. CONFIGURACIÓN DE RUTAS
+     Para este flujo se asume GET para todas las rutas del JSON.
+========================================================================*/
+
+INSERT INTO @rutas (
+    Url,
+    Verbo,
+    CrearMenu,
+    MenuNombreEs,
+    MenuNombreEn,
+    Orden
+)
+SELECT DISTINCT
+    x.Url,
+    'GET' AS Verbo,
+    0 AS CrearMenu,
+    NULL AS MenuNombreEs,
+    NULL AS MenuNombreEn,
+    NULL AS Orden
+FROM (
+    SELECT UrlAsistente AS Url
+    FROM @data
+    WHERE UrlAsistente IS NOT NULL AND UrlAsistente <> ''
+
+    UNION
+
+    SELECT UrlOrigen AS Url
+    FROM @data
+    WHERE UrlOrigen IS NOT NULL AND UrlOrigen <> ''
+
+    UNION
+
+    SELECT UrlCancelar AS Url
+    FROM @data
+    WHERE UrlCancelar IS NOT NULL AND UrlCancelar <> ''
+
+    UNION
+
+    SELECT UrlContinuar AS Url
+    FROM @data
+    WHERE UrlContinuar IS NOT NULL AND UrlContinuar <> ''
+) x
+
+-- Marcar como menú las rutas que son UrlAsistente.
+-- Se crean con visible = 0, igual al estilo del script original.
+UPDATE r
+SET r.CrearMenu = 1,
+    r.MenuNombreEs = d.TituloEs,
+    r.MenuNombreEn = d.TituloEn,
+    r.Orden = d.PasoActual
+FROM @rutas r
+INNER JOIN @data d
+    ON d.UrlAsistente = r.Url
+
+/*=======================================================================
+  7. VALIDAR / INSERTAR WP_RUTA
+========================================================================*/
+
+SELECT
+    'Ya existe la ruta ' + r.Url +
+    ' con canal ' + c.Canal +
+    ' y verbo ' + r.Verbo +
+    ' en wp_ruta' AS Mensaje
+FROM @canales c
+CROSS JOIN @rutas r
+WHERE EXISTS (
+    SELECT 1
+    FROM dbo.wp_ruta wr
+    WHERE wr.ru_direccion = r.Url
+      AND wr.ru_canal = c.Canal
+      AND wr.ru_verbo = r.Verbo
+)
+
+INSERT INTO dbo.wp_ruta (
+    ru_canal,
+    ru_verbo,
+    ru_direccion,
+    ru_recurso,
+    ru_estado,
+    ru_fecha
+)
+SELECT
+    c.Canal,
+    r.Verbo,
+    r.Url,
+    NULL,
+    'ACT',
+    GETDATE()
+FROM @canales c
+CROSS JOIN @rutas r
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM dbo.wp_ruta wr
+    WHERE wr.ru_direccion = r.Url
+      AND wr.ru_canal = c.Canal
+      AND wr.ru_verbo = r.Verbo
+)
+
+SELECT 'Rutas insertadas: ' + CONVERT(VARCHAR, @@ROWCOUNT) AS Resultado
+
+/*=======================================================================
+  8. VALIDAR / INSERTAR WP_MENU
+========================================================================*/
+
+SELECT
+    'Ya existe menú para la ruta ' + r.Url +
+    ' con canal ' + c.Canal +
+    ' en wp_menu' AS Mensaje
+FROM @canales c
+INNER JOIN @rutas r
+    ON r.CrearMenu = 1
+INNER JOIN dbo.wp_ruta wr
+    ON wr.ru_direccion = r.Url
+   AND wr.ru_canal = c.Canal
+   AND wr.ru_verbo = r.Verbo
+WHERE EXISTS (
+    SELECT 1
+    FROM dbo.wp_menu wm
+    WHERE wm.ru_id_ruta = wr.ru_id_ruta
+)
+
+INSERT INTO dbo.wp_menu (
+    ru_id_ruta,
+    me_id_padre,
+    me_orden,
+    me_critica,
+    me_visible,
+    me_favorito,
+    me_icono,
+    me_estado,
+    me_fecha
+)
+SELECT
+    wr.ru_id_ruta,
+    0,
+    ISNULL(r.Orden, 1),
+    0,
+    0,
+    0,
+    NULL,
+    'ACT',
+    GETDATE()
+FROM @canales c
+INNER JOIN @rutas r
+    ON r.CrearMenu = 1
+INNER JOIN dbo.wp_ruta wr
+    ON wr.ru_direccion = r.Url
+   AND wr.ru_canal = c.Canal
+   AND wr.ru_verbo = r.Verbo
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM dbo.wp_menu wm
+    WHERE wm.ru_id_ruta = wr.ru_id_ruta
+)
+
+SELECT 'Menús insertados: ' + CONVERT(VARCHAR, @@ROWCOUNT) AS Resultado
+
+/*=======================================================================
+  9. VALIDAR / INSERTAR WP_MENU_IDIOMA
+========================================================================*/
+
+SELECT
+    'Ya existe menú idioma para la ruta ' + r.Url +
+    ', canal ' + c.Canal +
+    ', idioma ' + i.Idioma +
+    ' en wp_menu_idioma' AS Mensaje
+FROM @canales c
+INNER JOIN @rutas r
+    ON r.CrearMenu = 1
+INNER JOIN dbo.wp_ruta wr
+    ON wr.ru_direccion = r.Url
+   AND wr.ru_canal = c.Canal
+   AND wr.ru_verbo = r.Verbo
+INNER JOIN dbo.wp_menu wm
+    ON wm.ru_id_ruta = wr.ru_id_ruta
+INNER JOIN @idiomas i
+    ON i.Idioma IN ('es-EC', 'en-US')
+WHERE EXISTS (
+    SELECT 1
+    FROM dbo.wp_menu_idioma mi
+    WHERE mi.me_id_menu = wm.me_id_menu
+      AND mi.id_id_idioma = i.id_id_idioma
+)
+
+INSERT INTO dbo.wp_menu_idioma (
+    id_id_idioma,
+    me_id_menu,
+    mi_nombre,
+    mi_etiqueta
+)
+SELECT
+    i.id_id_idioma,
+    wm.me_id_menu,
+    CASE
+        WHEN i.Idioma = 'es-EC' THEN r.MenuNombreEs
+        WHEN i.Idioma = 'en-US' THEN r.MenuNombreEn
+    END AS mi_nombre,
+    NULL
+FROM @canales c
+INNER JOIN @rutas r
+    ON r.CrearMenu = 1
+INNER JOIN dbo.wp_ruta wr
+    ON wr.ru_direccion = r.Url
+   AND wr.ru_canal = c.Canal
+   AND wr.ru_verbo = r.Verbo
+INNER JOIN dbo.wp_menu wm
+    ON wm.ru_id_ruta = wr.ru_id_ruta
+INNER JOIN @idiomas i
+    ON i.Idioma IN ('es-EC', 'en-US')
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM dbo.wp_menu_idioma mi
+    WHERE mi.me_id_menu = wm.me_id_menu
+      AND mi.id_id_idioma = i.id_id_idioma
+)
+AND CASE
+        WHEN i.Idioma = 'es-EC' THEN r.MenuNombreEs
+        WHEN i.Idioma = 'en-US' THEN r.MenuNombreEn
+    END IS NOT NULL
+
+SELECT 'Menú idioma insertado: ' + CONVERT(VARCHAR, @@ROWCOUNT) AS Resultado
+
+/*=======================================================================
+  10. VALIDAR / INSERTAR WP_ASISTENTE
+========================================================================*/
+
+SELECT
+    'Ya existe asistente para la ruta ' + d.UrlAsistente +
+    ', flujo ' + d.Flujo +
+    ', paso ' + CONVERT(VARCHAR, d.PasoActual) +
+    ', canal ' + c.Canal +
+    ' en wp_asistente' AS Mensaje
+FROM @data d
+INNER JOIN @canales c
+    ON 1 = 1
+INNER JOIN @rutas conf_asistente
+    ON conf_asistente.Url = d.UrlAsistente
+INNER JOIN dbo.wp_ruta ruta_asistente
+    ON ruta_asistente.ru_direccion = d.UrlAsistente
+   AND ruta_asistente.ru_canal = c.Canal
+   AND ruta_asistente.ru_verbo = conf_asistente.Verbo
+WHERE d.Flujo = @Flujo
+  AND EXISTS (
+        SELECT 1
+        FROM dbo.wp_asistente a
+        WHERE a.ru_id_ruta_asistente = ruta_asistente.ru_id_ruta
+          AND a.as_flujo = d.Flujo
+          AND a.as_pasos = d.Pasos
+          AND a.as_paso_actual = d.PasoActual
+  )
+
+INSERT INTO dbo.wp_asistente (
+    ru_id_ruta_asistente,
+    ru_id_ruta_origen,
+    ru_id_ruta_cancelar,
+    ru_id_ruta_continuar,
+    as_flujo,
+    as_pasos,
+    as_paso_actual,
+    as_paso_critico,
+    as_estado,
+    as_fecha
+)
+SELECT
+    ruta_asistente.ru_id_ruta,
+    ruta_origen.ru_id_ruta,
+    ruta_cancelar.ru_id_ruta,
+    ruta_continuar.ru_id_ruta,
+    d.Flujo,
+    d.Pasos,
+    d.PasoActual,
+    d.Critico,
+    'ACT',
+    GETDATE()
+FROM @data d
+INNER JOIN @canales c
+    ON 1 = 1
+INNER JOIN @rutas conf_asistente
+    ON conf_asistente.Url = d.UrlAsistente
+INNER JOIN @rutas conf_origen
+    ON conf_origen.Url = d.UrlOrigen
+INNER JOIN @rutas conf_cancelar
+    ON conf_cancelar.Url = d.UrlCancelar
+INNER JOIN @rutas conf_continuar
+    ON conf_continuar.Url = d.UrlContinuar
+INNER JOIN dbo.wp_ruta ruta_asistente
+    ON ruta_asistente.ru_direccion = d.UrlAsistente
+   AND ruta_asistente.ru_canal = c.Canal
+   AND ruta_asistente.ru_verbo = conf_asistente.Verbo
+INNER JOIN dbo.wp_ruta ruta_origen
+    ON ruta_origen.ru_direccion = d.UrlOrigen
+   AND ruta_origen.ru_canal = c.Canal
+   AND ruta_origen.ru_verbo = conf_origen.Verbo
+INNER JOIN dbo.wp_ruta ruta_cancelar
+    ON ruta_cancelar.ru_direccion = d.UrlCancelar
+   AND ruta_cancelar.ru_canal = c.Canal
+   AND ruta_cancelar.ru_verbo = conf_cancelar.Verbo
+INNER JOIN dbo.wp_ruta ruta_continuar
+    ON ruta_continuar.ru_direccion = d.UrlContinuar
+   AND ruta_continuar.ru_canal = c.Canal
+   AND ruta_continuar.ru_verbo = conf_continuar.Verbo
+WHERE d.Flujo = @Flujo
+  AND NOT EXISTS (
+        SELECT 1
+        FROM dbo.wp_asistente a
+        WHERE a.ru_id_ruta_asistente = ruta_asistente.ru_id_ruta
+          AND a.as_flujo = d.Flujo
+          AND a.as_pasos = d.Pasos
+          AND a.as_paso_actual = d.PasoActual
+  )
+
+SELECT 'Asistentes insertados: ' + CONVERT(VARCHAR, @@ROWCOUNT) AS Resultado
+
+/*=======================================================================
+  11. VALIDAR / INSERTAR WP_ASISTENTE_IDIOMA
+========================================================================*/
+
+SELECT
+    'Ya existe asistente_idioma para la ruta ' + d.UrlAsistente +
+    ', flujo ' + d.Flujo +
+    ', paso ' + CONVERT(VARCHAR, d.PasoActual) +
+    ', canal ' + c.Canal +
+    ', idioma ' + i.Idioma +
+    ' en wp_asistente_idioma' AS Mensaje
+FROM @data d
+INNER JOIN @canales c
+    ON 1 = 1
+INNER JOIN @rutas conf_asistente
+    ON conf_asistente.Url = d.UrlAsistente
+INNER JOIN dbo.wp_ruta ruta_asistente
+    ON ruta_asistente.ru_direccion = d.UrlAsistente
+   AND ruta_asistente.ru_canal = c.Canal
+   AND ruta_asistente.ru_verbo = conf_asistente.Verbo
+INNER JOIN dbo.wp_asistente a
+    ON a.ru_id_ruta_asistente = ruta_asistente.ru_id_ruta
+   AND a.as_flujo = d.Flujo
+   AND a.as_pasos = d.Pasos
+   AND a.as_paso_actual = d.PasoActual
+INNER JOIN @idiomas i
+    ON i.Idioma IN ('es-EC', 'en-US')
+WHERE d.Flujo = @Flujo
+  AND EXISTS (
+        SELECT 1
+        FROM dbo.wp_asistente_idioma ai
+        WHERE ai.as_id_asistente = a.as_id_asistente
+          AND ai.id_id_idioma = i.id_id_idioma
+  )
+
+INSERT INTO dbo.wp_asistente_idioma (
+    id_id_idioma,
+    as_id_asistente,
+    ai_titulo,
+    ai_subtitulo,
+    ai_boton_cancelar,
+    ai_boton_continuar
+)
+SELECT
+    i.id_id_idioma,
+    a.as_id_asistente,
+
+    CASE
+        WHEN i.Idioma = 'es-EC' THEN d.TituloEs
+        WHEN i.Idioma = 'en-US' THEN d.TituloEn
+    END AS ai_titulo,
+
+    CASE
+        WHEN i.Idioma = 'es-EC' THEN d.SubtituloEs
+        WHEN i.Idioma = 'en-US' THEN d.SubtituloEn
+    END AS ai_subtitulo,
+
+    CASE
+        WHEN i.Idioma = 'es-EC' THEN d.TextoCancelarEs
+        WHEN i.Idioma = 'en-US' THEN d.TextoCancelarEn
+    END AS ai_boton_cancelar,
+
+    CASE
+        WHEN i.Idioma = 'es-EC' THEN d.TextoContinuarEs
+        WHEN i.Idioma = 'en-US' THEN d.TextoContinuarEn
+    END AS ai_boton_continuar
+FROM @data d
+INNER JOIN @canales c
+    ON 1 = 1
+INNER JOIN @rutas conf_asistente
+    ON conf_asistente.Url = d.UrlAsistente
+INNER JOIN dbo.wp_ruta ruta_asistente
+    ON ruta_asistente.ru_direccion = d.UrlAsistente
+   AND ruta_asistente.ru_canal = c.Canal
+   AND ruta_asistente.ru_verbo = conf_asistente.Verbo
+INNER JOIN dbo.wp_asistente a
+    ON a.ru_id_ruta_asistente = ruta_asistente.ru_id_ruta
+   AND a.as_flujo = d.Flujo
+   AND a.as_pasos = d.Pasos
+   AND a.as_paso_actual = d.PasoActual
+INNER JOIN @idiomas i
+    ON i.Idioma IN ('es-EC', 'en-US')
+WHERE d.Flujo = @Flujo
+  AND NOT EXISTS (
+        SELECT 1
+        FROM dbo.wp_asistente_idioma ai
+        WHERE ai.as_id_asistente = a.as_id_asistente
+          AND ai.id_id_idioma = i.id_id_idioma
+  )
+
+SELECT 'Asistente idioma insertado: ' + CONVERT(VARCHAR, @@ROWCOUNT) AS Resultado
+
+/*=======================================================================
+  12. VALIDACIÓN FINAL
+========================================================================*/
+
+SELECT
+    a.as_id_asistente AS Codigo,
+    ruta_asistente.ru_direccion AS UrlAsistente,
+    ruta_origen.ru_direccion AS UrlOrigen,
+    ai.ai_titulo AS Titulo,
+    ai.ai_subtitulo AS Subtitulo,
+    a.as_flujo AS Flujo,
+    ai.ai_boton_cancelar AS TextoCancelar,
+    ruta_cancelar.ru_direccion AS UrlCancelar,
+    ai.ai_boton_continuar AS TextoContinuar,
+    ruta_continuar.ru_direccion AS UrlContinuar,
+    a.as_pasos AS Pasos,
+    a.as_paso_actual AS PasoActual,
+    CONVERT(BIT, a.as_paso_critico) AS Critico,
+    ruta_asistente.ru_canal AS Canal,
+    idioma.id_nemonico AS Idioma
+FROM dbo.wp_asistente a
+INNER JOIN dbo.wp_asistente_idioma ai
+    ON ai.as_id_asistente = a.as_id_asistente
+INNER JOIN dbo.wp_idioma idioma
+    ON idioma.id_id_idioma = ai.id_id_idioma
+INNER JOIN dbo.wp_ruta ruta_asistente
+    ON ruta_asistente.ru_id_ruta = a.ru_id_ruta_asistente
+INNER JOIN dbo.wp_ruta ruta_origen
+    ON ruta_origen.ru_id_ruta = a.ru_id_ruta_origen
+INNER JOIN dbo.wp_ruta ruta_cancelar
+    ON ruta_cancelar.ru_id_ruta = a.ru_id_ruta_cancelar
+INNER JOIN dbo.wp_ruta ruta_continuar
+    ON ruta_continuar.ru_id_ruta = a.ru_id_ruta_continuar
+INNER JOIN @canales c
+    ON c.Canal = ruta_asistente.ru_canal
+INNER JOIN @idiomas i
+    ON i.id_id_idioma = idioma.id_id_idioma
+WHERE a.as_flujo = @Flujo
+ORDER BY
+    ruta_asistente.ru_canal,
+    idioma.id_nemonico,
+    a.as_paso_actual
+
+GO
