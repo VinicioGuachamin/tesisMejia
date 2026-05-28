@@ -1,0 +1,530 @@
+USE pr_canales
+GO
+
+SET NOCOUNT ON
+GO
+
+/*=======================================================================
+  PARÁMETROS
+========================================================================*/
+
+-- Primero ejecutar en 0 para revisar.
+-- Cambiar a 1 para borrar realmente.
+DECLARE @EjecutarDelete BIT = 0
+
+-- Canales donde se hizo la carga: 'IN', 'IN,BK', etc.
+DECLARE @ListaCanales VARCHAR(200) = 'IN'
+
+-- Si está en 1 intenta borrar también menú/ruta.
+-- Igual solo borra rutas si ya no quedan referenciadas por wp_asistente.
+DECLARE @BorrarMenusYRutas BIT = 1
+
+/*=======================================================================
+  TABLAS TEMPORALES
+========================================================================*/
+
+DECLARE @TblCanales TABLE (
+    Canal VARCHAR(20) PRIMARY KEY
+)
+
+DECLARE @TblData TABLE (
+    RowId INT IDENTITY(1,1) PRIMARY KEY,
+    UrlAsistente VARCHAR(300),
+    UrlOrigen VARCHAR(300),
+    UrlCancelar VARCHAR(300),
+    UrlContinuar VARCHAR(300),
+    Flujo VARCHAR(150),
+    Pasos INT,
+    PasoActual INT
+)
+
+DECLARE @TblRutas TABLE (
+    Url VARCHAR(300),
+    Verbo VARCHAR(10),
+    PRIMARY KEY (Url, Verbo)
+)
+
+DECLARE @TblAsistentesEliminar TABLE (
+    as_id_asistente INT PRIMARY KEY
+)
+
+DECLARE @TblMenusEliminar TABLE (
+    me_id_menu INT PRIMARY KEY
+)
+
+DECLARE @TblRutasEliminar TABLE (
+    ru_id_ruta INT PRIMARY KEY
+)
+
+/*=======================================================================
+  CARGA DE CANALES
+========================================================================*/
+
+INSERT INTO @TblCanales (Canal)
+SELECT DISTINCT LTRIM(RTRIM(value))
+FROM STRING_SPLIT(@ListaCanales, ',')
+WHERE LTRIM(RTRIM(value)) <> ''
+
+IF NOT EXISTS (SELECT 1 FROM @TblCanales)
+BEGIN
+    RAISERROR('Debe configurar al menos un canal en @ListaCanales.', 16, 1)
+    RETURN
+END
+
+/*=======================================================================
+  DATA BASE DE LOS OBJETOS JSON
+========================================================================*/
+
+INSERT INTO @TblData (
+    UrlAsistente,
+    UrlOrigen,
+    UrlCancelar,
+    UrlContinuar,
+    Flujo,
+    Pasos,
+    PasoActual
+)
+VALUES
+/* Producto Cuentas */
+(
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/ListaSubCategoriaCertificados/{idCategoria}',
+    '/Documento/ListaSubCategoriaCertificados/{idCategoria}',
+    '/Documento/CertificadoProductoCuenta/Bancario/{idCertificado}',
+    'ProductoCertificadoCuentas',
+    3,
+    1
+),
+(
+    '/Documento/CertificadoProductoCuenta/Bancario/{idCertificado}',
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/CertificadoProductoCuenta/ConfirmacionDatos',
+    'ProductoCertificadoCuentas',
+    3,
+    2
+),
+(
+    '/Documento/CertificadoProductoCuenta/ConfirmacionDatos',
+    '/Documento/CertificadoProductoCuenta/Bancario/{idCertificado}',
+    '/Documento/CertificadoProductoCuenta/Bancario/{idCertificado}',
+    '/Documento/Listado',
+    'ProductoCertificadoCuentas',
+    3,
+    3
+),
+
+/* Producto Tarjetas Crédito */
+(
+    '/Documento/CertificadoProductoTarjetas/Bancario/{idCertificado}',
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/CertificadoProductoTarjetas/ConfirmacionDatos',
+    'ProductoCertificadoCuentas',
+    3,
+    2
+),
+(
+    '/Documento/CertificadoProductoTarjetas/ConfirmacionDatos',
+    '/Documento/CertificadoProductoTarjetas/Bancario/{idCertificado}',
+    '/Documento/CertificadoProductoTarjetas/Bancario/{idCertificado}',
+    '/Documento/Listado',
+    'ProductoCertificadoCuentas',
+    3,
+    3
+),
+
+/* Producto Créditos */
+(
+    '/Documento/CertificadoProductoCreditos/Bancario/{idCertificado}',
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/CertificadoProductoCreditos/ConfirmacionDatos',
+    'ProductoCertificadoCuentas',
+    3,
+    2
+),
+(
+    '/Documento/CertificadoProductoCreditos/ConfirmacionDatos',
+    '/Documento/CertificadoProductoCreditos/Bancario/{idCertificado}',
+    '/Documento/CertificadoProductoCreditos/Bancario/{idCertificado}',
+    '/Documento/Listado',
+    'ProductoCertificadoCuentas',
+    3,
+    3
+),
+
+/* Producto Inversiones */
+(
+    '/Documento/CertificadoProductoInversiones/Bancario/{idCertificado}',
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/CertificadoProductoInversiones/ConfirmacionDatos',
+    'ProductoCertificadoCuentas',
+    3,
+    2
+),
+(
+    '/Documento/CertificadoProductoInversiones/ConfirmacionDatos',
+    '/Documento/CertificadoProductoInversiones/Bancario/{idCertificado}',
+    '/Documento/CertificadoProductoInversiones/Bancario/{idCertificado}',
+    '/Documento/Listado',
+    'ProductoCertificadoCuentas',
+    3,
+    3
+),
+
+/* Otros Riesgos */
+(
+    '/Documento/OtrosCertificados/Riesgos/{idCategoria}',
+    '/Documento/ListaSubCategoriaCertificados/{idCategoria}',
+    '/Documento/ListaSubCategoriaCertificados/{idCategoria}',
+    '/Documento/OtrosCertificados/ConfirmacionDatos',
+    'OtrosCertificados',
+    2,
+    1
+),
+(
+    '/Documento/OtrosCertificados/ConfirmacionDatos',
+    '/Documento/OtrosCertificados/Riesgos/{idCategoria}',
+    '/Documento/OtrosCertificados/Riesgos/{idCategoria}',
+    '/Documento/Listado',
+    'OtrosCertificados',
+    2,
+    2
+),
+
+/* Movimientos Cuentas */
+(
+    '/Documento/Movimientos/Cuentas/{idCategoria}',
+    '/Documento/ListaSubCategoriaCertificados/{idCategoria}',
+    '/Documento/ListaSubCategoriaCertificados/{idCategoria}',
+    '/Documento/Movimientos/ConfirmacionDatos',
+    'MovimientoCertificadoCuentas',
+    2,
+    1
+),
+(
+    '/Documento/Movimientos/ConfirmacionDatos',
+    '/Documento/Movimientos/Cuentas/{idCategoria}',
+    '/Documento/Movimientos/Cuentas/{idCategoria}',
+    '/Documento/Listado',
+    'MovimientoCertificadoCuentas',
+    2,
+    2
+),
+
+/* Movimientos Tarjetas Crédito */
+(
+    '/Documento/Movimientos/TarjetasCredito/{idCategoria}',
+    '/Documento/ListaSubCategoriaCertificados/{idCategoria}',
+    '/Documento/ListaSubCategoriaCertificados/{idCategoria}',
+    '/Documento/Movimientos/ConfirmacionDatos',
+    'MovimientoCertificadoCuentas',
+    2,
+    1
+),
+(
+    '/Documento/Movimientos/ConfirmacionDatos',
+    '/Documento/Movimientos/TarjetasCredito/{idCategoria}',
+    '/Documento/Movimientos/TarjetasCredito/{idCategoria}',
+    '/Documento/Listado',
+    'MovimientoCertificadoCuentas',
+    2,
+    2
+),
+
+/* Movimientos Transferencias Internacionales */
+(
+    '/Documento/Movimientos/Transferencias/Internacionales/{idCertificado}',
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/Movimientos/ConfirmacionDatos',
+    'MovimientoCertificadoCuentas',
+    3,
+    2
+),
+(
+    '/Documento/Movimientos/ConfirmacionDatos',
+    '/Documento/Movimientos/Transferencias/Internacionales/{idCertificado}',
+    '/Documento/Movimientos/Transferencias/Internacionales/{idCertificado}',
+    '/Documento/Listado',
+    'MovimientoCertificadoCuentas',
+    3,
+    3
+),
+
+/* Movimientos Transferencias Locales */
+(
+    '/Documento/Movimientos/Transferencias/Locales/{idCertificado}',
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/Movimientos/ConfirmacionDatos',
+    'MovimientoCertificadoCuentas',
+    3,
+    2
+),
+(
+    '/Documento/Movimientos/ConfirmacionDatos',
+    '/Documento/Movimientos/Transferencias/Locales/{idCertificado}',
+    '/Documento/Movimientos/Transferencias/Locales/{idCertificado}',
+    '/Documento/Listado',
+    'MovimientoCertificadoCuentas',
+    3,
+    3
+)
+
+/*=======================================================================
+  ARMAR LISTA DE RUTAS INVOLUCRADAS
+========================================================================*/
+
+INSERT INTO @TblRutas (
+    Url,
+    Verbo
+)
+SELECT DISTINCT
+    x.Url,
+    'GET' AS Verbo
+FROM (
+    SELECT UrlAsistente AS Url FROM @TblData WHERE UrlAsistente IS NOT NULL AND UrlAsistente <> ''
+    UNION
+    SELECT UrlOrigen AS Url FROM @TblData WHERE UrlOrigen IS NOT NULL AND UrlOrigen <> ''
+    UNION
+    SELECT UrlCancelar AS Url FROM @TblData WHERE UrlCancelar IS NOT NULL AND UrlCancelar <> ''
+    UNION
+    SELECT UrlContinuar AS Url FROM @TblData WHERE UrlContinuar IS NOT NULL AND UrlContinuar <> ''
+) x
+
+/*=======================================================================
+  IDENTIFICAR ASISTENTES A ELIMINAR
+========================================================================*/
+
+INSERT INTO @TblAsistentesEliminar (
+    as_id_asistente
+)
+SELECT DISTINCT
+    wa.as_id_asistente
+FROM @TblData td
+INNER JOIN @TblCanales tc
+    ON 1 = 1
+INNER JOIN @TblRutas trAsistente
+    ON trAsistente.Url = td.UrlAsistente
+INNER JOIN @TblRutas trOrigen
+    ON trOrigen.Url = td.UrlOrigen
+INNER JOIN @TblRutas trCancelar
+    ON trCancelar.Url = td.UrlCancelar
+INNER JOIN @TblRutas trContinuar
+    ON trContinuar.Url = td.UrlContinuar
+INNER JOIN dbo.wp_ruta rutaAsistente
+    ON rutaAsistente.ru_direccion = td.UrlAsistente
+   AND rutaAsistente.ru_canal = tc.Canal
+   AND rutaAsistente.ru_verbo = trAsistente.Verbo
+INNER JOIN dbo.wp_ruta rutaOrigen
+    ON rutaOrigen.ru_direccion = td.UrlOrigen
+   AND rutaOrigen.ru_canal = tc.Canal
+   AND rutaOrigen.ru_verbo = trOrigen.Verbo
+INNER JOIN dbo.wp_ruta rutaCancelar
+    ON rutaCancelar.ru_direccion = td.UrlCancelar
+   AND rutaCancelar.ru_canal = tc.Canal
+   AND rutaCancelar.ru_verbo = trCancelar.Verbo
+INNER JOIN dbo.wp_ruta rutaContinuar
+    ON rutaContinuar.ru_direccion = td.UrlContinuar
+   AND rutaContinuar.ru_canal = tc.Canal
+   AND rutaContinuar.ru_verbo = trContinuar.Verbo
+INNER JOIN dbo.wp_asistente wa
+    ON wa.ru_id_ruta_asistente = rutaAsistente.ru_id_ruta
+   AND wa.ru_id_ruta_origen = rutaOrigen.ru_id_ruta
+   AND wa.ru_id_ruta_cancelar = rutaCancelar.ru_id_ruta
+   AND wa.ru_id_ruta_continuar = rutaContinuar.ru_id_ruta
+   AND wa.as_flujo = td.Flujo
+   AND wa.as_pasos = td.Pasos
+   AND wa.as_paso_actual = td.PasoActual
+
+/*=======================================================================
+  IDENTIFICAR MENÚS Y RUTAS A ELIMINAR
+========================================================================*/
+
+INSERT INTO @TblMenusEliminar (
+    me_id_menu
+)
+SELECT DISTINCT
+    wm.me_id_menu
+FROM @TblCanales tc
+INNER JOIN @TblRutas tr
+    ON 1 = 1
+INNER JOIN dbo.wp_ruta wr
+    ON wr.ru_direccion = tr.Url
+   AND wr.ru_canal = tc.Canal
+   AND wr.ru_verbo = tr.Verbo
+INNER JOIN dbo.wp_menu wm
+    ON wm.ru_id_ruta = wr.ru_id_ruta
+WHERE @BorrarMenusYRutas = 1
+
+INSERT INTO @TblRutasEliminar (
+    ru_id_ruta
+)
+SELECT DISTINCT
+    wr.ru_id_ruta
+FROM @TblCanales tc
+INNER JOIN @TblRutas tr
+    ON 1 = 1
+INNER JOIN dbo.wp_ruta wr
+    ON wr.ru_direccion = tr.Url
+   AND wr.ru_canal = tc.Canal
+   AND wr.ru_verbo = tr.Verbo
+WHERE @BorrarMenusYRutas = 1
+
+/*=======================================================================
+  PREVISUALIZACIÓN
+========================================================================*/
+
+SELECT 'wp_asistente_idioma a eliminar' AS Tabla, COUNT(*) AS Total
+FROM dbo.wp_asistente_idioma wai
+INNER JOIN @TblAsistentesEliminar tae
+    ON tae.as_id_asistente = wai.as_id_asistente
+
+UNION ALL
+
+SELECT 'wp_asistente a eliminar' AS Tabla, COUNT(*) AS Total
+FROM dbo.wp_asistente wa
+INNER JOIN @TblAsistentesEliminar tae
+    ON tae.as_id_asistente = wa.as_id_asistente
+
+UNION ALL
+
+SELECT 'wp_menu_idioma a eliminar' AS Tabla, COUNT(*) AS Total
+FROM dbo.wp_menu_idioma mi
+INNER JOIN @TblMenusEliminar tme
+    ON tme.me_id_menu = mi.me_id_menu
+
+UNION ALL
+
+SELECT 'wp_menu a eliminar' AS Tabla, COUNT(*) AS Total
+FROM dbo.wp_menu wm
+INNER JOIN @TblMenusEliminar tme
+    ON tme.me_id_menu = wm.me_id_menu
+
+UNION ALL
+
+SELECT 'wp_ruta a eliminar si no queda referenciada' AS Tabla, COUNT(*) AS Total
+FROM dbo.wp_ruta wr
+INNER JOIN @TblRutasEliminar tre
+    ON tre.ru_id_ruta = wr.ru_id_ruta
+
+SELECT 
+    wa.as_id_asistente,
+    ra.ru_direccion AS UrlAsistente,
+    ro.ru_direccion AS UrlOrigen,
+    rc.ru_direccion AS UrlCancelar,
+    rco.ru_direccion AS UrlContinuar,
+    wa.as_flujo,
+    wa.as_pasos,
+    wa.as_paso_actual,
+    ra.ru_canal
+FROM dbo.wp_asistente wa
+INNER JOIN @TblAsistentesEliminar tae
+    ON tae.as_id_asistente = wa.as_id_asistente
+INNER JOIN dbo.wp_ruta ra
+    ON ra.ru_id_ruta = wa.ru_id_ruta_asistente
+INNER JOIN dbo.wp_ruta ro
+    ON ro.ru_id_ruta = wa.ru_id_ruta_origen
+INNER JOIN dbo.wp_ruta rc
+    ON rc.ru_id_ruta = wa.ru_id_ruta_cancelar
+INNER JOIN dbo.wp_ruta rco
+    ON rco.ru_id_ruta = wa.ru_id_ruta_continuar
+ORDER BY 
+    wa.as_flujo,
+    ra.ru_canal,
+    wa.as_pasos,
+    wa.as_paso_actual,
+    wa.as_id_asistente
+
+/*=======================================================================
+  SI SOLO QUIERES PREVISUALIZAR, SE DETIENE AQUÍ
+========================================================================*/
+
+IF @EjecutarDelete = 0
+BEGIN
+    PRINT 'PREVISUALIZACIÓN COMPLETADA. No se borró nada.'
+    PRINT 'Para borrar realmente, cambia @EjecutarDelete = 1.'
+    RETURN
+END
+
+/*=======================================================================
+  BORRADO REAL
+========================================================================*/
+
+BEGIN TRY
+    BEGIN TRANSACTION
+
+    /* 1. Borrar idiomas del asistente */
+    DELETE wai
+    FROM dbo.wp_asistente_idioma wai
+    INNER JOIN @TblAsistentesEliminar tae
+        ON tae.as_id_asistente = wai.as_id_asistente
+
+    PRINT 'wp_asistente_idioma eliminados: ' + CONVERT(VARCHAR, @@ROWCOUNT)
+
+    /* 2. Borrar asistente */
+    DELETE wa
+    FROM dbo.wp_asistente wa
+    INNER JOIN @TblAsistentesEliminar tae
+        ON tae.as_id_asistente = wa.as_id_asistente
+
+    PRINT 'wp_asistente eliminados: ' + CONVERT(VARCHAR, @@ROWCOUNT)
+
+    IF @BorrarMenusYRutas = 1
+    BEGIN
+        /* 3. Borrar idioma de menú */
+        DELETE mi
+        FROM dbo.wp_menu_idioma mi
+        INNER JOIN @TblMenusEliminar tme
+            ON tme.me_id_menu = mi.me_id_menu
+
+        PRINT 'wp_menu_idioma eliminados: ' + CONVERT(VARCHAR, @@ROWCOUNT)
+
+        /* 4. Borrar menú */
+        DELETE wm
+        FROM dbo.wp_menu wm
+        INNER JOIN @TblMenusEliminar tme
+            ON tme.me_id_menu = wm.me_id_menu
+
+        PRINT 'wp_menu eliminados: ' + CONVERT(VARCHAR, @@ROWCOUNT)
+
+        /* 5. Borrar rutas solo si ya no quedan referenciadas */
+        DELETE wr
+        FROM dbo.wp_ruta wr
+        INNER JOIN @TblRutasEliminar tre
+            ON tre.ru_id_ruta = wr.ru_id_ruta
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM dbo.wp_asistente wa
+            WHERE wa.ru_id_ruta_asistente = wr.ru_id_ruta
+               OR wa.ru_id_ruta_origen = wr.ru_id_ruta
+               OR wa.ru_id_ruta_cancelar = wr.ru_id_ruta
+               OR wa.ru_id_ruta_continuar = wr.ru_id_ruta
+        )
+        AND NOT EXISTS (
+            SELECT 1
+            FROM dbo.wp_menu wm
+            WHERE wm.ru_id_ruta = wr.ru_id_ruta
+        )
+
+        PRINT 'wp_ruta eliminadas: ' + CONVERT(VARCHAR, @@ROWCOUNT)
+    END
+
+    COMMIT TRANSACTION
+
+    PRINT 'BORRADO COMPLETADO CORRECTAMENTE.'
+END TRY
+BEGIN CATCH
+    IF @@TRANCOUNT > 0
+        ROLLBACK TRANSACTION
+
+    PRINT 'ERROR AL BORRAR. SE HIZO ROLLBACK.'
+
+    SELECT 
+        ERROR_NUMBER() AS ErrorNumber,
+        ERROR_MESSAGE() AS ErrorMessage
+END CATCH
+GO
