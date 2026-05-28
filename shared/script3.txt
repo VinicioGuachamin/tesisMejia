@@ -1,0 +1,1239 @@
+/************************************************************************/
+/*  OBJETO: Script dinámico de creación de asistentes                   */
+/*  DESCRIPCION:                                                        */
+/*  Creación de asistentes para certificados y movimientos              */
+/*                                                                      */
+/*  CARACTERÍSTICAS:                                                    */
+/*  - Permite insertar por múltiples canales: IN, BK, BM, etc.          */
+/*  - Permite insertar por uno o varios idiomas: es-EC, en-US o ALL.    */
+/*  - No actualiza registros existentes.                                */
+/*  - No elimina registros existentes.                                  */
+/*  - No duplica registros existentes.                                  */
+/*  - Si ya existe, muestra mensaje.                                    */
+/*  - Si hay registros repetidos en el JSON, los omite del insert.      */
+/************************************************************************/
+
+USE pr_canales
+GO
+
+SET NOCOUNT ON
+GO
+
+/*=======================================================================
+  1. PARÁMETROS CONFIGURABLES
+========================================================================*/
+
+-- Ejemplos:
+-- 'IN'
+-- 'BK'
+-- 'IN,BK'
+-- 'IN,BK,BM'
+DECLARE @ListaCanales VARCHAR(200) = 'IN'
+
+-- Ejemplos:
+-- 'es-EC'
+-- 'en-US'
+-- 'es-EC,en-US'
+-- 'ALL'
+DECLARE @ListaIdiomas VARCHAR(200) = 'es-EC,en-US'
+
+/*=======================================================================
+  2. TABLAS TEMPORALES DE CONTROL
+========================================================================*/
+
+DECLARE @TblCanales TABLE (
+    Canal VARCHAR(20) PRIMARY KEY
+)
+
+DECLARE @TblIdiomas TABLE (
+    Idioma VARCHAR(20) PRIMARY KEY,
+    id_id_idioma INT NULL
+)
+
+DECLARE @TblDataCarga TABLE (
+    RowId INT IDENTITY(1,1) PRIMARY KEY,
+    Codigo INT,
+
+    UrlAsistente VARCHAR(300),
+    UrlOrigen VARCHAR(300),
+    UrlCancelar VARCHAR(300),
+    UrlContinuar VARCHAR(300),
+
+    TituloEs NVARCHAR(250),
+    SubtituloEs NVARCHAR(300),
+    TextoCancelarEs NVARCHAR(150),
+    TextoContinuarEs NVARCHAR(150),
+
+    TituloEn NVARCHAR(250),
+    SubtituloEn NVARCHAR(300),
+    TextoCancelarEn NVARCHAR(150),
+    TextoContinuarEn NVARCHAR(150),
+
+    Flujo VARCHAR(150),
+    Pasos INT,
+    PasoActual INT,
+    Critico BIT,
+
+    TipoSegundoFactor VARCHAR(50) NULL,
+    UrlRegresar VARCHAR(300) NULL
+)
+
+DECLARE @TblData TABLE (
+    RowId INT PRIMARY KEY,
+    Codigo INT,
+
+    UrlAsistente VARCHAR(300),
+    UrlOrigen VARCHAR(300),
+    UrlCancelar VARCHAR(300),
+    UrlContinuar VARCHAR(300),
+
+    TituloEs NVARCHAR(250),
+    SubtituloEs NVARCHAR(300),
+    TextoCancelarEs NVARCHAR(150),
+    TextoContinuarEs NVARCHAR(150),
+
+    TituloEn NVARCHAR(250),
+    SubtituloEn NVARCHAR(300),
+    TextoCancelarEn NVARCHAR(150),
+    TextoContinuarEn NVARCHAR(150),
+
+    Flujo VARCHAR(150),
+    Pasos INT,
+    PasoActual INT,
+    Critico BIT,
+
+    TipoSegundoFactor VARCHAR(50) NULL,
+    UrlRegresar VARCHAR(300) NULL
+)
+
+DECLARE @TblRutas TABLE (
+    Url VARCHAR(300),
+    Verbo VARCHAR(10),
+    CrearMenu BIT,
+    MenuNombreEs NVARCHAR(250) NULL,
+    MenuNombreEn NVARCHAR(250) NULL,
+    Orden INT NULL,
+    PRIMARY KEY (Url, Verbo)
+)
+
+/*=======================================================================
+  3. CARGA DE CANALES
+========================================================================*/
+
+INSERT INTO @TblCanales (Canal)
+SELECT DISTINCT LTRIM(RTRIM(value))
+FROM STRING_SPLIT(@ListaCanales, ',')
+WHERE LTRIM(RTRIM(value)) <> ''
+
+IF NOT EXISTS (SELECT 1 FROM @TblCanales)
+BEGIN
+    RAISERROR('Debe configurar al menos un canal en @ListaCanales.', 16, 1)
+    RETURN
+END
+
+/*=======================================================================
+  4. CARGA DE IDIOMAS
+========================================================================*/
+
+IF UPPER(LTRIM(RTRIM(@ListaIdiomas))) = 'ALL'
+BEGIN
+    INSERT INTO @TblIdiomas (Idioma)
+    VALUES ('es-EC'), ('en-US')
+END
+ELSE
+BEGIN
+    INSERT INTO @TblIdiomas (Idioma)
+    SELECT DISTINCT LTRIM(RTRIM(value))
+    FROM STRING_SPLIT(@ListaIdiomas, ',')
+    WHERE LTRIM(RTRIM(value)) <> ''
+END
+
+IF NOT EXISTS (SELECT 1 FROM @TblIdiomas)
+BEGIN
+    RAISERROR('Debe configurar al menos un idioma en @ListaIdiomas.', 16, 1)
+    RETURN
+END
+
+UPDATE ti
+SET ti.id_id_idioma = wi.id_id_idioma
+FROM @TblIdiomas ti
+INNER JOIN dbo.wp_idioma wi
+    ON wi.id_nemonico = ti.Idioma
+
+IF EXISTS (SELECT 1 FROM @TblIdiomas WHERE id_id_idioma IS NULL)
+BEGIN
+    SELECT 
+        'Idioma no encontrado en dbo.wp_idioma: ' + Idioma AS Mensaje
+    FROM @TblIdiomas
+    WHERE id_id_idioma IS NULL
+
+    RAISERROR('Existen idiomas configurados que no están registrados en dbo.wp_idioma.', 16, 1)
+    RETURN
+END
+
+IF EXISTS (
+    SELECT 1
+    FROM @TblIdiomas
+    WHERE Idioma NOT IN ('es-EC', 'en-US')
+)
+BEGIN
+    SELECT 
+        'Idioma sin traducción configurada en el script: ' + Idioma AS Mensaje
+    FROM @TblIdiomas
+    WHERE Idioma NOT IN ('es-EC', 'en-US')
+
+    RAISERROR('El script solo tiene traducciones configuradas para es-EC y en-US.', 16, 1)
+    RETURN
+END
+
+/*=======================================================================
+  5. DATA BASE DEL JSON CON TRADUCCIONES
+========================================================================*/
+
+INSERT INTO @TblDataCarga (
+    Codigo,
+    UrlAsistente,
+    UrlOrigen,
+    UrlCancelar,
+    UrlContinuar,
+
+    TituloEs,
+    SubtituloEs,
+    TextoCancelarEs,
+    TextoContinuarEs,
+
+    TituloEn,
+    SubtituloEn,
+    TextoCancelarEn,
+    TextoContinuarEn,
+
+    Flujo,
+    Pasos,
+    PasoActual,
+    Critico,
+    TipoSegundoFactor,
+    UrlRegresar
+)
+VALUES
+/*-------------------- ProductoCertificadoCuentas - Cuentas --------------------*/
+(
+    1,
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/ListaSubCategoriaCertificados/{idCategoria}',
+    '/Documento/ListaSubCategoriaCertificados/{idCategoria}',
+    '/Documento/CertificadoProductoCuenta/Bancario/{idCertificado}',
+
+    N'Cuentas',
+    N'',
+    N'Cancelar',
+    N'Continuar',
+
+    N'Accounts',
+    N'',
+    N'Cancel',
+    N'Continue',
+
+    'ProductoCertificadoCuentas',
+    3,
+    1,
+    0,
+    NULL,
+    NULL
+),
+(
+    2,
+    '/Documento/CertificadoProductoCuenta/Bancario/{idCertificado}',
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/CertificadoProductoCuenta/ConfirmacionDatos',
+
+    N'Certificado de Cuenta',
+    N'',
+    N'Cancelar',
+    N'Continuar',
+
+    N'Account Certificate',
+    N'',
+    N'Cancel',
+    N'Continue',
+
+    'ProductoCertificadoCuentas',
+    3,
+    2,
+    0,
+    NULL,
+    NULL
+),
+(
+    3,
+    '/Documento/CertificadoProductoCuenta/ConfirmacionDatos',
+    '/Documento/CertificadoProductoCuenta/Bancario/{idCertificado}',
+    '/Documento/CertificadoProductoCuenta/Bancario/{idCertificado}',
+    '/Documento/Listado',
+
+    N'Confirmación de Datos',
+    N'',
+    N'Cancelar',
+    N'Continuar',
+
+    N'Data Confirmation',
+    N'',
+    N'Cancel',
+    N'Continue',
+
+    'ProductoCertificadoCuentas',
+    3,
+    3,
+    0,
+    NULL,
+    NULL
+),
+
+/*-------------------- ProductoCertificadoCuentas - Tarjetas --------------------*/
+(
+    4,
+    '/Documento/CertificadoProductoTarjetas/Bancario/{idCertificado}',
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/CertificadoProductoTarjetas/ConfirmacionDatos',
+
+    N'Tarjetas de Crédito',
+    N'',
+    N'Cancelar',
+    N'Continuar',
+
+    N'Credit Cards',
+    N'',
+    N'Cancel',
+    N'Continue',
+
+    'ProductoCertificadoCuentas',
+    3,
+    2,
+    0,
+    NULL,
+    NULL
+),
+(
+    5,
+    '/Documento/CertificadoProductoTarjetas/ConfirmacionDatos',
+    '/Documento/CertificadoProductoTarjetas/Bancario/{idCertificado}',
+    '/Documento/CertificadoProductoTarjetas/Bancario/{idCertificado}',
+    '/Documento/Listado',
+
+    N'Confirmación de Datos',
+    N'',
+    N'Cancelar',
+    N'Continuar',
+
+    N'Data Confirmation',
+    N'',
+    N'Cancel',
+    N'Continue',
+
+    'ProductoCertificadoCuentas',
+    3,
+    3,
+    0,
+    NULL,
+    NULL
+),
+
+/*-------------------- ProductoCertificadoCuentas - Créditos --------------------*/
+(
+    6,
+    '/Documento/CertificadoProductoCreditos/Bancario/{idCertificado}',
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/CertificadoProductoCreditos/ConfirmacionDatos',
+
+    N'Créditos',
+    N'',
+    N'Cancelar',
+    N'Continuar',
+
+    N'Loans',
+    N'',
+    N'Cancel',
+    N'Continue',
+
+    'ProductoCertificadoCuentas',
+    3,
+    2,
+    0,
+    NULL,
+    NULL
+),
+(
+    7,
+    '/Documento/CertificadoProductoCreditos/ConfirmacionDatos',
+    '/Documento/CertificadoProductoCreditos/Bancario/{idCertificado}',
+    '/Documento/CertificadoProductoCreditos/Bancario/{idCertificado}',
+    '/Documento/Listado',
+
+    N'Confirmación de Datos',
+    N'',
+    N'Cancelar',
+    N'Continuar',
+
+    N'Data Confirmation',
+    N'',
+    N'Cancel',
+    N'Continue',
+
+    'ProductoCertificadoCuentas',
+    3,
+    3,
+    0,
+    NULL,
+    NULL
+),
+
+/*-------------------- ProductoCertificadoCuentas - Inversiones --------------------*/
+(
+    8,
+    '/Documento/CertificadoProductoInversiones/Bancario/{idCertificado}',
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/CertificadoProductoInversiones/ConfirmacionDatos',
+
+    N'Inversiones',
+    N'',
+    N'Cancelar',
+    N'Continuar',
+
+    N'Investments',
+    N'',
+    N'Cancel',
+    N'Continue',
+
+    'ProductoCertificadoCuentas',
+    3,
+    2,
+    0,
+    NULL,
+    NULL
+),
+(
+    9,
+    '/Documento/CertificadoProductoInversiones/ConfirmacionDatos',
+    '/Documento/CertificadoProductoInversiones/Bancario/{idCertificado}',
+    '/Documento/CertificadoProductoInversiones/Bancario/{idCertificado}',
+    '/Documento/Listado',
+
+    N'Confirmación de Datos',
+    N'',
+    N'Cancelar',
+    N'Continuar',
+
+    N'Data Confirmation',
+    N'',
+    N'Cancel',
+    N'Continue',
+
+    'ProductoCertificadoCuentas',
+    3,
+    3,
+    0,
+    NULL,
+    NULL
+),
+
+/*-------------------- OtrosCertificados --------------------*/
+(
+    10,
+    '/Documento/OtrosCertificados/Riesgos/{idCategoria}',
+    '/Documento/ListaSubCategoriaCertificados/{idCategoria}',
+    '/Documento/ListaSubCategoriaCertificados/{idCategoria}',
+    '/Documento/OtrosCertificados/ConfirmacionDatos',
+
+    N'Certificado de Riesgos',
+    N'',
+    N'Cancelar',
+    N'Continuar',
+
+    N'Risk Certificate',
+    N'',
+    N'Cancel',
+    N'Continue',
+
+    'OtrosCertificados',
+    2,
+    1,
+    0,
+    NULL,
+    NULL
+),
+(
+    11,
+    '/Documento/OtrosCertificados/ConfirmacionDatos',
+    '/Documento/OtrosCertificados/Riesgos/{idCategoria}',
+    '/Documento/OtrosCertificados/Riesgos/{idCategoria}',
+    '/Documento/Listado',
+
+    N'Confirmación de Datos',
+    N'',
+    N'Cancelar',
+    N'Continuar',
+
+    N'Data Confirmation',
+    N'',
+    N'Cancel',
+    N'Continue',
+
+    'OtrosCertificados',
+    2,
+    2,
+    0,
+    NULL,
+    NULL
+),
+
+/*-------------------- MovimientoCertificadoCuentas - Cuentas --------------------*/
+(
+    12,
+    '/Documento/Movimientos/Cuentas/{idCategoria}',
+    '/Documento/ListaSubCategoriaCertificados/{idCategoria}',
+    '/Documento/ListaSubCategoriaCertificados/{idCategoria}',
+    '/Documento/Movimientos/ConfirmacionDatos',
+
+    N'Certificado de Movimientos de Cuentas',
+    N'',
+    N'Cancelar',
+    N'Continuar',
+
+    N'Account Movement Certificate',
+    N'',
+    N'Cancel',
+    N'Continue',
+
+    'MovimientoCertificadoCuentas',
+    2,
+    1,
+    0,
+    NULL,
+    NULL
+),
+(
+    13,
+    '/Documento/Movimientos/ConfirmacionDatos',
+    '/Documento/Movimientos/Cuentas/{idCategoria}',
+    '/Documento/Movimientos/Cuentas/{idCategoria}',
+    '/Documento/Listado',
+
+    N'Confirmación de Datos',
+    N'',
+    N'Cancelar',
+    N'Continuar',
+
+    N'Data Confirmation',
+    N'',
+    N'Cancel',
+    N'Continue',
+
+    'MovimientoCertificadoCuentas',
+    2,
+    2,
+    0,
+    NULL,
+    NULL
+),
+
+/*-------------------- MovimientoCertificadoCuentas - Tarjetas --------------------*/
+(
+    14,
+    '/Documento/Movimientos/TarjetasCredito/{idCategoria}',
+    '/Documento/ListaSubCategoriaCertificados/{idCategoria}',
+    '/Documento/ListaSubCategoriaCertificados/{idCategoria}',
+    '/Documento/Movimientos/ConfirmacionDatos',
+
+    N'Certificado de Movimientos de Cuentas',
+    N'',
+    N'Cancelar',
+    N'Continuar',
+
+    N'Account Movement Certificate',
+    N'',
+    N'Cancel',
+    N'Continue',
+
+    'MovimientoCertificadoCuentas',
+    2,
+    1,
+    0,
+    NULL,
+    NULL
+),
+(
+    15,
+    '/Documento/Movimientos/ConfirmacionDatos',
+    '/Documento/Movimientos/TarjetasCredito/{idCategoria}',
+    '/Documento/Movimientos/TarjetasCredito/{idCategoria}',
+    '/Documento/Listado',
+
+    N'Confirmación de Datos',
+    N'',
+    N'Cancelar',
+    N'Continuar',
+
+    N'Data Confirmation',
+    N'',
+    N'Cancel',
+    N'Continue',
+
+    'MovimientoCertificadoCuentas',
+    2,
+    2,
+    0,
+    NULL,
+    NULL
+),
+
+/*-------------------- MovimientoCertificadoCuentas - Transferencias Internacionales --------------------*/
+(
+    16,
+    '/Documento/Movimientos/Transferencias/Internacionales/{idCertificado}',
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/Movimientos/ConfirmacionDatos',
+
+    N'Certificado de transferencias internacionales',
+    N'',
+    N'Cancelar',
+    N'Continuar',
+
+    N'International Transfer Certificate',
+    N'',
+    N'Cancel',
+    N'Continue',
+
+    'MovimientoCertificadoCuentas',
+    3,
+    2,
+    0,
+    NULL,
+    NULL
+),
+(
+    17,
+    '/Documento/Movimientos/ConfirmacionDatos',
+    '/Documento/Movimientos/Transferencias/Internacionales/{idCertificado}',
+    '/Documento/Movimientos/Transferencias/Internacionales/{idCertificado}',
+    '/Documento/Listado',
+
+    N'Confirmación de Datos',
+    N'',
+    N'Cancelar',
+    N'Continuar',
+
+    N'Data Confirmation',
+    N'',
+    N'Cancel',
+    N'Continue',
+
+    'MovimientoCertificadoCuentas',
+    3,
+    3,
+    0,
+    NULL,
+    NULL
+),
+
+/*-------------------- MovimientoCertificadoCuentas - Transferencias Locales --------------------*/
+(
+    18,
+    '/Documento/Movimientos/Transferencias/Locales/{idCertificado}',
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/ListaCertificados/{idSubCategoria}',
+    '/Documento/Movimientos/ConfirmacionDatos',
+
+    N'Certificado de transferencias locales',
+    N'',
+    N'Cancelar',
+    N'Continuar',
+
+    N'Local Transfer Certificate',
+    N'',
+    N'Cancel',
+    N'Continue',
+
+    'MovimientoCertificadoCuentas',
+    3,
+    2,
+    0,
+    NULL,
+    NULL
+),
+(
+    19,
+    '/Documento/Movimientos/ConfirmacionDatos',
+    '/Documento/Movimientos/Transferencias/Locales/{idCertificado}',
+    '/Documento/Movimientos/Transferencias/Locales/{idCertificado}',
+    '/Documento/Listado',
+
+    N'Confirmación de Datos',
+    N'',
+    N'Cancelar',
+    N'Continuar',
+
+    N'Data Confirmation',
+    N'',
+    N'Cancel',
+    N'Continue',
+
+    'MovimientoCertificadoCuentas',
+    3,
+    3,
+    0,
+    NULL,
+    NULL
+)
+
+/*=======================================================================
+  6. CONTROL DE REGISTROS REPETIDOS EN LA DATA DE ENTRADA
+     Regla conservada:
+     UrlAsistente + Flujo + Pasos + PasoActual
+========================================================================*/
+
+SELECT
+    'Registro repetido en data de entrada. Se omite del insert: ruta ' +
+    dc.UrlAsistente +
+    ', flujo ' + dc.Flujo +
+    ', pasos ' + CONVERT(VARCHAR, dc.Pasos) +
+    ', paso ' + CONVERT(VARCHAR, dc.PasoActual) +
+    ', origen ' + dc.UrlOrigen AS Mensaje
+FROM (
+    SELECT
+        dc.*,
+        ROW_NUMBER() OVER (
+            PARTITION BY dc.UrlAsistente, dc.Flujo, dc.Pasos, dc.PasoActual
+            ORDER BY dc.RowId
+        ) AS rn
+    FROM @TblDataCarga dc
+) dc
+WHERE dc.rn > 1
+
+INSERT INTO @TblData (
+    RowId,
+    Codigo,
+    UrlAsistente,
+    UrlOrigen,
+    UrlCancelar,
+    UrlContinuar,
+
+    TituloEs,
+    SubtituloEs,
+    TextoCancelarEs,
+    TextoContinuarEs,
+
+    TituloEn,
+    SubtituloEn,
+    TextoCancelarEn,
+    TextoContinuarEn,
+
+    Flujo,
+    Pasos,
+    PasoActual,
+    Critico,
+    TipoSegundoFactor,
+    UrlRegresar
+)
+SELECT
+    dc.RowId,
+    dc.Codigo,
+    dc.UrlAsistente,
+    dc.UrlOrigen,
+    dc.UrlCancelar,
+    dc.UrlContinuar,
+
+    dc.TituloEs,
+    dc.SubtituloEs,
+    dc.TextoCancelarEs,
+    dc.TextoContinuarEs,
+
+    dc.TituloEn,
+    dc.SubtituloEn,
+    dc.TextoCancelarEn,
+    dc.TextoContinuarEn,
+
+    dc.Flujo,
+    dc.Pasos,
+    dc.PasoActual,
+    dc.Critico,
+    dc.TipoSegundoFactor,
+    dc.UrlRegresar
+FROM (
+    SELECT
+        dc.*,
+        ROW_NUMBER() OVER (
+            PARTITION BY dc.UrlAsistente, dc.Flujo, dc.Pasos, dc.PasoActual
+            ORDER BY dc.RowId
+        ) AS rn
+    FROM @TblDataCarga dc
+) dc
+WHERE dc.rn = 1
+
+/*=======================================================================
+  7. CONFIGURACIÓN DE RUTAS
+     En este flujo se asume GET para todas las rutas del JSON.
+========================================================================*/
+
+INSERT INTO @TblRutas (
+    Url,
+    Verbo,
+    CrearMenu,
+    MenuNombreEs,
+    MenuNombreEn,
+    Orden
+)
+SELECT DISTINCT
+    x.Url,
+    'GET' AS Verbo,
+    0 AS CrearMenu,
+    NULL AS MenuNombreEs,
+    NULL AS MenuNombreEn,
+    NULL AS Orden
+FROM (
+    SELECT UrlAsistente AS Url
+    FROM @TblDataCarga
+    WHERE UrlAsistente IS NOT NULL AND UrlAsistente <> ''
+
+    UNION
+
+    SELECT UrlOrigen AS Url
+    FROM @TblDataCarga
+    WHERE UrlOrigen IS NOT NULL AND UrlOrigen <> ''
+
+    UNION
+
+    SELECT UrlCancelar AS Url
+    FROM @TblDataCarga
+    WHERE UrlCancelar IS NOT NULL AND UrlCancelar <> ''
+
+    UNION
+
+    SELECT UrlContinuar AS Url
+    FROM @TblDataCarga
+    WHERE UrlContinuar IS NOT NULL AND UrlContinuar <> ''
+) x
+
+-- Las rutas que son UrlAsistente se crean también en wp_menu.
+UPDATE tr
+SET tr.CrearMenu = 1,
+    tr.MenuNombreEs = td.TituloEs,
+    tr.MenuNombreEn = td.TituloEn,
+    tr.Orden = td.PasoActual
+FROM @TblRutas tr
+INNER JOIN (
+    SELECT
+        UrlAsistente,
+        MIN(TituloEs) AS TituloEs,
+        MIN(TituloEn) AS TituloEn,
+        MIN(PasoActual) AS PasoActual
+    FROM @TblData
+    GROUP BY UrlAsistente
+) td
+    ON td.UrlAsistente = tr.Url
+WHERE tr.Verbo = 'GET'
+
+/*=======================================================================
+  8. VALIDAR / INSERTAR WP_RUTA
+========================================================================*/
+
+SELECT
+    'Ya existe la ruta ' + tr.Url +
+    ' con canal ' + tc.Canal +
+    ' y verbo ' + tr.Verbo +
+    ' en wp_ruta' AS Mensaje
+FROM @TblCanales tc
+CROSS JOIN @TblRutas tr
+WHERE EXISTS (
+    SELECT 1
+    FROM dbo.wp_ruta wr
+    WHERE wr.ru_direccion = tr.Url
+      AND wr.ru_canal = tc.Canal
+      AND wr.ru_verbo = tr.Verbo
+)
+
+INSERT INTO dbo.wp_ruta (
+    ru_canal,
+    ru_verbo,
+    ru_direccion,
+    ru_recurso,
+    ru_estado,
+    ru_fecha
+)
+SELECT
+    tc.Canal,
+    tr.Verbo,
+    tr.Url,
+    NULL,
+    'ACT',
+    GETDATE()
+FROM @TblCanales tc
+CROSS JOIN @TblRutas tr
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM dbo.wp_ruta wr
+    WHERE wr.ru_direccion = tr.Url
+      AND wr.ru_canal = tc.Canal
+      AND wr.ru_verbo = tr.Verbo
+)
+
+SELECT 'Rutas insertadas: ' + CONVERT(VARCHAR, @@ROWCOUNT) AS Resultado
+
+/*=======================================================================
+  9. VALIDAR / INSERTAR WP_MENU
+========================================================================*/
+
+SELECT
+    'Ya existe menú para la ruta ' + tr.Url +
+    ' con canal ' + tc.Canal +
+    ' en wp_menu' AS Mensaje
+FROM @TblCanales tc
+INNER JOIN @TblRutas tr
+    ON tr.CrearMenu = 1
+INNER JOIN dbo.wp_ruta wr
+    ON wr.ru_direccion = tr.Url
+   AND wr.ru_canal = tc.Canal
+   AND wr.ru_verbo = tr.Verbo
+WHERE EXISTS (
+    SELECT 1
+    FROM dbo.wp_menu wm
+    WHERE wm.ru_id_ruta = wr.ru_id_ruta
+)
+
+INSERT INTO dbo.wp_menu (
+    ru_id_ruta,
+    me_id_padre,
+    me_orden,
+    me_critica,
+    me_visible,
+    me_favorito,
+    me_icono,
+    me_estado,
+    me_fecha
+)
+SELECT
+    wr.ru_id_ruta,
+    0,
+    ISNULL(tr.Orden, 1),
+    0,
+    0,
+    0,
+    NULL,
+    'ACT',
+    GETDATE()
+FROM @TblCanales tc
+INNER JOIN @TblRutas tr
+    ON tr.CrearMenu = 1
+INNER JOIN dbo.wp_ruta wr
+    ON wr.ru_direccion = tr.Url
+   AND wr.ru_canal = tc.Canal
+   AND wr.ru_verbo = tr.Verbo
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM dbo.wp_menu wm
+    WHERE wm.ru_id_ruta = wr.ru_id_ruta
+)
+
+SELECT 'Menús insertados: ' + CONVERT(VARCHAR, @@ROWCOUNT) AS Resultado
+
+/*=======================================================================
+  10. VALIDAR / INSERTAR WP_MENU_IDIOMA
+========================================================================*/
+
+SELECT
+    'Ya existe menú idioma para la ruta ' + tr.Url +
+    ', canal ' + tc.Canal +
+    ', idioma ' + ti.Idioma +
+    ' en wp_menu_idioma' AS Mensaje
+FROM @TblCanales tc
+INNER JOIN @TblRutas tr
+    ON tr.CrearMenu = 1
+INNER JOIN dbo.wp_ruta wr
+    ON wr.ru_direccion = tr.Url
+   AND wr.ru_canal = tc.Canal
+   AND wr.ru_verbo = tr.Verbo
+INNER JOIN dbo.wp_menu wm
+    ON wm.ru_id_ruta = wr.ru_id_ruta
+INNER JOIN @TblIdiomas ti
+    ON ti.Idioma IN ('es-EC', 'en-US')
+WHERE EXISTS (
+    SELECT 1
+    FROM dbo.wp_menu_idioma mi
+    WHERE mi.me_id_menu = wm.me_id_menu
+      AND mi.id_id_idioma = ti.id_id_idioma
+)
+
+INSERT INTO dbo.wp_menu_idioma (
+    id_id_idioma,
+    me_id_menu,
+    mi_nombre,
+    mi_etiqueta
+)
+SELECT
+    ti.id_id_idioma,
+    wm.me_id_menu,
+    CASE
+        WHEN ti.Idioma = 'es-EC' THEN tr.MenuNombreEs
+        WHEN ti.Idioma = 'en-US' THEN tr.MenuNombreEn
+    END AS mi_nombre,
+    NULL
+FROM @TblCanales tc
+INNER JOIN @TblRutas tr
+    ON tr.CrearMenu = 1
+INNER JOIN dbo.wp_ruta wr
+    ON wr.ru_direccion = tr.Url
+   AND wr.ru_canal = tc.Canal
+   AND wr.ru_verbo = tr.Verbo
+INNER JOIN dbo.wp_menu wm
+    ON wm.ru_id_ruta = wr.ru_id_ruta
+INNER JOIN @TblIdiomas ti
+    ON ti.Idioma IN ('es-EC', 'en-US')
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM dbo.wp_menu_idioma mi
+    WHERE mi.me_id_menu = wm.me_id_menu
+      AND mi.id_id_idioma = ti.id_id_idioma
+)
+AND CASE
+        WHEN ti.Idioma = 'es-EC' THEN tr.MenuNombreEs
+        WHEN ti.Idioma = 'en-US' THEN tr.MenuNombreEn
+    END IS NOT NULL
+
+SELECT 'Menú idioma insertado: ' + CONVERT(VARCHAR, @@ROWCOUNT) AS Resultado
+
+/*=======================================================================
+  11. VALIDAR / INSERTAR WP_ASISTENTE
+      Regla conservada:
+      UrlAsistente + Flujo + Pasos + PasoActual
+========================================================================*/
+
+SELECT
+    'Ya existe asistente para la ruta ' + td.UrlAsistente +
+    ', flujo ' + td.Flujo +
+    ', pasos ' + CONVERT(VARCHAR, td.Pasos) +
+    ', paso ' + CONVERT(VARCHAR, td.PasoActual) +
+    ', canal ' + tc.Canal +
+    ' en wp_asistente' AS Mensaje
+FROM @TblData td
+INNER JOIN @TblCanales tc
+    ON 1 = 1
+INNER JOIN @TblRutas trAsistente
+    ON trAsistente.Url = td.UrlAsistente
+INNER JOIN dbo.wp_ruta rutaAsistente
+    ON rutaAsistente.ru_direccion = td.UrlAsistente
+   AND rutaAsistente.ru_canal = tc.Canal
+   AND rutaAsistente.ru_verbo = trAsistente.Verbo
+WHERE EXISTS (
+    SELECT 1
+    FROM dbo.wp_asistente wa
+    WHERE wa.ru_id_ruta_asistente = rutaAsistente.ru_id_ruta
+      AND wa.as_flujo = td.Flujo
+      AND wa.as_pasos = td.Pasos
+      AND wa.as_paso_actual = td.PasoActual
+)
+
+INSERT INTO dbo.wp_asistente (
+    ru_id_ruta_asistente,
+    ru_id_ruta_origen,
+    ru_id_ruta_cancelar,
+    ru_id_ruta_continuar,
+    as_flujo,
+    as_pasos,
+    as_paso_actual,
+    as_paso_critico,
+    as_estado,
+    as_fecha
+)
+SELECT
+    rutaAsistente.ru_id_ruta,
+    rutaOrigen.ru_id_ruta,
+    rutaCancelar.ru_id_ruta,
+    rutaContinuar.ru_id_ruta,
+    td.Flujo,
+    td.Pasos,
+    td.PasoActual,
+    td.Critico,
+    'ACT',
+    GETDATE()
+FROM @TblData td
+INNER JOIN @TblCanales tc
+    ON 1 = 1
+INNER JOIN @TblRutas trAsistente
+    ON trAsistente.Url = td.UrlAsistente
+INNER JOIN @TblRutas trOrigen
+    ON trOrigen.Url = td.UrlOrigen
+INNER JOIN @TblRutas trCancelar
+    ON trCancelar.Url = td.UrlCancelar
+INNER JOIN @TblRutas trContinuar
+    ON trContinuar.Url = td.UrlContinuar
+INNER JOIN dbo.wp_ruta rutaAsistente
+    ON rutaAsistente.ru_direccion = td.UrlAsistente
+   AND rutaAsistente.ru_canal = tc.Canal
+   AND rutaAsistente.ru_verbo = trAsistente.Verbo
+INNER JOIN dbo.wp_ruta rutaOrigen
+    ON rutaOrigen.ru_direccion = td.UrlOrigen
+   AND rutaOrigen.ru_canal = tc.Canal
+   AND rutaOrigen.ru_verbo = trOrigen.Verbo
+INNER JOIN dbo.wp_ruta rutaCancelar
+    ON rutaCancelar.ru_direccion = td.UrlCancelar
+   AND rutaCancelar.ru_canal = tc.Canal
+   AND rutaCancelar.ru_verbo = trCancelar.Verbo
+INNER JOIN dbo.wp_ruta rutaContinuar
+    ON rutaContinuar.ru_direccion = td.UrlContinuar
+   AND rutaContinuar.ru_canal = tc.Canal
+   AND rutaContinuar.ru_verbo = trContinuar.Verbo
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM dbo.wp_asistente wa
+    WHERE wa.ru_id_ruta_asistente = rutaAsistente.ru_id_ruta
+      AND wa.as_flujo = td.Flujo
+      AND wa.as_pasos = td.Pasos
+      AND wa.as_paso_actual = td.PasoActual
+)
+
+SELECT 'Asistentes insertados: ' + CONVERT(VARCHAR, @@ROWCOUNT) AS Resultado
+
+/*=======================================================================
+  12. VALIDAR / INSERTAR WP_ASISTENTE_IDIOMA
+========================================================================*/
+
+SELECT
+    'Ya existe asistente_idioma para la ruta ' + td.UrlAsistente +
+    ', flujo ' + td.Flujo +
+    ', pasos ' + CONVERT(VARCHAR, td.Pasos) +
+    ', paso ' + CONVERT(VARCHAR, td.PasoActual) +
+    ', canal ' + tc.Canal +
+    ', idioma ' + ti.Idioma +
+    ' en wp_asistente_idioma' AS Mensaje
+FROM @TblData td
+INNER JOIN @TblCanales tc
+    ON 1 = 1
+INNER JOIN @TblRutas trAsistente
+    ON trAsistente.Url = td.UrlAsistente
+INNER JOIN dbo.wp_ruta rutaAsistente
+    ON rutaAsistente.ru_direccion = td.UrlAsistente
+   AND rutaAsistente.ru_canal = tc.Canal
+   AND rutaAsistente.ru_verbo = trAsistente.Verbo
+INNER JOIN dbo.wp_asistente wa
+    ON wa.ru_id_ruta_asistente = rutaAsistente.ru_id_ruta
+   AND wa.as_flujo = td.Flujo
+   AND wa.as_pasos = td.Pasos
+   AND wa.as_paso_actual = td.PasoActual
+INNER JOIN @TblIdiomas ti
+    ON ti.Idioma IN ('es-EC', 'en-US')
+WHERE EXISTS (
+    SELECT 1
+    FROM dbo.wp_asistente_idioma wai
+    WHERE wai.as_id_asistente = wa.as_id_asistente
+      AND wai.id_id_idioma = ti.id_id_idioma
+)
+
+INSERT INTO dbo.wp_asistente_idioma (
+    id_id_idioma,
+    as_id_asistente,
+    ai_titulo,
+    ai_subtitulo,
+    ai_boton_cancelar,
+    ai_boton_continuar
+)
+SELECT
+    ti.id_id_idioma,
+    wa.as_id_asistente,
+
+    CASE
+        WHEN ti.Idioma = 'es-EC' THEN td.TituloEs
+        WHEN ti.Idioma = 'en-US' THEN td.TituloEn
+    END AS ai_titulo,
+
+    CASE
+        WHEN ti.Idioma = 'es-EC' THEN td.SubtituloEs
+        WHEN ti.Idioma = 'en-US' THEN td.SubtituloEn
+    END AS ai_subtitulo,
+
+    CASE
+        WHEN ti.Idioma = 'es-EC' THEN td.TextoCancelarEs
+        WHEN ti.Idioma = 'en-US' THEN td.TextoCancelarEn
+    END AS ai_boton_cancelar,
+
+    CASE
+        WHEN ti.Idioma = 'es-EC' THEN td.TextoContinuarEs
+        WHEN ti.Idioma = 'en-US' THEN td.TextoContinuarEn
+    END AS ai_boton_continuar
+FROM @TblData td
+INNER JOIN @TblCanales tc
+    ON 1 = 1
+INNER JOIN @TblRutas trAsistente
+    ON trAsistente.Url = td.UrlAsistente
+INNER JOIN dbo.wp_ruta rutaAsistente
+    ON rutaAsistente.ru_direccion = td.UrlAsistente
+   AND rutaAsistente.ru_canal = tc.Canal
+   AND rutaAsistente.ru_verbo = trAsistente.Verbo
+INNER JOIN dbo.wp_asistente wa
+    ON wa.ru_id_ruta_asistente = rutaAsistente.ru_id_ruta
+   AND wa.as_flujo = td.Flujo
+   AND wa.as_pasos = td.Pasos
+   AND wa.as_paso_actual = td.PasoActual
+INNER JOIN @TblIdiomas ti
+    ON ti.Idioma IN ('es-EC', 'en-US')
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM dbo.wp_asistente_idioma wai
+    WHERE wai.as_id_asistente = wa.as_id_asistente
+      AND wai.id_id_idioma = ti.id_id_idioma
+)
+
+SELECT 'Asistente idioma insertado: ' + CONVERT(VARCHAR, @@ROWCOUNT) AS Resultado
+
+/*=======================================================================
+  13. VALIDACIÓN FINAL
+========================================================================*/
+
+SELECT
+    wa.as_id_asistente AS Codigo,
+    rutaAsistente.ru_direccion AS UrlAsistente,
+    rutaOrigen.ru_direccion AS UrlOrigen,
+    wai.ai_titulo AS Titulo,
+    wai.ai_subtitulo AS Subtitulo,
+    wa.as_flujo AS Flujo,
+    wai.ai_boton_cancelar AS TextoCancelar,
+    rutaCancelar.ru_direccion AS UrlCancelar,
+    wai.ai_boton_continuar AS TextoContinuar,
+    rutaContinuar.ru_direccion AS UrlContinuar,
+    wa.as_pasos AS Pasos,
+    wa.as_paso_actual AS PasoActual,
+    CONVERT(BIT, wa.as_paso_critico) AS Critico,
+    rutaAsistente.ru_canal AS Canal,
+    wi.id_nemonico AS Idioma
+FROM dbo.wp_asistente wa
+INNER JOIN dbo.wp_asistente_idioma wai
+    ON wai.as_id_asistente = wa.as_id_asistente
+INNER JOIN dbo.wp_idioma wi
+    ON wi.id_id_idioma = wai.id_id_idioma
+INNER JOIN dbo.wp_ruta rutaAsistente
+    ON rutaAsistente.ru_id_ruta = wa.ru_id_ruta_asistente
+INNER JOIN dbo.wp_ruta rutaOrigen
+    ON rutaOrigen.ru_id_ruta = wa.ru_id_ruta_origen
+INNER JOIN dbo.wp_ruta rutaCancelar
+    ON rutaCancelar.ru_id_ruta = wa.ru_id_ruta_cancelar
+INNER JOIN dbo.wp_ruta rutaContinuar
+    ON rutaContinuar.ru_id_ruta = wa.ru_id_ruta_continuar
+INNER JOIN @TblCanales tc
+    ON tc.Canal = rutaAsistente.ru_canal
+INNER JOIN @TblIdiomas ti
+    ON ti.id_id_idioma = wi.id_id_idioma
+WHERE wa.as_flujo IN (
+    SELECT DISTINCT Flujo
+    FROM @TblDataCarga
+)
+ORDER BY
+    wa.as_flujo,
+    rutaAsistente.ru_canal,
+    wi.id_nemonico,
+    wa.as_pasos,
+    wa.as_paso_actual,
+    wa.as_id_asistente
+
+GO
