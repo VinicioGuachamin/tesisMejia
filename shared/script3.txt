@@ -8,9 +8,9 @@
 /*  - Permite insertar por uno o varios idiomas: es-EC, en-US o ALL.    */
 /*  - No actualiza registros existentes.                                */
 /*  - No elimina registros existentes.                                  */
-/*  - No duplica registros existentes.                                  */
+/*  - No duplica rutas existentes.                                      */
+/*  - No elimina objetos del asistente aunque compartan UrlAsistente.   */
 /*  - Si ya existe, muestra mensaje.                                    */
-/*  - Si hay registros repetidos en el JSON, los omite del insert.      */
 /************************************************************************/
 
 USE pr_canales
@@ -23,19 +23,14 @@ GO
   1. PARÁMETROS CONFIGURABLES
 ========================================================================*/
 
--- Ejemplos:
--- 'IN'
--- 'BK'
--- 'IN,BK'
--- 'IN,BK,BM'
+-- Para que Redis devuelva exactamente los JSON que pasaste, dejar es-EC.
+-- Si necesitas más canales: 'IN,BK', 'IN,BK,BM', etc.
 DECLARE @ListaCanales VARCHAR(200) = 'IN'
 
--- Ejemplos:
--- 'es-EC'
--- 'en-US'
--- 'es-EC,en-US'
--- 'ALL'
-DECLARE @ListaIdiomas VARCHAR(200) = 'es-EC,en-US'
+-- Para que Redis devuelva exactamente los JSON que pasaste, dejar es-EC.
+-- Si necesitas inglés: 'en-US'
+-- Si necesitas ambos: 'es-EC,en-US' o 'ALL'
+DECLARE @ListaIdiomas VARCHAR(200) = 'es-EC'
 
 /*=======================================================================
   2. TABLAS TEMPORALES DE CONTROL
@@ -50,36 +45,8 @@ DECLARE @TblIdiomas TABLE (
     id_id_idioma INT NULL
 )
 
-DECLARE @TblDataCarga TABLE (
-    RowId INT IDENTITY(1,1) PRIMARY KEY,
-    Codigo INT,
-
-    UrlAsistente VARCHAR(300),
-    UrlOrigen VARCHAR(300),
-    UrlCancelar VARCHAR(300),
-    UrlContinuar VARCHAR(300),
-
-    TituloEs NVARCHAR(250),
-    SubtituloEs NVARCHAR(300),
-    TextoCancelarEs NVARCHAR(150),
-    TextoContinuarEs NVARCHAR(150),
-
-    TituloEn NVARCHAR(250),
-    SubtituloEn NVARCHAR(300),
-    TextoCancelarEn NVARCHAR(150),
-    TextoContinuarEn NVARCHAR(150),
-
-    Flujo VARCHAR(150),
-    Pasos INT,
-    PasoActual INT,
-    Critico BIT,
-
-    TipoSegundoFactor VARCHAR(50) NULL,
-    UrlRegresar VARCHAR(300) NULL
-)
-
 DECLARE @TblData TABLE (
-    RowId INT PRIMARY KEY,
+    RowId INT IDENTITY(1,1) PRIMARY KEY,
     Codigo INT,
 
     UrlAsistente VARCHAR(300),
@@ -190,7 +157,7 @@ END
   5. DATA BASE DEL JSON CON TRADUCCIONES
 ========================================================================*/
 
-INSERT INTO @TblDataCarga (
+INSERT INTO @TblData (
     Codigo,
     UrlAsistente,
     UrlOrigen,
@@ -215,7 +182,7 @@ INSERT INTO @TblDataCarga (
     UrlRegresar
 )
 VALUES
-/*-------------------- ProductoCertificadoCuentas - Cuentas --------------------*/
+/*-------------------- Producto Cuentas --------------------*/
 (
     1,
     '/Documento/ListaCertificados/{idSubCategoria}',
@@ -289,7 +256,7 @@ VALUES
     NULL
 ),
 
-/*-------------------- ProductoCertificadoCuentas - Tarjetas --------------------*/
+/*-------------------- Producto Tarjetas Crédito --------------------*/
 (
     4,
     '/Documento/CertificadoProductoTarjetas/Bancario/{idCertificado}',
@@ -339,7 +306,7 @@ VALUES
     NULL
 ),
 
-/*-------------------- ProductoCertificadoCuentas - Créditos --------------------*/
+/*-------------------- Producto Créditos --------------------*/
 (
     6,
     '/Documento/CertificadoProductoCreditos/Bancario/{idCertificado}',
@@ -389,7 +356,7 @@ VALUES
     NULL
 ),
 
-/*-------------------- ProductoCertificadoCuentas - Inversiones --------------------*/
+/*-------------------- Producto Inversiones --------------------*/
 (
     8,
     '/Documento/CertificadoProductoInversiones/Bancario/{idCertificado}',
@@ -439,7 +406,7 @@ VALUES
     NULL
 ),
 
-/*-------------------- OtrosCertificados --------------------*/
+/*-------------------- Otros Riesgos --------------------*/
 (
     10,
     '/Documento/OtrosCertificados/Riesgos/{idCategoria}',
@@ -489,7 +456,7 @@ VALUES
     NULL
 ),
 
-/*-------------------- MovimientoCertificadoCuentas - Cuentas --------------------*/
+/*-------------------- Movimientos Cuentas --------------------*/
 (
     12,
     '/Documento/Movimientos/Cuentas/{idCategoria}',
@@ -539,7 +506,7 @@ VALUES
     NULL
 ),
 
-/*-------------------- MovimientoCertificadoCuentas - Tarjetas --------------------*/
+/*-------------------- Movimientos Tarjetas Crédito --------------------*/
 (
     14,
     '/Documento/Movimientos/TarjetasCredito/{idCategoria}',
@@ -589,7 +556,7 @@ VALUES
     NULL
 ),
 
-/*-------------------- MovimientoCertificadoCuentas - Transferencias Internacionales --------------------*/
+/*-------------------- Movimientos Transferencias Internacionales --------------------*/
 (
     16,
     '/Documento/Movimientos/Transferencias/Internacionales/{idCertificado}',
@@ -639,7 +606,7 @@ VALUES
     NULL
 ),
 
-/*-------------------- MovimientoCertificadoCuentas - Transferencias Locales --------------------*/
+/*-------------------- Movimientos Transferencias Locales --------------------*/
 (
     18,
     '/Documento/Movimientos/Transferencias/Locales/{idCertificado}',
@@ -690,92 +657,8 @@ VALUES
 )
 
 /*=======================================================================
-  6. CONTROL DE REGISTROS REPETIDOS EN LA DATA DE ENTRADA
-     Regla conservada:
-     UrlAsistente + Flujo + Pasos + PasoActual
-========================================================================*/
-
-SELECT
-    'Registro repetido en data de entrada. Se omite del insert: ruta ' +
-    dc.UrlAsistente +
-    ', flujo ' + dc.Flujo +
-    ', pasos ' + CONVERT(VARCHAR, dc.Pasos) +
-    ', paso ' + CONVERT(VARCHAR, dc.PasoActual) +
-    ', origen ' + dc.UrlOrigen AS Mensaje
-FROM (
-    SELECT
-        dc.*,
-        ROW_NUMBER() OVER (
-            PARTITION BY dc.UrlAsistente, dc.Flujo, dc.Pasos, dc.PasoActual
-            ORDER BY dc.RowId
-        ) AS rn
-    FROM @TblDataCarga dc
-) dc
-WHERE dc.rn > 1
-
-INSERT INTO @TblData (
-    RowId,
-    Codigo,
-    UrlAsistente,
-    UrlOrigen,
-    UrlCancelar,
-    UrlContinuar,
-
-    TituloEs,
-    SubtituloEs,
-    TextoCancelarEs,
-    TextoContinuarEs,
-
-    TituloEn,
-    SubtituloEn,
-    TextoCancelarEn,
-    TextoContinuarEn,
-
-    Flujo,
-    Pasos,
-    PasoActual,
-    Critico,
-    TipoSegundoFactor,
-    UrlRegresar
-)
-SELECT
-    dc.RowId,
-    dc.Codigo,
-    dc.UrlAsistente,
-    dc.UrlOrigen,
-    dc.UrlCancelar,
-    dc.UrlContinuar,
-
-    dc.TituloEs,
-    dc.SubtituloEs,
-    dc.TextoCancelarEs,
-    dc.TextoContinuarEs,
-
-    dc.TituloEn,
-    dc.SubtituloEn,
-    dc.TextoCancelarEn,
-    dc.TextoContinuarEn,
-
-    dc.Flujo,
-    dc.Pasos,
-    dc.PasoActual,
-    dc.Critico,
-    dc.TipoSegundoFactor,
-    dc.UrlRegresar
-FROM (
-    SELECT
-        dc.*,
-        ROW_NUMBER() OVER (
-            PARTITION BY dc.UrlAsistente, dc.Flujo, dc.Pasos, dc.PasoActual
-            ORDER BY dc.RowId
-        ) AS rn
-    FROM @TblDataCarga dc
-) dc
-WHERE dc.rn = 1
-
-/*=======================================================================
-  7. CONFIGURACIÓN DE RUTAS
-     En este flujo se asume GET para todas las rutas del JSON.
+  6. CONFIGURACIÓN DE RUTAS
+     Solo se deduplican rutas, no objetos del asistente.
 ========================================================================*/
 
 INSERT INTO @TblRutas (
@@ -795,25 +678,25 @@ SELECT DISTINCT
     NULL AS Orden
 FROM (
     SELECT UrlAsistente AS Url
-    FROM @TblDataCarga
+    FROM @TblData
     WHERE UrlAsistente IS NOT NULL AND UrlAsistente <> ''
 
     UNION
 
     SELECT UrlOrigen AS Url
-    FROM @TblDataCarga
+    FROM @TblData
     WHERE UrlOrigen IS NOT NULL AND UrlOrigen <> ''
 
     UNION
 
     SELECT UrlCancelar AS Url
-    FROM @TblDataCarga
+    FROM @TblData
     WHERE UrlCancelar IS NOT NULL AND UrlCancelar <> ''
 
     UNION
 
     SELECT UrlContinuar AS Url
-    FROM @TblDataCarga
+    FROM @TblData
     WHERE UrlContinuar IS NOT NULL AND UrlContinuar <> ''
 ) x
 
@@ -837,7 +720,7 @@ INNER JOIN (
 WHERE tr.Verbo = 'GET'
 
 /*=======================================================================
-  8. VALIDAR / INSERTAR WP_RUTA
+  7. VALIDAR / INSERTAR WP_RUTA
 ========================================================================*/
 
 SELECT
@@ -883,7 +766,7 @@ WHERE NOT EXISTS (
 SELECT 'Rutas insertadas: ' + CONVERT(VARCHAR, @@ROWCOUNT) AS Resultado
 
 /*=======================================================================
-  9. VALIDAR / INSERTAR WP_MENU
+  8. VALIDAR / INSERTAR WP_MENU
 ========================================================================*/
 
 SELECT
@@ -940,7 +823,7 @@ WHERE NOT EXISTS (
 SELECT 'Menús insertados: ' + CONVERT(VARCHAR, @@ROWCOUNT) AS Resultado
 
 /*=======================================================================
-  10. VALIDAR / INSERTAR WP_MENU_IDIOMA
+  9. VALIDAR / INSERTAR WP_MENU_IDIOMA
 ========================================================================*/
 
 SELECT
@@ -1005,13 +888,13 @@ AND CASE
 SELECT 'Menú idioma insertado: ' + CONVERT(VARCHAR, @@ROWCOUNT) AS Resultado
 
 /*=======================================================================
-  11. VALIDAR / INSERTAR WP_ASISTENTE
-      Regla conservada:
-      UrlAsistente + Flujo + Pasos + PasoActual
+  10. VALIDAR / INSERTAR WP_ASISTENTE
+      Esta validación conserva cada objeto del JSON.
 ========================================================================*/
 
 SELECT
     'Ya existe asistente para la ruta ' + td.UrlAsistente +
+    ', origen ' + td.UrlOrigen +
     ', flujo ' + td.Flujo +
     ', pasos ' + CONVERT(VARCHAR, td.Pasos) +
     ', paso ' + CONVERT(VARCHAR, td.PasoActual) +
@@ -1022,14 +905,35 @@ INNER JOIN @TblCanales tc
     ON 1 = 1
 INNER JOIN @TblRutas trAsistente
     ON trAsistente.Url = td.UrlAsistente
+INNER JOIN @TblRutas trOrigen
+    ON trOrigen.Url = td.UrlOrigen
+INNER JOIN @TblRutas trCancelar
+    ON trCancelar.Url = td.UrlCancelar
+INNER JOIN @TblRutas trContinuar
+    ON trContinuar.Url = td.UrlContinuar
 INNER JOIN dbo.wp_ruta rutaAsistente
     ON rutaAsistente.ru_direccion = td.UrlAsistente
    AND rutaAsistente.ru_canal = tc.Canal
    AND rutaAsistente.ru_verbo = trAsistente.Verbo
+INNER JOIN dbo.wp_ruta rutaOrigen
+    ON rutaOrigen.ru_direccion = td.UrlOrigen
+   AND rutaOrigen.ru_canal = tc.Canal
+   AND rutaOrigen.ru_verbo = trOrigen.Verbo
+INNER JOIN dbo.wp_ruta rutaCancelar
+    ON rutaCancelar.ru_direccion = td.UrlCancelar
+   AND rutaCancelar.ru_canal = tc.Canal
+   AND rutaCancelar.ru_verbo = trCancelar.Verbo
+INNER JOIN dbo.wp_ruta rutaContinuar
+    ON rutaContinuar.ru_direccion = td.UrlContinuar
+   AND rutaContinuar.ru_canal = tc.Canal
+   AND rutaContinuar.ru_verbo = trContinuar.Verbo
 WHERE EXISTS (
     SELECT 1
     FROM dbo.wp_asistente wa
     WHERE wa.ru_id_ruta_asistente = rutaAsistente.ru_id_ruta
+      AND wa.ru_id_ruta_origen = rutaOrigen.ru_id_ruta
+      AND wa.ru_id_ruta_cancelar = rutaCancelar.ru_id_ruta
+      AND wa.ru_id_ruta_continuar = rutaContinuar.ru_id_ruta
       AND wa.as_flujo = td.Flujo
       AND wa.as_pasos = td.Pasos
       AND wa.as_paso_actual = td.PasoActual
@@ -1089,6 +993,9 @@ WHERE NOT EXISTS (
     SELECT 1
     FROM dbo.wp_asistente wa
     WHERE wa.ru_id_ruta_asistente = rutaAsistente.ru_id_ruta
+      AND wa.ru_id_ruta_origen = rutaOrigen.ru_id_ruta
+      AND wa.ru_id_ruta_cancelar = rutaCancelar.ru_id_ruta
+      AND wa.ru_id_ruta_continuar = rutaContinuar.ru_id_ruta
       AND wa.as_flujo = td.Flujo
       AND wa.as_pasos = td.Pasos
       AND wa.as_paso_actual = td.PasoActual
@@ -1097,11 +1004,12 @@ WHERE NOT EXISTS (
 SELECT 'Asistentes insertados: ' + CONVERT(VARCHAR, @@ROWCOUNT) AS Resultado
 
 /*=======================================================================
-  12. VALIDAR / INSERTAR WP_ASISTENTE_IDIOMA
+  11. VALIDAR / INSERTAR WP_ASISTENTE_IDIOMA
 ========================================================================*/
 
 SELECT
     'Ya existe asistente_idioma para la ruta ' + td.UrlAsistente +
+    ', origen ' + td.UrlOrigen +
     ', flujo ' + td.Flujo +
     ', pasos ' + CONVERT(VARCHAR, td.Pasos) +
     ', paso ' + CONVERT(VARCHAR, td.PasoActual) +
@@ -1113,12 +1021,33 @@ INNER JOIN @TblCanales tc
     ON 1 = 1
 INNER JOIN @TblRutas trAsistente
     ON trAsistente.Url = td.UrlAsistente
+INNER JOIN @TblRutas trOrigen
+    ON trOrigen.Url = td.UrlOrigen
+INNER JOIN @TblRutas trCancelar
+    ON trCancelar.Url = td.UrlCancelar
+INNER JOIN @TblRutas trContinuar
+    ON trContinuar.Url = td.UrlContinuar
 INNER JOIN dbo.wp_ruta rutaAsistente
     ON rutaAsistente.ru_direccion = td.UrlAsistente
    AND rutaAsistente.ru_canal = tc.Canal
    AND rutaAsistente.ru_verbo = trAsistente.Verbo
+INNER JOIN dbo.wp_ruta rutaOrigen
+    ON rutaOrigen.ru_direccion = td.UrlOrigen
+   AND rutaOrigen.ru_canal = tc.Canal
+   AND rutaOrigen.ru_verbo = trOrigen.Verbo
+INNER JOIN dbo.wp_ruta rutaCancelar
+    ON rutaCancelar.ru_direccion = td.UrlCancelar
+   AND rutaCancelar.ru_canal = tc.Canal
+   AND rutaCancelar.ru_verbo = trCancelar.Verbo
+INNER JOIN dbo.wp_ruta rutaContinuar
+    ON rutaContinuar.ru_direccion = td.UrlContinuar
+   AND rutaContinuar.ru_canal = tc.Canal
+   AND rutaContinuar.ru_verbo = trContinuar.Verbo
 INNER JOIN dbo.wp_asistente wa
     ON wa.ru_id_ruta_asistente = rutaAsistente.ru_id_ruta
+   AND wa.ru_id_ruta_origen = rutaOrigen.ru_id_ruta
+   AND wa.ru_id_ruta_cancelar = rutaCancelar.ru_id_ruta
+   AND wa.ru_id_ruta_continuar = rutaContinuar.ru_id_ruta
    AND wa.as_flujo = td.Flujo
    AND wa.as_pasos = td.Pasos
    AND wa.as_paso_actual = td.PasoActual
@@ -1167,12 +1096,33 @@ INNER JOIN @TblCanales tc
     ON 1 = 1
 INNER JOIN @TblRutas trAsistente
     ON trAsistente.Url = td.UrlAsistente
+INNER JOIN @TblRutas trOrigen
+    ON trOrigen.Url = td.UrlOrigen
+INNER JOIN @TblRutas trCancelar
+    ON trCancelar.Url = td.UrlCancelar
+INNER JOIN @TblRutas trContinuar
+    ON trContinuar.Url = td.UrlContinuar
 INNER JOIN dbo.wp_ruta rutaAsistente
     ON rutaAsistente.ru_direccion = td.UrlAsistente
    AND rutaAsistente.ru_canal = tc.Canal
    AND rutaAsistente.ru_verbo = trAsistente.Verbo
+INNER JOIN dbo.wp_ruta rutaOrigen
+    ON rutaOrigen.ru_direccion = td.UrlOrigen
+   AND rutaOrigen.ru_canal = tc.Canal
+   AND rutaOrigen.ru_verbo = trOrigen.Verbo
+INNER JOIN dbo.wp_ruta rutaCancelar
+    ON rutaCancelar.ru_direccion = td.UrlCancelar
+   AND rutaCancelar.ru_canal = tc.Canal
+   AND rutaCancelar.ru_verbo = trCancelar.Verbo
+INNER JOIN dbo.wp_ruta rutaContinuar
+    ON rutaContinuar.ru_direccion = td.UrlContinuar
+   AND rutaContinuar.ru_canal = tc.Canal
+   AND rutaContinuar.ru_verbo = trContinuar.Verbo
 INNER JOIN dbo.wp_asistente wa
     ON wa.ru_id_ruta_asistente = rutaAsistente.ru_id_ruta
+   AND wa.ru_id_ruta_origen = rutaOrigen.ru_id_ruta
+   AND wa.ru_id_ruta_cancelar = rutaCancelar.ru_id_ruta
+   AND wa.ru_id_ruta_continuar = rutaContinuar.ru_id_ruta
    AND wa.as_flujo = td.Flujo
    AND wa.as_pasos = td.Pasos
    AND wa.as_paso_actual = td.PasoActual
@@ -1188,7 +1138,7 @@ WHERE NOT EXISTS (
 SELECT 'Asistente idioma insertado: ' + CONVERT(VARCHAR, @@ROWCOUNT) AS Resultado
 
 /*=======================================================================
-  13. VALIDACIÓN FINAL
+  12. VALIDACIÓN FINAL
 ========================================================================*/
 
 SELECT
@@ -1224,9 +1174,16 @@ INNER JOIN @TblCanales tc
     ON tc.Canal = rutaAsistente.ru_canal
 INNER JOIN @TblIdiomas ti
     ON ti.id_id_idioma = wi.id_id_idioma
-WHERE wa.as_flujo IN (
-    SELECT DISTINCT Flujo
-    FROM @TblDataCarga
+WHERE EXISTS (
+    SELECT 1
+    FROM @TblData td
+    WHERE td.Flujo = wa.as_flujo
+      AND td.Pasos = wa.as_pasos
+      AND td.PasoActual = wa.as_paso_actual
+      AND td.UrlAsistente = rutaAsistente.ru_direccion
+      AND td.UrlOrigen = rutaOrigen.ru_direccion
+      AND td.UrlCancelar = rutaCancelar.ru_direccion
+      AND td.UrlContinuar = rutaContinuar.ru_direccion
 )
 ORDER BY
     wa.as_flujo,
